@@ -1,0 +1,33 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "User workshop production order and status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "orderNumber": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "status": {
+          "type": "string",
+          "enum": ["pendiente", "en_produccion", "terminaciones", "despachado", "entregado"]
+        },
+        "customerName": { "type": "string", "maxLength": 128 },
+        "customerEmail": { "type": "string", "maxLength": 128 },
+        "customerPhone": { "type": "string", "maxLength": 64 },
+        "shippingMethod": { "type": "string", "maxLength": 64 },
+        "totalAmountARS": { "type": "number" },
+        "paymentStatus": { "type": "string", "enum": ["acreditado", "pendiente"] },
+        "priority": { "type": "string", "maxLength": 32 },
+        "items": { "type": "array" }
+      },
+      "required": ["id", "orderNumber", "status", "customerName", "customerEmail", "totalAmountARS", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Production orders tracked by customers and workshop"
+    }
+  }
+}

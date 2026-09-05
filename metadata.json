@@ -1,0 +1,6 @@
+{
+  "name": "CartelesClick2026",
+  "description": "Plataforma de cotización instantánea, diseño asistido por IA y producción de cartelería en gran formato.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

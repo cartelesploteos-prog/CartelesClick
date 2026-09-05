@@ -1,0 +1,52 @@
+      try {
+        const promises = bulkItems.map(async (item) => {
+          const val = validateQuoteParams({
+            materialId: selectedMaterialId,
+            widthCm: currentMaterial?.mode !== "unidad" ? item.widthCm : 100,
+            heightCm: currentMaterial?.mode !== "unidad" ? item.heightCm : 100,
+            quantity: item.quantity,
+            printQuality,
+            inkType: item.inkType || inkType,
+            selectedColor: currentMaterial?.hasColorPalette ? selectedColor : undefined,
+            mountOption: enableMounting ? selectedMount : undefined,
+            finishings: item.finishings || selectedFinishings,
+          });
+          if (!val.success) {
+            return {
+              ...item,
+              quoteData: null,
+              error: val.firstError,
+              isLoading: false,
+            };
+          }
+          try {
+            const resp = await fetch("/api/quote", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                materialId: selectedMaterialId,
+                widthCm: currentMaterial?.mode !== "unidad" ? item.widthCm : undefined,
+                heightCm: currentMaterial?.mode !== "unidad" ? item.heightCm : undefined,
+                quantity: item.quantity,
+                printQuality,
+                inkType: item.inkType || inkType,
+                selectedColor: currentMaterial?.hasColorPalette ? selectedColor : undefined,
+                mountOption: enableMounting ? selectedMount : undefined,
+                finishings: item.finishings || selectedFinishings,
+              }),
+            });
+            if (!resp.ok) {
+              return { ...item, quoteData: null, error: "Error en servidor", isLoading: false };
+            }
+            const data: QuoteResponsePayload = await resp.json();
+            return { ...item, quoteData: data, error: null, isLoading: false };
+          } catch (err: any) {
+            return { ...item, quoteData: null, error: err.message, isLoading: false };
+          }
+        });
+
+        const updated = await Promise.all(promises);
+        if (isMounted) {
+          setBulkItems(updated);
+        }
+      } catch (err: any) {

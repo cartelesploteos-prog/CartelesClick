@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidOrder(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.orderNumber is string && data.orderNumber.size() <= 64 &&
+             data.status in ['pendiente', 'en_produccion', 'terminaciones', 'despachado', 'entregado'] &&
+             data.customerName is string && data.customerName.size() <= 128 &&
+             data.customerEmail is string && data.customerEmail.size() <= 128 &&
+             data.totalAmountARS is number && data.totalAmountARS >= 0;
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      allow get, list: if true; // Public tracking for customers by order ID / reference
+      allow create: if isValidId(orderId) && isValidOrder(request.resource.data);
+      allow update: if isValidId(orderId) && isValidOrder(request.resource.data);
+      allow delete: if false;
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

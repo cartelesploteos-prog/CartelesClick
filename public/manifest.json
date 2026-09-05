@@ -1,0 +1,54 @@
+{
+  "short_name": "Carteles.Click",
+  "name": "Carteles.Click - Cartelería e Imprenta Gran Formato",
+  "description": "Cotizador e imprenta digital de carteles, lonas front, vinilos ploteados, portabanners y materiales rígidos con inteligencia artificial.",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "/",
+  "start_url": "/",
+  "background_color": "#161821",
+  "theme_color": "#161821",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es-AR",
+  "categories": ["shopping", "business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Cotizador de Carteles",
+      "short_name": "Cotizar",
+      "description": "Calculá el precio m² o por placa de tus lonas y vinilos en tiempo real",
+      "url": "/?view=cotizador"
+    },
+    {
+      "name": "Crear Cartel con IA",
+      "short_name": "Diseñar IA",
+      "description": "Generador de anuncios y banners con Inteligencia Artificial",
+      "url": "/?view=poster"
+    },
+    {
+      "name": "Seguimiento de Pedidos",
+      "short_name": "Mis Pedidos",
+      "description": "Consultá el estado en taller de tus impresiones",
+      "url": "/?view=pedidos"
+    }
+  ]
+}
