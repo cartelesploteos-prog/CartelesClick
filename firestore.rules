@@ -7,25 +7,50 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    function isAdmin() {
+      return isSignedIn() && (request.auth.token.admin == true || request.auth.token.email == 'carteles.ploteos@gmail.com');
     }
 
-    function isValidOrder(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.orderNumber is string && data.orderNumber.size() <= 64 &&
-             data.status in ['pendiente', 'en_produccion', 'terminaciones', 'despachado', 'entregado'] &&
-             data.customerName is string && data.customerName.size() <= 128 &&
-             data.customerEmail is string && data.customerEmail.size() <= 128 &&
-             data.totalAmountARS is number && data.totalAmountARS >= 0;
+    function isOwner(email) {
+      return isSignedIn() && request.auth.token.email == email;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
     }
 
     // Orders Collection
     match /orders/{orderId} {
-      allow get, list: if true; // Public tracking for customers by order ID / reference
-      allow create: if isValidId(orderId) && isValidOrder(request.resource.data);
-      allow update: if isValidId(orderId) && isValidOrder(request.resource.data);
-      allow delete: if false;
+      // Allow users to read/update their own orders using UID
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      
+      // Allow creation ensuring the user sets their own UID
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Allow updates (restricted to owner or admin)
+      allow update: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      
+      allow delete: if isAdmin();
+
+      // Audit Logs Subcollection (Immutable history of order status and mutations)
+      match /audit_logs/{logId} {
+        allow read, create: if isAdmin();
+        allow update, delete: if false;
+      }
+    }
+
+    // Top-level Audit Logs Collection
+    match /audit_logs/{logId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+    
+    // Materials (Public read, admin write)
+    match /materials/{materialId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Default deny catch-all

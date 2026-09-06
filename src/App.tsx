@@ -15,6 +15,7 @@ import { BlogView } from "./components/views/BlogView";
 import { OrdersView } from "./components/views/OrdersView";
 import { AdminPanelView } from "./components/views/AdminPanelView";
 import { NotificationToast } from "./components/ui/NotificationToast";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { useThemeStore } from "./store/useThemeStore";
 import { useI18nStore } from "./store/useI18nStore";
 import { getLocalBusinessSchema } from "./utils/schema";
@@ -109,13 +110,19 @@ export default function App() {
         )}
         {currentView === "blog" && <BlogView onNavigate={handleNavigate} />}
         {currentView === "pedidos" && (
-          <OrdersView onNavigate={handleNavigate} />
+          <ProtectedRoute>
+            <OrdersView onNavigate={handleNavigate} />
+          </ProtectedRoute>
         )}
         {currentView === "cuenta" && (
-          <OrdersView onNavigate={handleNavigate} />
+          <ProtectedRoute>
+            <OrdersView onNavigate={handleNavigate} />
+          </ProtectedRoute>
         )}
         {currentView === "admin" && (
-          <AdminPanelView onNavigate={handleNavigate} />
+          <ProtectedRoute adminOnly>
+            <AdminPanelView onNavigate={handleNavigate} />
+          </ProtectedRoute>
         )}
       </main>
 

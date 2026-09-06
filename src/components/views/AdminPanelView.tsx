@@ -39,12 +39,27 @@ import {
   FileSpreadsheet,
   Bell,
   Mail,
-  Send
+  Send,
+  History,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Table as TableIcon,
+  LayoutList
 } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationStore } from "../../store/useNotificationStore";
 import { exportProductsToCsv, exportOrdersToCsv } from "../../utils/exportCsv";
-import { OrdersListSkeleton } from "../ui/Skeleton";
+import { OrdersListSkeleton, Skeleton } from "../ui/Skeleton";
+import { DashboardMetrics } from "../admin/DashboardMetrics";
+import { AdminMetricsWidgets } from "../admin/AdminMetricsWidgets";
+import { OrderAuditLogModal } from "../admin/OrderAuditLogModal";
+import { ProductionVerificationModal } from "../admin/ProductionVerificationModal";
+import { recordOrderAuditLog, recordBulkOrderAuditLogs, logOrderStatusAudit } from "../../lib/firestore";
+import { validateOrderCriticalFields, validateOrderForProduction } from "../../utils/orderValidation";
 import {
   AdminProduct,
   AdminPeriodMetrics,
@@ -60,9 +75,9 @@ interface AdminPanelViewProps {
 }
 
 export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) => {
-  const { isAdmin, loginAsAdmin, loginAsClient } = useAuthStore();
+  const { isAdmin, user } = useAuthStore();
   const { addNotification } = useNotificationStore();
-  const [activeTab, setActiveTab] = useState<"metricas" | "productos" | "blog_cms" | "pedidos" | "notificaciones" | "seguridad">("metricas");
+  const [activeTab, setActiveTab] = useState<"metricas" | "productos" | "blog_cms" | "pedidos" | "notificaciones" | "seguridad" | "usuarios">("metricas");
 
   // Broadcast Notification Form State
   const [notifType, setNotifType] = useState<"order_status" | "promotion" | "blog" | "system">("promotion");
@@ -125,8 +140,29 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
   }, [metricsPeriod]);
 
   // ==========================================
-  // 🛠️ PRODUCTS STATE
+  // 👥 USERS STATE
   // ==========================================
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const res = await fetch("/api/admin/users");
+      const data = await res.json();
+      if (data && data.users) {
+        setUsers(data.users);
+      }
+    } catch (e) {
+      console.error("Error cargando usuarios:", e);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [productModeFilter, setProductModeFilter] = useState<"todos" | CalculationMode>("todos");
@@ -383,19 +419,219 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
     fetchOrders();
   }, [orderCustomerFilter, orderPriorityFilter, orderStatusFilter]);
 
-  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
+  // Bulk Order Management
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+
+  // Audit Log & Production Verification Modal States
+  const [auditLogOrder, setAuditLogOrder] = useState<Order | null>(null);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [verificationOrder, setVerificationOrder] = useState<Order | null>(null);
+  const [pendingTargetStatus, setPendingTargetStatus] = useState<string>("en_produccion");
+
+  // Sorting, View Mode & Pagination States
+  type OrderSortField = "createdAt" | "orderNumber" | "customerName" | "totalAmountARS" | "priority" | "status";
+  const [sortField, setSortField] = useState<OrderSortField>("createdAt");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage, setOrdersPerPage] = useState(10);
+  const [ordersViewMode, setOrdersViewMode] = useState<"table" | "cards">("table");
+
+  const handleSort = (field: OrderSortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+    setCurrentPage(1);
+  };
+
+  // Filtered Orders
+  const filteredOrders = orders.filter((o) => {
+    if (!orderSearchQuery) return true;
+    const q = orderSearchQuery.toLowerCase().trim();
+    return (
+      (o.id && o.id.toLowerCase().includes(q)) ||
+      (o.orderNumber && o.orderNumber.toLowerCase().includes(q)) ||
+      (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+      (o.customerEmail && o.customerEmail.toLowerCase().includes(q)) ||
+      (o.customerCompany && o.customerCompany.toLowerCase().includes(q))
+    );
+  });
+
+  // Sorted Orders
+  const sortedOrders = React.useMemo(() => {
+    return [...filteredOrders].sort((a, b) => {
+      let valA: any = a[sortField];
+      let valB: any = b[sortField];
+
+      if (sortField === "totalAmountARS") {
+        valA = Number(valA) || 0;
+        valB = Number(valB) || 0;
+      } else if (sortField === "createdAt") {
+        valA = new Date(valA || 0).getTime();
+        valB = new Date(valB || 0).getTime();
+      } else {
+        valA = String(valA || "").toLowerCase();
+        valB = String(valB || "").toLowerCase();
+      }
+
+      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredOrders, sortField, sortDirection]);
+
+  // Paginated Orders
+  const totalPages = Math.max(1, Math.ceil(sortedOrders.length / ordersPerPage));
+  const paginatedOrders = React.useMemo(() => {
+    const start = (currentPage - 1) * ordersPerPage;
+    return sortedOrders.slice(start, start + ordersPerPage);
+  }, [sortedOrders, currentPage, ordersPerPage]);
+
+  const handleExportSelected = () => {
+    const selectedOrdersData = orders.filter((o) => selectedOrders.includes(o.id));
+    const targetData = selectedOrdersData.length > 0 ? selectedOrdersData : filteredOrders;
+    const filename =
+      selectedOrdersData.length > 0
+        ? `pedidos_seleccionados_${new Date().toISOString().slice(0, 10)}.csv`
+        : `reporte_pedidos_taller_${new Date().toISOString().slice(0, 10)}.csv`;
+    exportOrdersToCsv(targetData, filename);
+  };
+
+  const handleUpdateOrderStatus = async (
+    ord: Order,
+    status: string,
+    bypassValidation = false
+  ) => {
+    // Validar la existencia y formato de campos críticos ('medidas', 'material', 'archivos') antes de procesar cambios de estado
+    if (!bypassValidation && (status === "en_produccion" || status === "impresion" || status === "terminaciones")) {
+      const validation = validateOrderCriticalFields(ord);
+      if (!validation.isValid) {
+        setVerificationOrder(ord);
+        setPendingTargetStatus(status);
+        addNotification({
+          type: "system",
+          title: "Validación de Campos Críticos Requerida",
+          message: `El pedido #${ord.orderNumber} requiere verificar medidas, material o archivos gráficos antes de cambiar a ${status}.`,
+          priority: "high",
+        });
+        return;
+      }
+    }
+
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const previousStatus = ord.status || "pendiente";
+      const timestamp = new Date().toISOString();
+      const adminUid = user?.uid || "admin";
+      const action = "update_status";
+
+      await fetch(`/api/admin/orders/${ord.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ 
+          status,
+          adminUid,
+          action,
+          timestamp,
+          previousStatus,
+          notes: `Estado actualizado a "${status}" por control administrativo`
+        }),
       });
-      const data = await res.json();
-      if (data.success) fetchOrders();
+
+      // Registra automáticamente un nuevo documento en la subcolección 'auditLogs' de Firestore
+      await logOrderStatusAudit({
+        adminUid,
+        action,
+        orderId: ord.id,
+        orderNumber: ord.orderNumber,
+        timestamp,
+        previousStatus,
+        newStatus: status,
+        adminEmail: user?.email || "carteles.ploteos@gmail.com",
+        adminName: user?.displayName || user?.email?.split("@")[0] || "Administrador",
+        notes: `Estado actualizado a "${status}" desde AdminPanelView`,
+      });
+
+      addNotification({
+        type: "system",
+        title: "Estado Actualizado & Auditado",
+        message: `Pedido #${ord.orderNumber} pasó a ${status}. Registrado en subcolección auditLogs de Firestore.`,
+        priority: "normal",
+      });
+
+      fetchOrders();
     } catch (e) {
-      console.error("Error actualizando estado:", e);
+      console.error("Error update status:", e);
     }
   };
+
+  const handleBulkStatusUpdate = async (newStatus: string) => {
+    if (newStatus === "en_produccion" || newStatus === "impresion" || newStatus === "terminaciones") {
+      const targetOrders = orders.filter((o) => selectedOrders.includes(o.id));
+      const invalid = targetOrders.filter((o) => !validateOrderCriticalFields(o).isValid);
+      if (invalid.length > 0) {
+        addNotification({
+          type: "system",
+          title: "Validación de Campos Críticos Requerida",
+          message: `${invalid.length} pedido(s) tienen datos críticos incompletos (medidas, material o archivos). Corrige los datos antes de enviarlos a producción.`,
+          priority: "high",
+        });
+        setVerificationOrder(invalid[0]);
+        setPendingTargetStatus(newStatus);
+        return;
+      }
+    }
+
+    try {
+      // 1. Ejecutar actualización de estado en endpoint API
+      await Promise.all(
+        selectedOrders.map(async (id) => {
+          await fetch(`/api/admin/orders/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus }),
+          });
+        })
+      );
+
+      // 2. Construir mapa de datos de órdenes seleccionadas para trazabilidad
+      const ordersMap: Record<string, { status?: string; orderNumber?: string }> = {};
+      selectedOrders.forEach((id) => {
+        const ord = orders.find((o) => o.id === id);
+        if (ord) {
+          ordersMap[id] = { status: ord.status, orderNumber: ord.orderNumber };
+        }
+      });
+
+      // 3. Registrar en Firestore subcolección 'auditLogs' de cada pedido
+      // Registra automáticamente: quién (admin UID), qué acción realizó ('update_status') y en qué objeto (order ID)
+      await recordBulkOrderAuditLogs({
+        orderIds: selectedOrders,
+        ordersMap,
+        action: "update_status",
+        newStatus,
+        adminUser: {
+          uid: user?.uid || "admin",
+          email: user?.email || "carteles.ploteos@gmail.com",
+          displayName: user?.displayName || "Administrador",
+        },
+        notes: `Actualización masiva de estado a "${newStatus}" desde AdminPanelView`,
+      });
+
+      setSelectedOrders([]);
+      addNotification({
+        type: "system",
+        title: "Actualización Masiva Auditada en Firestore",
+        message: `Se actualizaron ${selectedOrders.length} pedido(s) a ${newStatus} y se registró en la subcolección auditLogs.`,
+        priority: "normal",
+      });
+      fetchOrders();
+    } catch (e) {
+      console.error("Error bulk update:", e);
+    }
+  };
+
 
   const handleSaveOrderDetails = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -497,7 +733,6 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
 
         <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={isAdmin ? loginAsClient : loginAsAdmin}
             className={`px-4 py-2.5 rounded-[7px] text-xs font-sans font-medium transition-all flex items-center gap-2 ${
               isAdmin
                 ? "bg-accent text-black font-semibold shadow-sm"
@@ -505,7 +740,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
             }`}
           >
             <Lock className="w-4 h-4" />
-            <span>{isAdmin ? "Admin Activo" : "Iniciar Modo Admin"}</span>
+            <span>{isAdmin ? "Admin Activo" : "Usuario sin privilegios"}</span>
           </button>
         </div>
       </div>
@@ -585,6 +820,18 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
         >
           <ShieldCheck className="w-4 h-4" />
           <span>Auditoría & Servidor</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("usuarios")}
+          className={`px-4 py-2.5 rounded-t-[7px] text-xs font-sans font-medium transition-all flex items-center gap-2 border-b-2 whitespace-nowrap ${
+            activeTab === "usuarios"
+              ? "border-primary text-primary bg-[var(--bg-surface)]"
+              : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Usuarios</span>
         </button>
       </div>
 
@@ -1025,6 +1272,9 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
       {/* ========================================================================= */}
       {activeTab === "pedidos" && (
         <div className="space-y-6">
+          {/* 📊 KPI DASHBOARD WIDGETS CON RECHARTS: VOLUMEN MENSUAL Y TASA DE CONVERSIÓN */}
+          <DashboardMetrics orders={orders} />
+
           {/* ORDERS FILTERS */}
           <div className="p-4 sm:p-6 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1037,27 +1287,87 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {selectedOrders.length > 0 && (
+                  <div className="flex items-center gap-2 mr-1 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-[7px]">
+                    <span className="text-xs font-medium text-primary">{selectedOrders.length} sel.</span>
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) handleBulkStatusUpdate(e.target.value);
+                      }}
+                      defaultValue=""
+                      className="px-2 py-1 rounded-[7px] text-xs bg-primary text-white border-0 focus:outline-none cursor-pointer"
+                    >
+                      <option value="" disabled>Cambiar estado masivo...</option>
+                      <option value="pendiente">A: Pendiente</option>
+                      <option value="en_produccion">A: En Producción</option>
+                      <option value="terminaciones">A: Terminaciones</option>
+                      <option value="despachado">A: Despachado</option>
+                      <option value="entregado">A: Entregado</option>
+                    </select>
+                    <button
+                      onClick={handleExportSelected}
+                      className="px-2 py-1 rounded-[7px] text-xs font-medium bg-emerald-700 hover:bg-emerald-600 text-white flex items-center gap-1 transition-colors"
+                      title="Descargar pedidos seleccionados a CSV"
+                    >
+                      <Download className="w-3 h-3" />
+                      <span>Exportar CSV</span>
+                    </button>
+                    <button 
+                      onClick={() => setSelectedOrders([])} 
+                      className="text-xs text-[var(--text-secondary)] hover:text-red-400 p-0.5"
+                      title="Limpiar selección"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 <button
-                  onClick={() => exportOrdersToCsv(orders)}
+                  onClick={() => exportOrdersToCsv(filteredOrders, `pedidos_taller_${new Date().toISOString().slice(0, 10)}.csv`)}
                   className="px-3.5 py-2 rounded-[7px] text-xs font-sans font-medium bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)] flex items-center gap-1.5 transition-colors"
-                  title="Exportar pedidos en formato CSV compatible con Google Sheets"
+                  title="Exportar pedidos actuales en formato CSV compatible con Google Sheets / Excel"
                 >
                   <Download className="w-3.5 h-3.5 text-primary" />
-                  <span>Exportar Pedidos a Sheets</span>
+                  <span>Exportar a CSV ({filteredOrders.length})</span>
                 </button>
 
                 <button
                   onClick={fetchOrders}
                   className="p-2 rounded-[7px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-primary)]"
+                  title="Actualizar pedidos"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loadingOrders ? "animate-spin" : ""}`} />
                 </button>
               </div>
             </div>
 
-            {/* FILTER CHIPS */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[var(--border-subtle)]">
+            {/* FILTER CHIPS & SEARCH */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-[var(--border-subtle)]">
+              <div>
+                <label className="text-[11px] text-[var(--text-secondary)] uppercase font-medium block mb-1">
+                  Buscar por N° / UID / Cliente
+                </label>
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                  <input
+                    type="text"
+                    value={orderSearchQuery}
+                    onChange={(e) => setOrderSearchQuery(e.target.value)}
+                    placeholder="Ej: ORD- o Nombre..."
+                    className="w-full pl-8 pr-3 py-1.5 rounded-[7px] text-xs bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  {orderSearchQuery && (
+                    <button
+                      onClick={() => setOrderSearchQuery("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="text-[11px] text-[var(--text-secondary)] uppercase font-medium block mb-1">
                   Tipo de Cliente
@@ -1110,18 +1420,353 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                 </select>
               </div>
             </div>
+
+            {/* SELECTION & SORTING TOOLBAR */}
+            <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] font-medium text-[var(--text-secondary)] uppercase tracking-wider mr-1 flex items-center gap-1">
+                    <ArrowUpDown className="w-3 h-3" />
+                    <span>Ordenar por:</span>
+                  </span>
+
+                  {(
+                    [
+                      { id: "createdAt", label: "Fecha" },
+                      { id: "orderNumber", label: "N° Pedido" },
+                      { id: "customerName", label: "Cliente" },
+                      { id: "totalAmountARS", label: "Total ARS" },
+                      { id: "priority", label: "Prioridad" },
+                      { id: "status", label: "Estado" },
+                    ] as const
+                  ).map((col) => {
+                    const isActive = sortField === col.id;
+                    return (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onClick={() => handleSort(col.id)}
+                        className={`px-2.5 py-1 rounded-[5px] text-[11px] font-medium border flex items-center gap-1 transition-colors ${
+                          isActive
+                            ? "bg-primary/15 border-primary text-primary"
+                            : "bg-[var(--bg-surface-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        <span>{col.label}</span>
+                        {isActive ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="w-3 h-3" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 border border-[var(--border-subtle)] rounded-[5px] p-0.5 bg-[var(--bg-surface-subtle)]">
+                    <button
+                      type="button"
+                      onClick={() => setOrdersViewMode("table")}
+                      className={`px-2 py-1 rounded-[4px] text-xs font-medium flex items-center gap-1 transition-colors ${
+                        ordersViewMode === "table"
+                          ? "bg-[var(--bg-surface)] text-primary shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      }`}
+                      title="Vista tabla compacta para grandes volúmenes"
+                    >
+                      <TableIcon className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Tabla</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOrdersViewMode("cards")}
+                      className={`px-2 py-1 rounded-[4px] text-xs font-medium flex items-center gap-1 transition-colors ${
+                        ordersViewMode === "cards"
+                          ? "bg-[var(--bg-surface)] text-primary shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      }`}
+                      title="Vista detallada en tarjetas"
+                    >
+                      <LayoutList className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Tarjetas</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                    <span>Por pág:</span>
+                    <select
+                      value={ordersPerPage}
+                      onChange={(e) => {
+                        setOrdersPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="px-2 py-0.5 rounded-[5px] text-xs bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] cursor-pointer"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (selectedOrders.length === sortedOrders.length) {
+                        setSelectedOrders([]);
+                      } else {
+                        setSelectedOrders(sortedOrders.map((o) => o.id));
+                      }
+                    }}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    {selectedOrders.length === sortedOrders.length
+                      ? "Deseleccionar todos"
+                      : `Seleccionar todos (${sortedOrders.length})`}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* ORDERS LIST */}
+          {/* ORDERS LIST / TABLE */}
           <div className="space-y-4">
             {loadingOrders ? (
               <OrdersListSkeleton count={3} />
-            ) : orders.length === 0 ? (
+            ) : sortedOrders.length === 0 ? (
               <div className="p-12 text-center text-xs text-[var(--text-secondary)] bg-[var(--bg-surface)] rounded-[7px] border border-[var(--border-subtle)]">
-                No hay pedidos que coincidan con los filtros seleccionados.
+                No hay pedidos que coincidan con los filtros seleccionados o la búsqueda &quot;{orderSearchQuery}&quot;.
+              </div>
+            ) : ordersViewMode === "table" ? (
+              /* TABLA DE PEDIDOS OPTIMIZADA CON CABECERAS ORDENABLES */
+              <div className="overflow-x-auto rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                      <th className="p-3 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={paginatedOrders.length > 0 && paginatedOrders.every(o => selectedOrders.includes(o.id))}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              const newSelected = Array.from(new Set([...selectedOrders, ...paginatedOrders.map(o => o.id)]));
+                              setSelectedOrders(newSelected);
+                            } else {
+                              setSelectedOrders(selectedOrders.filter(id => !paginatedOrders.some(o => o.id === id)));
+                            }
+                          }}
+                          aria-label="Seleccionar página"
+                        />
+                      </th>
+                      <th
+                        onClick={() => handleSort("orderNumber")}
+                        className="p-3 cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        <div className="flex items-center gap-1">
+                          <span>N° Pedido</span>
+                          {sortField === "orderNumber" ? (
+                            sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-primary" /> : <ChevronDown className="w-3 h-3 text-primary" />
+                          ) : (
+                            <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort("createdAt")}
+                        className="p-3 cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        <div className="flex items-center gap-1">
+                          <span>Fecha</span>
+                          {sortField === "createdAt" ? (
+                            sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-primary" /> : <ChevronDown className="w-3 h-3 text-primary" />
+                          ) : (
+                            <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort("customerName")}
+                        className="p-3 cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        <div className="flex items-center gap-1">
+                          <span>Cliente</span>
+                          {sortField === "customerName" ? (
+                            sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-primary" /> : <ChevronDown className="w-3 h-3 text-primary" />
+                          ) : (
+                            <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="p-3">Segmento</th>
+                      <th className="p-3">Ítems & Medidas</th>
+                      <th
+                        onClick={() => handleSort("totalAmountARS")}
+                        className="p-3 text-right cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          <span>Total ARS</span>
+                          {sortField === "totalAmountARS" ? (
+                            sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-primary" /> : <ChevronDown className="w-3 h-3 text-primary" />
+                          ) : (
+                            <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort("priority")}
+                        className="p-3 text-center cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <span>Prioridad</span>
+                          {sortField === "priority" ? (
+                            sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-primary" /> : <ChevronDown className="w-3 h-3 text-primary" />
+                          ) : (
+                            <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th
+                        onClick={() => handleSort("status")}
+                        className="p-3 cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        <div className="flex items-center gap-1">
+                          <span>Estado</span>
+                          {sortField === "status" ? (
+                            sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-primary" /> : <ChevronDown className="w-3 h-3 text-primary" />
+                          ) : (
+                            <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="p-3 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-subtle)]">
+                    {paginatedOrders.map((ord) => {
+                      const custInfo = getCustomerTypeLabel(ord.customerType);
+                      const isSelected = selectedOrders.includes(ord.id);
+                      const isUrgent = ord.priority === "urgente";
+
+                      return (
+                        <tr
+                          key={ord.id}
+                          className={`hover:bg-[var(--bg-surface-subtle)] transition-colors ${
+                            isSelected ? "bg-primary/5" : isUrgent ? "bg-red-950/10" : ""
+                          }`}
+                        >
+                          <td className="p-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) =>
+                                setSelectedOrders(
+                                  e.target.checked
+                                    ? [...selectedOrders, ord.id]
+                                    : selectedOrders.filter((id) => id !== ord.id)
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="p-3">
+                            <span className="font-mono-num font-bold text-xs text-primary">
+                              {ord.orderNumber || ord.id.slice(0, 8)}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-[var(--text-secondary)]">
+                            {new Date(ord.createdAt).toLocaleDateString("es-AR", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>
+                          <td className="p-3">
+                            <div className="font-medium text-[var(--text-primary)]">
+                              {ord.customerName}
+                            </div>
+                            {ord.customerCompany && (
+                              <div className="text-[10px] text-primary font-medium truncate max-w-[140px]">
+                                {ord.customerCompany}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-[var(--text-secondary)] truncate max-w-[160px]">
+                              {ord.customerEmail}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-[5px] text-[10px] font-medium border ${custInfo.color}`}
+                            >
+                              {custInfo.label}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <div className="text-[var(--text-primary)] font-medium">
+                              {ord.items?.length || 0} prod. {ord.totalM2 ? `(${ord.totalM2} m²)` : ""}
+                            </div>
+                            <div className="text-[10px] text-[var(--text-secondary)] truncate max-w-[180px]">
+                              {ord.items?.map((i) => `${i.quantity}x ${i.materialName || 'Ítem'}`).join(", ")}
+                            </div>
+                          </td>
+                          <td className="p-3 text-right">
+                            <span className="font-mono-num font-semibold text-xs text-[var(--text-primary)]">
+                              ${(ord.totalAmountARS || (ord as any).totalPriceARS || 0).toLocaleString("es-AR")}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">
+                            {getPriorityBadge(ord.priority)}
+                          </td>
+                          <td className="p-3">
+                            <select
+                              value={ord.status}
+                              onChange={(e) => handleUpdateOrderStatus(ord, e.target.value)}
+                              className="px-2 py-1 rounded-[5px] text-[11px] bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-medium cursor-pointer"
+                            >
+                              <option value="pendiente">Pendiente</option>
+                              <option value="en_produccion">En Producción</option>
+                              <option value="terminaciones">Terminaciones</option>
+                              <option value="despachado">Despachado</option>
+                              <option value="entregado">Entregado</option>
+                            </select>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAuditLogOrder(ord);
+                                  setIsAuditModalOpen(true);
+                                }}
+                                className="p-1 rounded-[5px] bg-[var(--bg-surface-subtle)] hover:bg-primary/10 hover:text-primary border border-[var(--border-subtle)] text-[var(--text-secondary)] transition-colors"
+                                title="Ver historial de auditoría (auditLogs)"
+                              >
+                                <History className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingOrder(ord)}
+                                className="p-1 rounded-[5px] bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                                title="Editar notas y prioridad"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             ) : (
-              orders.map((ord) => {
+              /* VISTA DETALLADA EN TARJETAS */
+              paginatedOrders.map((ord) => {
                 const custInfo = getCustomerTypeLabel(ord.customerType);
 
                 return (
@@ -1136,6 +1781,11 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                     {/* TOP HEADER ROW */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
                       <div className="flex flex-wrap items-center gap-2.5">
+                        <input
+                          type="checkbox"
+                          checked={selectedOrders.includes(ord.id)}
+                          onChange={(e) => setSelectedOrders(e.target.checked ? [...selectedOrders, ord.id] : selectedOrders.filter(id => id !== ord.id))}
+                        />
                         <span className="font-mono-num font-bold text-xs text-primary">
                           {ord.orderNumber || ord.id}
                         </span>
@@ -1183,11 +1833,11 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
 
                       <div>
                         <span className="text-[11px] text-[var(--text-secondary)] block font-medium">Despacho & Estado</span>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           <select
                             value={ord.status}
-                            onChange={(e) => handleUpdateOrderStatus(ord.id, e.target.value)}
-                            className="px-2 py-1 rounded-[7px] text-[11px] bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-medium"
+                            onChange={(e) => handleUpdateOrderStatus(ord, e.target.value)}
+                            className="px-2 py-1 rounded-[7px] text-[11px] bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-medium cursor-pointer"
                           >
                             <option value="pendiente">Pendiente</option>
                             <option value="en_produccion">En Producción</option>
@@ -1197,10 +1847,24 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                           </select>
 
                           <button
+                            type="button"
                             onClick={() => setEditingOrder(ord)}
                             className="px-2.5 py-1 rounded-[7px] bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)]"
                           >
                             Editar Prioridad/Notas
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuditLogOrder(ord);
+                              setIsAuditModalOpen(true);
+                            }}
+                            className="px-2.5 py-1 rounded-[7px] bg-[var(--bg-surface-subtle)] hover:bg-primary/10 hover:text-primary border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors"
+                            title="Ver trazabilidad de auditoría en Firestore"
+                          >
+                            <History className="w-3.5 h-3.5 text-primary" />
+                            <span>Auditoría</span>
                           </button>
                         </div>
                       </div>
@@ -1218,6 +1882,63 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                   </div>
                 );
               })
+            )}
+
+            {/* PAGINATION CONTROLS BAR */}
+            {sortedOrders.length > 0 && (
+              <div className="p-4 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <span className="text-[var(--text-secondary)]">
+                  Mostrando <strong>{(currentPage - 1) * ordersPerPage + 1}</strong> -{" "}
+                  <strong>{Math.min(currentPage * ordersPerPage, sortedOrders.length)}</strong> de{" "}
+                  <strong>{sortedOrders.length}</strong> pedidos
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(1)}
+                    className="p-1.5 rounded-[5px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    title="Primera página"
+                  >
+                    <ChevronsLeft className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className="p-1.5 rounded-[5px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    title="Página anterior"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <span className="px-3 py-1 font-mono text-xs font-semibold text-[var(--text-primary)]">
+                    Página {currentPage} de {totalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    className="p-1.5 rounded-[5px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    title="Página siguiente"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                    className="p-1.5 rounded-[5px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    title="Última página"
+                  >
+                    <ChevronsRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -2029,6 +2750,59 @@ Placa PVC 3mm	rigidos	placa	42000	100"
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* 👤 TAB 7: USERS MANAGEMENT                                               */}
+      {/* ========================================================================= */}
+      {activeTab === "usuarios" && (
+        <div className="p-6 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4">
+          <h2 className="font-heading text-lg text-[var(--text-primary)] font-medium">Usuarios Registrados</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-sans">
+              <thead className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] uppercase text-[10px] font-heading font-medium">
+                <tr>
+                  <th className="py-2.5 px-3">Email</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {users.map((u, i) => (
+                  <tr key={i}>
+                    <td className="py-2.5 px-3">{u.email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 📜 HISTORIAL DE CAMBIOS & AUDIT LOG MODAL (FIRESTORE) */}
+      <OrderAuditLogModal
+        order={auditLogOrder}
+        isOpen={isAuditModalOpen}
+        onClose={() => {
+          setIsAuditModalOpen(false);
+          setAuditLogOrder(null);
+        }}
+      />
+
+      {/* 🛡️ VERIFICACIÓN DE DATOS PRE-PRODUCCIÓN MODAL (MEDIDAS Y MATERIAL) */}
+      <ProductionVerificationModal
+        order={verificationOrder}
+        targetStatus={pendingTargetStatus}
+        isOpen={Boolean(verificationOrder)}
+        onClose={() => {
+          setVerificationOrder(null);
+          setPendingTargetStatus("");
+        }}
+        onConfirm={() => {
+          if (verificationOrder && pendingTargetStatus) {
+            handleUpdateOrderStatus(verificationOrder, pendingTargetStatus, true);
+            setVerificationOrder(null);
+            setPendingTargetStatus("");
+          }
+        }}
+      />
 
     </div>
   );

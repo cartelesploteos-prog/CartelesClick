@@ -2471,7 +2471,7 @@ app.patch('/api/admin/orders/:id', (req, res) => {
 
 app.patch('/api/admin/orders/:id/status', (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, adminUid, action, notes, timestamp } = req.body;
   const orderIndex = IN_MEMORY_ORDERS.findIndex((o) => o.id === id);
   if (orderIndex === -1) {
     return res.status(404).json({ error: 'Pedido no encontrado.' });
@@ -2479,7 +2479,25 @@ app.patch('/api/admin/orders/:id/status', (req, res) => {
 
   const oldStatus = IN_MEMORY_ORDERS[orderIndex].status;
   IN_MEMORY_ORDERS[orderIndex].status = status;
+  IN_MEMORY_ORDERS[orderIndex].updatedAt = timestamp || new Date().toISOString();
   const currentOrder = IN_MEMORY_ORDERS[orderIndex];
+
+  // Registrar entrada en historial de auditoría de la orden
+  if (!currentOrder.auditHistory) {
+    currentOrder.auditHistory = [];
+  }
+  const auditEntry = {
+    id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    orderId: currentOrder.id,
+    orderNumber: currentOrder.orderNumber,
+    adminUid: adminUid || 'admin',
+    action: action || 'update_status',
+    previousStatus: oldStatus,
+    newStatus: status,
+    timestamp: timestamp || new Date().toISOString(),
+    notes: notes || `Estado actualizado a "${status}"`
+  };
+  currentOrder.auditHistory.unshift(auditEntry);
 
   // Trigger automated notification if status changed
   if (status && status !== oldStatus) {

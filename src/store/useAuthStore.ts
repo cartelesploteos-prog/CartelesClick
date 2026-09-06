@@ -1,67 +1,115 @@
 import { create } from "zustand";
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "cliente";
-  companyName?: string;
-  phone?: string;
-  wholesaleTier?: "inicio" | "agencia" | "partner";
-}
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged, 
+  User,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail
+} from "firebase/auth";
+import { auth } from "../lib/firebase";
+import { getFirebaseAuthErrorMessage } from "../utils/authErrors";
+import { useNotificationStore } from "./useNotificationStore";
+
 interface AuthStore {
-  user: UserProfile | null;
-  isAuthenticated: boolean;
+  user: User | null;
+  loading: boolean;
   isAdmin: boolean;
-  loginAsClient: () => void;
-  loginAsAdmin: () => void;
-  logout: () => void;
-  updateProfile: (data: Partial<UserProfile>) => void;
+  isAuthenticated: boolean;
+  login: (email: string, pass: string) => Promise<void>;
+  register: (email: string, pass: string) => Promise<void>;
+  loginAsClient?: (email?: string, pass?: string) => Promise<void>;
+  logout: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithGithub: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
 }
-export const useAuthStore = create<AuthStore>((set) => ({
-  user: {
-    id: "usr-1092",
-    name: "Martín Bossi",
-    email: "carteles.ploteos@gmail.com",
-    role: "cliente",
-    companyName: "Estudio Gráfico MB",
-    phone: "+54 11 4892-1100",
-    wholesaleTier: "inicio",
-  },
-  isAuthenticated: true,
-  isAdmin: false,
-  loginAsClient: () => {
-    set({
-      user: {
-        id: "usr-1092",
-        name: "Martín Bossi",
-        email: "carteles.ploteos@gmail.com",
-        role: "cliente",
-        companyName: "Estudio Gráfico MB",
-        phone: "+54 11 4892-1100",
-        wholesaleTier: "inicio",
-      },
-      isAuthenticated: true,
-      isAdmin: false,
+
+export const useAuthStore = create<AuthStore>((set) => {
+  // Listen for auth state changes
+  onAuthStateChanged(auth, async (user) => {
+    let isAdmin = false;
+    if (user) {
+      try {
+        const token = await user.getIdTokenResult();
+        isAdmin = !!token.claims.admin || user.email?.toLowerCase() === "carteles.ploteos@gmail.com";
+      } catch (e) {
+        isAdmin = user.email?.toLowerCase() === "carteles.ploteos@gmail.com";
+      }
+    }
+    set({ user, loading: false, isAdmin, isAuthenticated: !!user });
+  });
+
+  const notifyAuthError = (err: any) => {
+    const message = getFirebaseAuthErrorMessage(err);
+    useNotificationStore.getState().addNotification({
+      type: "system",
+      title: "Error de autenticación",
+      message,
+      priority: "high"
     });
-  },
-  loginAsAdmin: () => {
-    set({
-      user: {
-        id: "usr-admin-01",
-        name: "Administrador de Taller",
-        email: "admin@carteles.click",
-        role: "admin",
-        companyName: "Carteles.Click Central",
-        phone: "+54 11 9988-7766",
-      },
-      isAuthenticated: true,
-      isAdmin: true,
-    });
-  },
-  logout: () => {
-    set({ user: null, isAuthenticated: false, isAdmin: false });
-  },
-  updateProfile: (data) => {
-    set((state) => ({ user: state.user ? { ...state.user, ...data } : null }));
-  },
-}));
+    return new Error(message);
+  };
+
+  return {
+    user: null,
+    loading: true,
+    isAdmin: false,
+    isAuthenticated: false,
+    login: async (email, pass) => {
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+    loginAsClient: async (email = "cliente@carteles.click", pass = "123456") => {
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+    register: async (email, pass) => {
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+    logout: async () => {
+      try {
+        await signOut(auth);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+    signInWithGoogle: async () => {
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+    signInWithGithub: async () => {
+      try {
+        const provider = new GithubAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+    forgotPassword: async (email: string) => {
+      try {
+        await sendPasswordResetEmail(auth, email);
+      } catch (err: any) {
+        throw notifyAuthError(err);
+      }
+    },
+  };
+});
+

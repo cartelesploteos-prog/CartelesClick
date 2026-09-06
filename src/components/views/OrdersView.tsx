@@ -37,6 +37,7 @@ import {
 import { collection, onSnapshot, query, orderBy, doc, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { Order } from "../../types";
+import { OrderProgressBar } from "../ui/OrderProgressBar";
 import { OrdersListSkeleton } from "../ui/Skeleton";
 import { generateOrderSheetPdf } from "../../utils/generateQuotePdf";
 
@@ -722,14 +723,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                 {getProductionStepPercent(trackedOrder.status, trackedOrder.paymentStatus)}% completado
               </span>
             </div>
-            <div className="w-full h-2.5 rounded-full bg-[var(--bg-page)] border border-[var(--border-subtle)] overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-primary via-accent to-emerald-400 transition-all duration-500 rounded-full"
-                style={{
-                  width: `${getProductionStepPercent(trackedOrder.status, trackedOrder.paymentStatus)}%`,
-                }}
-              />
-            </div>
+            <OrderProgressBar status={trackedOrder.status} />
           </div>
 
           {/* 4 PRODUCTION MILESTONES */}
@@ -969,14 +963,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                     {getProductionStepPercent(order.status, order.paymentStatus)}% en línea de montaje
                   </span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-[var(--bg-page)] overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{
-                      width: `${getProductionStepPercent(order.status, order.paymentStatus)}%`,
-                    }}
-                  />
-                </div>
+                <OrderProgressBar status={order.status} />
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-sans pt-1">
                   <div
                     className={`p-2.5 rounded-[7px] flex items-center gap-2 font-medium ${

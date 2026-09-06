@@ -59,13 +59,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [lastNotifiedVolume, setLastNotifiedVolume] = useState<number>(0);
   const [customerName, setCustomerName] = useState(
-    user?.name || "Cliente Taller"
+    (user as any)?.name || user?.displayName || "Cliente Taller"
   );
   const [customerEmail, setCustomerEmail] = useState(
     user?.email || "cliente@carteles.click"
   );
   const [customerPhone, setCustomerPhone] = useState(
-    user?.phone || "+54 11 4892-1100"
+    (user as any)?.phone || user?.phoneNumber || "+54 11 4892-1100"
   );
 
   // Volume metrics
