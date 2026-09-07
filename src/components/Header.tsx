@@ -237,8 +237,24 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
           </div>
         </motion.button>
 
-        {/* RIGHT CONTROLS: Just Hamburger Menu for minimalism */}
+        {/* RIGHT CONTROLS: Quick Search & Hamburger Menu */}
         <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* QUICK SEARCH BUTTON */}
+          <button
+            type="button"
+            id="btn-header-quick-search"
+            onClick={() => setIsMobileSearchOpen(true)}
+            aria-label="Buscar materiales, blog o portfolio"
+            title="Buscar (⌘K)"
+            className="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-full bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer border border-[var(--border-subtle)]"
+          >
+            <Search className="w-4 h-4 text-[var(--brand-brick)]" strokeWidth={2} />
+            <span className="hidden sm:inline">Buscar...</span>
+            <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+              ⌘K
+            </span>
+          </button>
+
           {/* BURGER MENU BUTTON WITH ANIMATEPRESENCE */}
           <motion.button
             id="btn-burger-menu"

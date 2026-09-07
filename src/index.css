@@ -732,3 +732,166 @@ html.dark ::-webkit-scrollbar-thumb {
   color: #FBBF24;
 }
 
+/* ==========================================================================
+   PRINT STYLESHEET (@media print)
+   Garantiza formateo industrial limpio, tipografía legible y cero desperdicio
+   de tinta/tóner en presupuestos, fichas técnicas y resúmenes de pedidos.
+   ========================================================================== */
+.print-only-header,
+.print-only-footer,
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm 15mm 15mm;
+  }
+
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  html,
+  body {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #111827 !important;
+    font-size: 10pt !important;
+    line-height: 1.4 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Ocultar elementos irrelevantes de navegación y utilitarios */
+  header,
+  footer,
+  #btn-burger-menu,
+  #btn-header-quick-search,
+  #floating-dock,
+  .floating-dock,
+  .no-print,
+  button,
+  input,
+  select,
+  textarea,
+  .toast-container,
+  [role="dialog"],
+  .cart-drawer,
+  nav,
+  .border-beam,
+  [aria-hidden="true"],
+  .hide-on-print {
+    display: none !important;
+  }
+
+  /* Ancho completo sin márgenes flotantes de pantalla */
+  main,
+  #main-content,
+  .section-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+  }
+
+  /* Cajas, bordes y tarjetas nítidas para impresión */
+  .ideogram-card,
+  .glass-panel,
+  [class*="rounded-"],
+  .border {
+    border: 1px solid #d1d5db !important;
+    background-color: #ffffff !important;
+    border-radius: 4px !important;
+  }
+
+  /* Tablas de cotización y pedidos */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+    font-size: 9pt !important;
+    margin-top: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  th,
+  td {
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 6px 8px !important;
+    text-align: left;
+  }
+
+  th {
+    font-weight: 700 !important;
+    border-bottom: 2px solid #111827 !important;
+    text-transform: uppercase;
+    font-size: 8pt !important;
+    letter-spacing: 0.05em;
+  }
+
+  /* Saltos de página inteligentes */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+
+  .print-break-inside-avoid,
+  .p-6,
+  .divide-y > * {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Membretes visibles exclusivamente en impresión */
+  .print-only-header {
+    display: block !important;
+    border-bottom: 2px solid #0055FF !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .print-only-footer {
+    display: block !important;
+    border-top: 1px solid #e5e7eb !important;
+    padding-top: 8px !important;
+    margin-top: 18px !important;
+    font-size: 8pt !important;
+    color: #4b5563 !important;
+    text-align: center;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}
+
+

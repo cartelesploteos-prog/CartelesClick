@@ -10,8 +10,10 @@ import {
   Sparkles,
   Command,
   CornerDownLeft,
+  Briefcase,
+  Image as ImageIcon,
 } from "lucide-react";
-import { MATERIALS_CATALOG, DICTIONARY_TERMS } from "../../data/materials";
+import { MATERIALS_CATALOG, DICTIONARY_TERMS, PORTFOLIO_ITEMS } from "../../data/materials";
 import { FALLBACK_ARTICLES } from "../../data/blog";
 import { searchGlobalCatalog, FuzzySearchResult } from "../../utils/fuzzySearch";
 import { IconBadge } from "./IconBadge";
@@ -32,7 +34,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [activeCategory, setActiveCategory] = useState<"all" | "material" | "dictionary" | "blog">("all");
+  const [activeCategory, setActiveCategory] = useState<"all" | "material" | "portfolio" | "blog" | "dictionary">("all");
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,9 +68,9 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Compute fuzzy search results
+  // Compute fuzzy search results across Materials, Dictionary, Blog, and Portfolio
   const allResults = useMemo(() => {
-    return searchGlobalCatalog(query, MATERIALS_CATALOG, DICTIONARY_TERMS, FALLBACK_ARTICLES, 16);
+    return searchGlobalCatalog(query, MATERIALS_CATALOG, DICTIONARY_TERMS, FALLBACK_ARTICLES, PORTFOLIO_ITEMS, 20);
   }, [query]);
 
   const filteredResults = useMemo(() => {
@@ -81,8 +83,9 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     return {
       all: allResults.length,
       material: allResults.filter((r) => r.type === "material").length,
-      dictionary: allResults.filter((r) => r.type === "dictionary").length,
+      portfolio: allResults.filter((r) => r.type === "portfolio").length,
       blog: allResults.filter((r) => r.type === "blog").length,
+      dictionary: allResults.filter((r) => r.type === "dictionary").length,
     };
   }, [allResults]);
 
@@ -124,6 +127,8 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     switch (type) {
       case "material":
         return Layers;
+      case "portfolio":
+        return Briefcase;
       case "dictionary":
         return BookOpen;
       case "blog":
@@ -218,15 +223,15 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveCategory("dictionary")}
+                  onClick={() => setActiveCategory("portfolio")}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1 ${
-                    activeCategory === "dictionary"
+                    activeCategory === "portfolio"
                       ? "bg-primary text-white font-bold"
                       : "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
                   }`}
                 >
-                  <span>Glosario Técnico</span>
-                  <span className="opacity-80">({counts.dictionary})</span>
+                  <span>Portfolio</span>
+                  <span className="opacity-80">({counts.portfolio})</span>
                 </button>
                 <button
                   type="button"
@@ -239,6 +244,18 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                 >
                   <span>Blog & Guías</span>
                   <span className="opacity-80">({counts.blog})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCategory("dictionary")}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1 ${
+                    activeCategory === "dictionary"
+                      ? "bg-primary text-white font-bold"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
+                  }`}
+                >
+                  <span>Glosario</span>
+                  <span className="opacity-80">({counts.dictionary})</span>
                 </button>
               </div>
             )}
@@ -255,8 +272,9 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                     {[
                       { label: "Lona Front 13oz", view: "cotizador", param: "lona_front_13oz" },
                       { label: "Vinilo Microperforado", view: "cotizador", param: "vinilo_microperforado" },
+                      { label: "Marquesinas (Portfolio)", view: "portfolio", param: "port-1" },
+                      { label: "Ploteo Vidrieras (Portfolio)", view: "portfolio", param: "port-2" },
                       { label: "PVC Espumado", view: "cotizador", param: "pvc_espumado" },
-                      { label: "¿Qué es CMYK?", view: "diccionario", param: "cmyk" },
                       { label: "Resolución 150 DPI", view: "blog", param: "guia-dpi-gran-formato" },
                       { label: "Demasía / Sangrado", view: "diccionario", param: "sangrado-demasia" },
                       { label: "Ojales y Refuerzo", view: "diccionario", param: "ojales-perimetrales" },
@@ -287,7 +305,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                     No encontramos resultados para "{query}"
                   </h4>
                   <p className="text-[11px] text-[var(--text-secondary)] max-w-xs mx-auto">
-                    Probá con términos generales como "lona", "vinilo", "DPI", "ojales", "corte router" o "backlight".
+                    Probá con términos generales como "lona", "vinilo", "portfolio", "marquesina", "DPI", "ojales" o "PVC".
                   </p>
                 </div>
               ) : (
@@ -307,12 +325,21 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                       }`}
                     >
                       <div className="mt-0.5 shrink-0">
-                        <IconBadge
-                          icon={getResultIconComponent(result.type)}
-                          size="sm"
-                          variant={result.type === "material" ? "primary" : result.type === "dictionary" ? "accent" : "neutral"}
-                          containerStyle="subtle"
-                        />
+                        {result.type === "portfolio" && result.image ? (
+                          <img
+                            src={result.image}
+                            alt={result.title}
+                            referrerPolicy="no-referrer"
+                            className="w-8 h-8 rounded-lg object-cover border border-[var(--border-subtle)]"
+                          />
+                        ) : (
+                          <IconBadge
+                            icon={getResultIconComponent(result.type)}
+                            size="sm"
+                            variant={result.type === "material" ? "primary" : result.type === "portfolio" ? "primary" : result.type === "dictionary" ? "accent" : "neutral"}
+                            containerStyle="subtle"
+                          />
+                        )}
                       </div>
 
                       <div className="flex-1 min-w-0">

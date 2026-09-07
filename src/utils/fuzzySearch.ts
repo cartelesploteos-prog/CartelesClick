@@ -5,14 +5,15 @@
 
 export interface FuzzySearchResult<T = any> {
   id: string;
-  type: "material" | "dictionary" | "blog";
+  type: "material" | "dictionary" | "blog" | "portfolio";
   title: string;
   subtitle: string;
   badge: string;
   badgeColor?: "primary" | "accent" | "subtle" | "emerald" | "blue";
   slug?: string;
-  targetView: "cotizador" | "materiales" | "diccionario" | "blog";
+  targetView: "cotizador" | "materiales" | "diccionario" | "blog" | "portfolio";
   targetParam?: string;
+  image?: string;
   score: number;
   highlightIndices?: [number, number][];
   rawItem: T;
@@ -112,14 +113,15 @@ export function fuzzyMatch(
 }
 
 /**
- * Searches across Materials, Dictionary terms, and Blog posts
+ * Searches across Materials, Technical Dictionary terms, Blog posts, and Portfolio items
  */
 export function searchGlobalCatalog(
   query: string,
   materials: any[],
   dictionaryTerms: any[],
   blogPosts: any[],
-  limit = 12
+  portfolioItems: any[] = [],
+  limit = 16
 ): FuzzySearchResult[] {
   if (!query || !query.trim()) return [];
 
@@ -218,6 +220,39 @@ export function searchGlobalCatalog(
         targetParam: post.slug,
         score: maxScore,
         rawItem: post,
+      });
+    }
+  }
+
+  // 4. Search Portfolio Works
+  for (const item of portfolioItems) {
+    const titleScore = fuzzyMatch(item.title || "", query);
+    const clientScore = fuzzyMatch(item.client || "", query);
+    const matScore = fuzzyMatch(item.material || "", query);
+    const catScore = fuzzyMatch(item.category || "", query);
+    const tagScore = fuzzyMatch(item.tag || "", query);
+
+    const maxScore = Math.max(
+      titleScore.score * 1.3,
+      clientScore.score * 1.1,
+      matScore.score * 1.0,
+      tagScore.score * 0.9,
+      catScore.score * 0.8
+    );
+
+    if (maxScore >= 30) {
+      results.push({
+        id: `port-${item.id || item.title}`,
+        type: "portfolio",
+        title: item.title,
+        subtitle: `${item.client} · ${item.material}`,
+        badge: item.tag || "Trabajo Real",
+        badgeColor: "blue",
+        image: item.image,
+        targetView: "portfolio",
+        targetParam: item.id,
+        score: maxScore,
+        rawItem: item,
       });
     }
   }

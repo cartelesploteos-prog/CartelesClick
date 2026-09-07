@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { FloatingDock } from "./components/FloatingDock";
@@ -70,63 +71,74 @@ export default function App() {
       {/* GLOBAL HEADER */}
       <Header currentView={currentView} onNavigate={handleNavigate} />
 
-      {/* MAIN VIEW AREA */}
+      {/* MAIN VIEW AREA WITH FRAMER MOTION TRANSITIONS */}
       <main
         id="main-content"
         role="main"
         className="flex-1 focus:outline-none w-full max-w-full overflow-x-hidden"
         tabIndex={-1}
       >
-        {currentView === "home" && <HomeView onNavigate={handleNavigate} />}
-        {currentView === "cotizador" && (
-          <CotizadorView
-            initialMaterialId={viewParam}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentView === "poster" && (
-          <PosterCreatorView
-            initialPrompt={viewParam}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentView === "materiales" && (
-          <MaterialsCatalogView onNavigate={handleNavigate} />
-        )}
-        {currentView === "material-detail" && (
-          <MaterialDetailView
-            materialId={viewParam}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentView === "mayoristas" && (
-          <WholesaleView onNavigate={handleNavigate} />
-        )}
-        {currentView === "diccionario" && (
-          <DictionaryView
-            initialSlug={viewParam}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentView === "portfolio" && (
-          <PortfolioView onNavigate={handleNavigate} />
-        )}
-        {currentView === "blog" && <BlogView onNavigate={handleNavigate} />}
-        {currentView === "pedidos" && (
-          <ProtectedRoute>
-            <OrdersView onNavigate={handleNavigate} />
-          </ProtectedRoute>
-        )}
-        {currentView === "cuenta" && (
-          <ProtectedRoute>
-            <OrdersView onNavigate={handleNavigate} />
-          </ProtectedRoute>
-        )}
-        {currentView === "admin" && (
-          <ProtectedRoute adminOnly>
-            <AdminPanelView onNavigate={handleNavigate} />
-          </ProtectedRoute>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full flex-1"
+          >
+            {currentView === "home" && <HomeView onNavigate={handleNavigate} />}
+            {currentView === "cotizador" && (
+              <CotizadorView
+                initialMaterialId={viewParam}
+                onNavigate={handleNavigate}
+              />
+            )}
+            {currentView === "poster" && (
+              <PosterCreatorView
+                initialPrompt={viewParam}
+                onNavigate={handleNavigate}
+              />
+            )}
+            {currentView === "materiales" && (
+              <MaterialsCatalogView onNavigate={handleNavigate} />
+            )}
+            {currentView === "material-detail" && (
+              <MaterialDetailView
+                materialId={viewParam}
+                onNavigate={handleNavigate}
+              />
+            )}
+            {currentView === "mayoristas" && (
+              <WholesaleView onNavigate={handleNavigate} />
+            )}
+            {currentView === "diccionario" && (
+              <DictionaryView
+                initialSlug={viewParam}
+                onNavigate={handleNavigate}
+              />
+            )}
+            {currentView === "portfolio" && (
+              <PortfolioView onNavigate={handleNavigate} />
+            )}
+            {currentView === "blog" && <BlogView onNavigate={handleNavigate} />}
+            {currentView === "pedidos" && (
+              <ProtectedRoute>
+                <OrdersView onNavigate={handleNavigate} />
+              </ProtectedRoute>
+            )}
+            {currentView === "cuenta" && (
+              <ProtectedRoute>
+                <OrdersView onNavigate={handleNavigate} />
+              </ProtectedRoute>
+            )}
+            {currentView === "admin" && (
+              <ProtectedRoute adminOnly>
+                <AdminPanelView onNavigate={handleNavigate} />
+              </ProtectedRoute>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* SLIDE-OVER CART DRAWER */}

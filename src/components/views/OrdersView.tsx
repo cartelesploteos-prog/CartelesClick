@@ -33,6 +33,7 @@ import {
   Check,
   Eye,
   Filter,
+  Printer,
 } from "lucide-react";
 import { collection, onSnapshot, query, orderBy, doc, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
@@ -678,13 +679,35 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
       {/* DETAILED TRACKED ORDER SPOTLIGHT CARD */}
       {trackedOrder && (
         <div className="p-6 rounded-[7px] bg-[var(--bg-surface)] border-2 border-primary/50 space-y-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+          {/* PRINT-ONLY OFFICIAL HEADER */}
+          <div className="print-only-header">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-primary">
+              <div>
+                <h1 className="text-xl font-bold font-heading text-black tracking-tight">
+                  CARTELES.CLICK · FICHA TÉCNICA Y REMITO DE TALLER
+                </h1>
+                <p className="text-xs text-gray-600">
+                  Gran Formato · Ploteo & Cama Plana UV · carteles.ploteos@gmail.com
+                </p>
+              </div>
+              <div className="text-right text-xs">
+                <span className="font-bold block text-primary font-mono">
+                  ORDEN #{trackedOrder.orderNumber || trackedOrder.id}
+                </span>
+                <span className="text-gray-500 font-mono">
+                  {new Date(trackedOrder.createdAt).toLocaleDateString("es-AR")}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs uppercase tracking-wider text-primary font-bold">
                   Seguimiento Activo de Taller
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-mono font-bold">
+                <span className="px-2 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-mono font-bold no-print">
                   LIVE FIRESTORE
                 </span>
               </div>
@@ -704,8 +727,17 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
             <div className="flex items-center gap-2">
               {getStatusBadge(trackedOrder.status, trackedOrder.paymentStatus)}
               <button
+                type="button"
+                onClick={() => window.print()}
+                className="text-xs px-3 py-1.5 rounded-[5px] bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary/20 flex items-center gap-1.5 cursor-pointer no-print"
+                title="Imprimir ficha de producción o remito de entrega"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Imprimir Ficha</span>
+              </button>
+              <button
                 onClick={() => setTrackedOrder(null)}
-                className="text-xs px-3 py-1.5 rounded-[5px] bg-[var(--bg-page)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                className="text-xs px-3 py-1.5 rounded-[5px] bg-[var(--bg-page)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer no-print"
               >
                 Cerrar
               </button>
@@ -1230,6 +1262,22 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                           ? "Generando PDF..."
                           : "Descargar Ficha / Comprobante PDF"}
                       </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      id={`btn-print-order-${order.id}`}
+                      onClick={() => {
+                        setTrackedOrder(order);
+                        setTimeout(() => {
+                          window.print();
+                        }, 150);
+                      }}
+                      className="px-3 py-1.5 rounded-[6px] bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] border border-[var(--border-subtle)] flex items-center gap-1.5 transition-all cursor-pointer no-print"
+                      title="Abrir vista de impresión y remito de trabajo"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-primary" />
+                      <span>Imprimir Remito</span>
                     </button>
                   </div>
 

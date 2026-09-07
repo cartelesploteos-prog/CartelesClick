@@ -2678,6 +2678,26 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               </div>
 
               <div className="p-6 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-6">
+                {/* PRINT-ONLY OFFICIAL HEADER */}
+                <div className="print-only-header">
+                  <div className="flex items-center justify-between pb-3 border-b-2 border-primary">
+                    <div>
+                      <h1 className="text-xl font-bold font-heading text-black tracking-tight">
+                        CARTELES.CLICK · TALLER DE MANUFACTURA GRÁFICA
+                      </h1>
+                      <p className="text-xs text-gray-600">
+                        Gran Formato · Ploteo & Cama Plana UV · Corpóreos & Letras 3D · carteles.ploteos@gmail.com
+                      </p>
+                    </div>
+                    <div className="text-right text-xs">
+                      <span className="font-bold block text-primary">PRESUPUESTO ESTIMADO</span>
+                      <span className="text-gray-500 font-mono">
+                        {new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* BULK BREAKDOWN TABLE OR SINGLE BREAKDOWN */}
                 {orderMode === "bulk" ? (
                   <div className="space-y-4">
@@ -2885,10 +2905,26 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         {isGeneratingPdf ? "Generando Presupuesto..." : "Descargar Presupuesto en PDF (Validez 15 días)"}
                       </span>
                     </button>
+
+                    <button
+                      type="button"
+                      id="btn-print-quote-step9"
+                      onClick={() => window.print()}
+                      className="w-full py-2.5 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      title="Imprimir o guardar como PDF desde el navegador"
+                    >
+                      <Printer className="w-4 h-4 text-primary" />
+                      <span>Imprimir Presupuesto (Vista de Impresión)</span>
+                    </button>
                   </div>
                 )}
-                <div className="text-center mt-3 text-xs font-medium text-[var(--text-secondary)]">
+                <div className="text-center mt-3 text-xs font-medium text-[var(--text-secondary)] no-print">
                   Compra rápida · Bulk order · Envíos a todo el país
+                </div>
+
+                {/* PRINT-ONLY FOOTER */}
+                <div className="print-only-footer">
+                  <p>Carteles.Click · Taller Central de Manufactura Gráfica · Presupuesto con validez por 15 días corridos · Precios en ARS sujetos a variación cambiaria · carteles.ploteos@gmail.com</p>
                 </div>
               </div>
             </div>

@@ -2972,7 +2972,7 @@ app.get('/api/admin/stats', (req, res) => {
 
 export interface ServerNotification {
   id: string;
-  type: 'order_status' | 'promotion' | 'blog' | 'system';
+  type: 'order_status' | 'promotion' | 'blog' | 'system' | 'admin_alert';
   title: string;
   message: string;
   timestamp: string;
