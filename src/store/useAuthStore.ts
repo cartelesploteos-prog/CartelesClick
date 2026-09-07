@@ -29,19 +29,24 @@ interface AuthStore {
 }
 
 export const useAuthStore = create<AuthStore>((set) => {
-  // Listen for auth state changes
-  onAuthStateChanged(auth, async (user) => {
-    let isAdmin = false;
-    if (user) {
-      try {
-        const token = await user.getIdTokenResult();
-        isAdmin = !!token.claims.admin || user.email?.toLowerCase() === "carteles.ploteos@gmail.com";
-      } catch (e) {
-        isAdmin = user.email?.toLowerCase() === "carteles.ploteos@gmail.com";
+  // Listen for auth state changes defensively
+  try {
+    onAuthStateChanged(auth, async (user) => {
+      let isAdmin = false;
+      if (user) {
+        try {
+          const token = await user.getIdTokenResult();
+          isAdmin = !!token.claims.admin || user.email?.toLowerCase() === "carteles.ploteos@gmail.com";
+        } catch (e) {
+          isAdmin = user.email?.toLowerCase() === "carteles.ploteos@gmail.com";
+        }
       }
-    }
-    set({ user, loading: false, isAdmin, isAuthenticated: !!user });
-  });
+      set({ user, loading: false, isAdmin, isAuthenticated: !!user });
+    });
+  } catch (err) {
+    console.warn("Auth initialization warning:", err);
+    set({ user: null, loading: false, isAdmin: false, isAuthenticated: false });
+  }
 
   const notifyAuthError = (err: any) => {
     const message = getFirebaseAuthErrorMessage(err);

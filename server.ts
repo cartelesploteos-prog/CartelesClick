@@ -3110,9 +3110,29 @@ async function start() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    const distPath = path.resolve(process.cwd(), 'dist');
+    
+    // Assets versionados con hash: inmutables por 1 año
+    app.use('/assets', express.static(path.join(distPath, 'assets'), {
+      maxAge: '1y',
+      immutable: true
+    }));
+
+    // Demás archivos estáticos (favicon, manifest, etc.) con revalidación estándar
+    app.use(express.static(distPath, {
+      maxAge: '1h',
+      index: false
+    }));
+
+    // SPA fallback: servir index.html únicamente para rutas de navegación (nunca para assets inexistentes)
     app.get('*', (req, res) => {
+      if (req.path.startsWith('/assets/') || req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|map)$/i)) {
+        return res.status(404).type('text/plain').send('Recurso no encontrado');
+      }
+      // index.html jamás debe cachearse para garantizar que siempre enlace a los hashes actuales tras un deploy
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

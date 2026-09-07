@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ServerMaterialCost } from '../../server'; // Wait, we can't import from server.ts directly in the browser easily without building it. Let's just define the interface.
 
 export interface MaterialData {
   id: string;

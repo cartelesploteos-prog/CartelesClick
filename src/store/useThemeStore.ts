@@ -35,7 +35,7 @@ export const useThemeStore = create<ThemeStore>((set, get) => {
   const initialSaved =
     (typeof window !== "undefined"
       ? (localStorage.getItem("cc_theme") as ThemeMode)
-      : null) || "system";
+      : null) || "light";
 
   const initialResolved =
     initialSaved === "system" ? getSystemTheme() : initialSaved;
