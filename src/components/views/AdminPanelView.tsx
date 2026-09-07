@@ -58,6 +58,7 @@ import { DashboardMetrics } from "../admin/DashboardMetrics";
 import { AdminMetricsWidgets } from "../admin/AdminMetricsWidgets";
 import { OrderAuditLogModal } from "../admin/OrderAuditLogModal";
 import { ProductionVerificationModal } from "../admin/ProductionVerificationModal";
+import { OrderDetailModal } from "../admin/OrderDetailModal";
 import { recordOrderAuditLog, recordBulkOrderAuditLogs, logOrderStatusAudit } from "../../lib/firestore";
 import { validateOrderCriticalFields, validateOrderForProduction } from "../../utils/orderValidation";
 import {
@@ -76,7 +77,7 @@ interface AdminPanelViewProps {
 
 export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) => {
   const { isAdmin, user } = useAuthStore();
-  const { addNotification } = useNotificationStore();
+  const { addNotification, notifications, markAsRead, clearAll } = useNotificationStore();
   const [activeTab, setActiveTab] = useState<"metricas" | "productos" | "blog_cms" | "pedidos" | "notificaciones" | "seguridad" | "usuarios">("metricas");
 
   // Broadcast Notification Form State
@@ -425,6 +426,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
   // Audit Log & Production Verification Modal States
   const [auditLogOrder, setAuditLogOrder] = useState<Order | null>(null);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState<Order | null>(null);
   const [verificationOrder, setVerificationOrder] = useState<Order | null>(null);
   const [pendingTargetStatus, setPendingTargetStatus] = useState<string>("en_produccion");
 
@@ -1739,6 +1741,14 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                             <div className="flex items-center justify-center gap-1.5">
                               <button
                                 type="button"
+                                onClick={() => setSelectedOrderDetail(ord)}
+                                className="p-1 rounded-[5px] bg-[var(--bg-surface-subtle)] hover:bg-sky-500/10 hover:text-sky-500 border border-[var(--border-subtle)] text-[var(--text-secondary)] transition-colors"
+                                title="Ver detalles del pedido"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => {
                                   setAuditLogOrder(ord);
                                   setIsAuditModalOpen(true);
@@ -1845,6 +1855,14 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                             <option value="despachado">Despachado</option>
                             <option value="entregado">Entregado</option>
                           </select>
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedOrderDetail(ord)}
+                            className="px-2.5 py-1 rounded-[7px] bg-[var(--bg-surface-subtle)] hover:bg-sky-500/10 hover:text-sky-500 border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" /> Detalles
+                          </button>
 
                           <button
                             type="button"
@@ -2216,6 +2234,68 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          {/* BANDEJA DE ENTRADA ADMIN */}
+          <div className="p-5 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 mt-6">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
+              <h3 className="font-heading text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
+                <Bell className="w-4 h-4 text-amber-500" />
+                <span>Bandeja de Alertas del Sistema</span>
+              </h3>
+              <button
+                onClick={() => clearAll()}
+                className="text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline"
+              >
+                Limpiar todo
+              </button>
+            </div>
+            
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {notifications.filter(n => n.type === 'admin_alert' || n.type === 'system').length === 0 ? (
+                <div className="text-center py-6 text-xs text-[var(--text-secondary)]">
+                  No hay alertas del sistema recientes.
+                </div>
+              ) : (
+                notifications.filter(n => n.type === 'admin_alert' || n.type === 'system').map(notif => (
+                  <div 
+                    key={notif.id} 
+                    className={`p-3 rounded-[7px] border transition-colors ${
+                      notif.read ? 'bg-[var(--bg-surface-subtle)] border-transparent' : 'bg-[var(--bg-surface-elevated)] border-[var(--border-subtle)] border-l-4 border-l-amber-500'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`text-xs font-medium ${notif.read ? 'text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
+                            {notif.title}
+                          </h4>
+                          {notif.priority === 'high' && (
+                            <span className="px-1.5 py-0.5 bg-red-500/10 text-red-500 text-[9px] font-bold rounded-sm uppercase tracking-wider">
+                              Urgente
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[var(--text-secondary)]">
+                          {notif.message}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] pt-1">
+                          {new Date(notif.timestamp).toLocaleString('es-AR')}
+                        </p>
+                      </div>
+                      {!notif.read && (
+                        <button
+                          onClick={() => markAsRead(notif.id)}
+                          className="text-[10px] bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] px-2 py-1 rounded-sm text-[var(--text-primary)] transition-colors shrink-0"
+                        >
+                          Marcar leída
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -2804,6 +2884,11 @@ Placa PVC 3mm	rigidos	placa	42000	100"
         }}
       />
 
+      {/* 🔍 DETALLE COMPLETO DEL PEDIDO (VISTA) */}
+      <OrderDetailModal
+        order={selectedOrderDetail}
+        onClose={() => setSelectedOrderDetail(null)}
+      />
     </div>
   );
 };

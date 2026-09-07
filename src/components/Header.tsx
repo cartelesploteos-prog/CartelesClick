@@ -245,10 +245,10 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               isOpen
-                ? "bg-[#C8380A] dark:bg-[#FF5520] text-white border-[#C8380A] dark:border-[#FF5520] shadow-md shadow-[#C8380A]/25 dark:shadow-[#FF5520]/30"
-                : "bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border-[var(--border-subtle)] text-[var(--text-primary)]"
+                ? "bg-[var(--brand-brick)] dark:bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/25 dark:shadow-[var(--brand-brick)]/30"
+                : "bg-[var(--bg-surface-subtle)] text-[var(--text-primary)]"
             }`}
             aria-label={isOpen ? "Cerrar menú" : "Abrir menú de navegación"}
             title={isOpen ? "Cerrar menú" : "Abrir menú"}
@@ -304,10 +304,10 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 320, mass: 0.8 }}
-                className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md sm:max-w-lg bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] flex flex-col justify-between shadow-2xl border-l border-[var(--border-subtle)] overflow-hidden transform-gpu overscroll-contain"
+                className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md sm:max-w-lg bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] flex flex-col justify-between shadow-2xl overflow-hidden transform-gpu overscroll-contain"
               >
                 {/* DRAWER TOP BAR */}
-                <div className="w-full border-b border-[var(--border-subtle)] px-4 sm:px-6 h-16 flex items-center justify-between shrink-0 bg-[var(--bg-surface)]/95 backdrop-blur-md">
+                <div className="w-full px-4 sm:px-6 h-16 flex items-center justify-between shrink-0 bg-[var(--bg-surface)]/95 backdrop-blur-md">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-[var(--brand-brick)] flex items-center justify-center text-white shrink-0">
                       <Zap className="w-4.5 h-4.5 fill-current text-white" />
@@ -319,7 +319,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                     <ThemeSelector />
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="w-9 h-9 rounded-full bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] flex items-center justify-center transition-colors cursor-pointer text-[var(--text-primary)]"
+                      className="w-9 h-9 rounded-full bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] flex items-center justify-center transition-colors cursor-pointer text-[var(--text-primary)]"
                       aria-label="Cerrar menú"
                     >
                       <X className="w-4 h-4" />
@@ -386,7 +386,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                                 className={`w-full flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                                   isCurrent
                                     ? "bg-[var(--brand-brick)]/10 border-[var(--brand-brick)]/40 text-[var(--brand-brick)] font-bold"
-                                    : "bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border-[var(--border-subtle)] text-[var(--text-primary)]"
+                                    : "bg-[var(--bg-surface-subtle)] text-[var(--text-primary)]"
                                 }`}
                               >
                                 <div
@@ -418,7 +418,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                   </div>
 
                   {/* QUICK CONTACT & WORKSHOP BADGES */}
-                  <div className="p-3.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] flex flex-col gap-2.5 text-xs text-[var(--text-secondary)]">
+                  <div className="p-3.5 rounded-xl bg-[var(--bg-surface-subtle)] flex flex-col gap-2.5 text-xs text-[var(--text-secondary)]">
                     <div className="flex items-center gap-2.5">
                       <Clock className="w-4 h-4 text-[var(--brand-brick)] shrink-0" />
                       <div>
@@ -449,7 +449,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                 </div>
 
                 {/* DRAWER FOOTER */}
-                <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center justify-between text-xs text-[var(--text-secondary)] w-full shrink-0">
+                <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-[var(--bg-surface-subtle)] flex items-center justify-between text-xs text-[var(--text-secondary)] w-full shrink-0">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[var(--brand-brick)]" />
                     <span className="text-[var(--text-primary)] font-medium text-[11px]">Moneda: ARS ($)</span>
@@ -487,7 +487,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="relative z-50 w-full max-w-lg bg-[var(--bg-surface-elevated)] rounded-2xl border border-[var(--border-subtle)] shadow-2xl overflow-hidden p-4 space-y-3"
+                className="relative z-50 w-full max-w-lg bg-[var(--bg-surface-elevated)] rounded-2xl shadow-2xl overflow-hidden p-4 space-y-3"
               >
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
                   <div className="flex items-center gap-2">

@@ -33,11 +33,10 @@ export const Logo: React.FC<LogoProps> = ({
         Carteles.
       </span>
       <span
-        className="font-black transition-colors"
+        className="font-black transition-colors text-[var(--color-primary)]"
         style={{
           fontFamily: "var(--font-logo)",
           fontWeight: 900,
-          color: "#EE7828",
         }}
       >
         Click

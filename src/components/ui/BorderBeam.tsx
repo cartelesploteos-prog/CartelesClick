@@ -18,15 +18,15 @@ export const BorderBeam: React.FC<BorderBeamProps> = ({
   className = "",
   duration = 3.5,
   borderWidth = 2,
-  colorFrom = "#FFE600",
-  colorTo = "#FCD34D",
+  colorFrom = "#FFFFFF",
+  colorTo = "#F1F5F9",
   delay = 0,
   style,
 }) => {
   const durationVal = typeof duration === "number" ? `${duration}s` : duration || "3.5s";
   const borderWidthVal = typeof borderWidth === "number" ? `${borderWidth}px` : borderWidth || "2px";
-  const colorFromVal = colorFrom || "#FFE600";
-  const colorToVal = colorTo || "#FCD34D";
+  const colorFromVal = colorFrom || "#FFFFFF";
+  const colorToVal = colorTo || "#F1F5F9";
 
   return (
     <div

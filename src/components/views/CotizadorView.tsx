@@ -930,15 +930,6 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              id="btn-toggle-ai-drawer-cotizador"
-              onClick={() => setIsAiDesignDrawerOpen(true)}
-              className="px-3.5 py-1 rounded-full bg-gradient-to-r from-primary to-[#FFA048] text-white font-bold text-[11px] flex items-center gap-1.5 shadow-sm hover:brightness-105 transition-all cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{attachedAiDesign ? `Diseño IA: ${attachedAiDesign.headline}` : "✨ Asistente IA & Mockup"}</span>
-            </button>
             <span className="font-mono text-primary font-bold">
               {Math.round((currentStep / totalSteps) * 100)}%
             </span>

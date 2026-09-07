@@ -40,7 +40,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
           particleCount: 65,
           spread: 60,
           origin: { y: 0.7 },
-          colors: ["#FF5520", "#FCD34D", "#FFE600", "#FF7744", "#FFFFFF"],
+          colors: ["[var(--brand-brick)]", "#FCD34D", "#FFE600", "#FF7744", "#FFFFFF"],
         });
       } catch (err) {
         console.warn("Canvas confetti effect unavailable:", err);
@@ -57,7 +57,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   return (
     <Button
       onClick={handleClick}
-      className={`cta-border-beam px-8 py-3.5 min-h-[3rem] rounded-full bg-[#FF5520] hover:bg-[#FF6B38] text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-[0_8px_25px_rgba(255,85,32,0.35)] transition-all cursor-pointer ${className}`}
+      className={`cta-border-beam px-8 py-3.5 min-h-[3rem] rounded-full bg-[var(--brand-brick)] hover:bg-[#FF6B38] text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-[0_8px_25px_rgba(255,85,32,0.35)] transition-all cursor-pointer ${className}`}
       borderBeam={
         hideBorderBeam
           ? false

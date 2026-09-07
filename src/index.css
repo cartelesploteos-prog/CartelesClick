@@ -8,10 +8,10 @@
   --font-logo: var(--font-heading);
   
   /* IDEOGRAM.AI INSPIRED COLOR PALETTE - WCAG AA COMPLIANT (>= 4.5:1 CONTRAST) */
-  --color-primary: #C8380A; /* WCAG AA >= 4.5:1 on light backgrounds */
-  --color-primary-hover: #A72E08;
-  --color-accent: #B45309; /* WCAG AA >= 4.5:1 on light backgrounds */
-  --color-accent-hover: #92400E;
+  --color-primary: #0055FF; /* WCAG AA >= 4.5:1 on light backgrounds */
+  --color-primary-hover: #0044CC;
+  --color-accent: #0EA5E9; /* WCAG AA >= 4.5:1 on light backgrounds */
+  --color-accent-hover: #0284C7;
   --color-craft: #6B7280;
   --color-graphite: #18191E;
 
@@ -60,52 +60,61 @@
     --space-3xl: clamp(4rem, 3.2rem + 3.5vw, 6.5rem);      /* 64px - 104px */
 
     /* LIGHT THEME BASE TOKENS - WCAG AA COMPLIANT */
-    --bg-page: #FAFAFC;
+    --bg-page: #F8FAFC;
     --bg-surface: #FFFFFF;
-    --bg-surface-subtle: #F3F4F6;
+    --bg-surface-subtle: #F1F5F9;
     --bg-surface-elevated: #FFFFFF;
     
-    --border-subtle: rgba(0, 0, 0, 0.09);
-    --border-strong: rgba(0, 0, 0, 0.20);
-    --border-interactive: #C8380A;
+    --border-subtle: rgba(0, 0, 0, 0.05);
+    --border-strong: rgba(0, 0, 0, 0.10);
+    --border-interactive: #2563EB;
 
-    --text-primary: #111827; /* 15.3:1 contrast ratio */
-    --text-secondary: #374151; /* 9.5:1 contrast ratio */
-    --text-muted: #4B5563; /* 6.8:1 contrast ratio */
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
     --text-inverse: #FFFFFF;
 
-    --brand-brick: #C8380A; /* 5.0:1 contrast ratio on white */
-    --brand-brick-hover: #A72E08;
-    --brand-craft: #4B5563;
-    --brand-concrete: #E5E7EB;
-    --brand-graphite: #F3F4F6;
+    --brand-brick: #0055FF; /* Premium Tech Blue */
+    --brand-brick-hover: #0044CC;
+    --brand-craft: #475569;
+    --brand-concrete: #E2E8F0;
+    --brand-graphite: #F8FAFC;
+    
+    --color-primary: #0055FF;
+    --color-primary-hover: #0044CC;
+    --color-accent: #0284C7;
+    --color-accent-hover: #0369A1;
+
+    --pattern-color: rgba(0, 0, 0, 0.04);
   }
 
   .dark {
-    --bg-page: #1F1D21;
-    --bg-surface: #28262A;
-    --bg-surface-subtle: #333135;
-    --bg-surface-elevated: #3E3B40;
+    --bg-page: #0B0F19;
+    --bg-surface: #111827;
+    --bg-surface-subtle: #1F2937;
+    --bg-surface-elevated: #1F2937;
 
-    --border-subtle: rgba(255, 255, 255, 0.12);
-    --border-strong: rgba(255, 255, 255, 0.24);
-    --border-interactive: #FF5520;
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-strong: rgba(255, 255, 255, 0.10);
+    --border-interactive: #3B82F6;
 
-    --text-primary: #F8F9FA; /* 13.8:1 contrast ratio */
-    --text-secondary: #D1D5DB; /* 9.2:1 contrast ratio */
-    --text-muted: #9CA3AF; /* 5.4:1 contrast ratio */
-    --text-inverse: #1F1D21;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #475569;
+    --text-inverse: #0B0F19;
 
-    --brand-brick: #FF5520; /* 5.8:1 contrast ratio on dark surface */
-    --brand-brick-hover: #FF6B38;
-    --brand-craft: #9CA3AF;
-    --brand-concrete: #3E3B40;
-    --brand-graphite: #28262A;
+    --brand-brick: #0066FF;
+    --brand-brick-hover: #3388FF;
+    --brand-craft: #94A3B8;
+    --brand-concrete: #1F2937;
+    --brand-graphite: #111827;
 
-    --color-primary: #FF5520;
-    --color-primary-hover: #FF6B38;
-    --color-accent: #FFA048;
-    --color-accent-hover: #FF8F2E;
+    --color-primary: #0066FF;
+    --color-primary-hover: #3388FF;
+    --color-accent: #38BDF8;
+    --color-accent-hover: #7DD3FC;
+    
+    --pattern-color: rgba(255, 255, 255, 0.03);
   }
 
   html {
@@ -121,13 +130,13 @@
   }
 
   html:not(.dark) {
-    background-color: #FAFAFC;
-    color: #111827;
+    background-color: #F8FAFC;
+    color: #0F172A;
   }
 
   html.dark {
-    background-color: #1A1D27;
-    color: #F8F9FA;
+    background-color: #0B0F19;
+    color: #F8FAFC;
   }
 
   body {
@@ -135,6 +144,9 @@
     font-size: var(--text-base);
     font-weight: 400;
     background-color: var(--bg-page);
+    background-image: radial-gradient(var(--pattern-color) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center center;
     color: var(--text-primary);
     transition: background-color 350ms cubic-bezier(0.4, 0, 0.2, 1),
                 color 350ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -156,7 +168,7 @@
 
   /* Focus visible high-tech neon outline */
   :focus-visible {
-    outline: 2px solid #FF5520;
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 }
@@ -257,11 +269,11 @@ td {
    IDEOGRAM GLASS PANELS & GLOW UTILITIES (HARDWARE-ACCELERATED)
    ========================================================================== */
 .glass-panel {
-  background-color: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  background-color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02) inset;
   /* Hardware acceleration for ultra-fluid fixed rendering during scroll */
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
@@ -271,11 +283,11 @@ td {
 }
 
 .dark .glass-panel {
-  background-color: rgba(35, 39, 54, 0.88);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  background-color: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -370,17 +382,17 @@ td {
 }
 
 .ideogram-btn-glow {
-  background: linear-gradient(135deg, #FF5520 0%, #FF3366 100%);
+  background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
   color: #FFFFFF;
   font-weight: 600;
   border-radius: 9999px;
-  box-shadow: 0 4px 20px -2px rgba(255, 85, 32, 0.5);
+  box-shadow: 0 4px 20px -2px rgba(79, 70, 229, 0.4);
   transition: all 0.2s ease;
 }
 
 .ideogram-btn-glow:hover {
   filter: brightness(1.1);
-  box-shadow: 0 6px 28px 0 rgba(255, 85, 32, 0.65);
+  box-shadow: 0 6px 28px 0 rgba(79, 70, 229, 0.55);
   transform: scale(1.02);
 }
 
@@ -390,12 +402,12 @@ td {
 
 /* Hardware-Accelerated Elevated Glass Panels */
 .glass-panel-elevated {
-  background-color: rgba(249, 250, 251, 0.9);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--border-subtle);
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+  border: none;
   border-radius: 0.75rem;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.05);
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -404,12 +416,12 @@ td {
 }
 
 .dark .glass-panel-elevated {
-  background-color: rgba(35, 39, 54, 0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--border-subtle);
+  background-color: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+  border: none;
   border-radius: 0.75rem;
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -679,7 +691,7 @@ html.dark ::-webkit-scrollbar-thumb {
 .icon-box-primary {
   background-color: rgba(200, 56, 10, 0.10);
   border: 1px solid rgba(200, 56, 10, 0.20);
-  color: #C8380A;
+  color: #4F46E5;
 }
 .dark .icon-box-primary {
   background-color: rgba(255, 85, 32, 0.15);
@@ -690,7 +702,7 @@ html.dark ::-webkit-scrollbar-thumb {
 .icon-box-accent {
   background-color: rgba(180, 83, 9, 0.10);
   border: 1px solid rgba(180, 83, 9, 0.20);
-  color: #B45309;
+  color: #0EA5E9;
 }
 .dark .icon-box-accent {
   background-color: rgba(255, 160, 72, 0.15);
@@ -712,7 +724,7 @@ html.dark ::-webkit-scrollbar-thumb {
 .icon-box-warning {
   background-color: rgba(245, 158, 11, 0.10);
   border: 1px solid rgba(245, 158, 11, 0.20);
-  color: #B45309;
+  color: #0EA5E9;
 }
 .dark .icon-box-warning {
   background-color: rgba(251, 191, 36, 0.15);

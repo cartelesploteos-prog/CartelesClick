@@ -1,16 +1,13 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
     // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
-
     function isAdmin() {
       return isSignedIn() && (request.auth.token.admin == true || request.auth.token.email == 'carteles.ploteos@gmail.com');
     }
-
     function isOwner(email) {
       return isSignedIn() && request.auth.token.email == email;
     }
@@ -39,10 +36,18 @@ service cloud.firestore {
         allow read, create: if isAdmin();
         allow update, delete: if false;
       }
+      match /auditLogs/{logId} {
+        allow read, create: if isAdmin();
+        allow update, delete: if false;
+      }
     }
 
     // Top-level Audit Logs Collection
     match /audit_logs/{logId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+    match /auditLogs/{logId} {
       allow read, create: if isAdmin();
       allow update, delete: if false;
     }

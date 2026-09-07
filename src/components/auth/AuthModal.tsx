@@ -206,27 +206,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
-      <motion.div
-        id="auth-modal-backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto"
-        onClick={(e) => {
-          if (e.target === e.currentTarget && onClose) onClose();
-        }}
-      >
+      {isOpen && (
         <motion.div
-          id="auth-modal-card"
-          initial={{ opacity: 0, scale: 0.96, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 10 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+          id="auth-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && onClose) onClose();
+          }}
+        >
+          <motion.div
+            id="auth-modal-card"
+            initial={{ opacity: 0, scale: 0.96, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           className="relative w-full max-w-md my-8 p-6 sm:p-8 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl text-[var(--text-primary)]"
           onClick={(e) => e.stopPropagation()}
         >
@@ -431,6 +430,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 };

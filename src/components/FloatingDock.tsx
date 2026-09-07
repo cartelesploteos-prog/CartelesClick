@@ -37,15 +37,15 @@ const SubActionButton = ({ icon: Icon, label, onClick, badge }: { icon: any, lab
       e.stopPropagation();
       onClick();
     }}
-    className="group relative flex items-center justify-center w-10 h-10 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] shadow-lg hover:bg-[var(--border-subtle)] text-[var(--text-primary)] transition-all cursor-pointer"
+    className="group relative flex items-center justify-center w-10 h-10 rounded-full bg-[var(--bg-surface-elevated)] shadow-lg hover:bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] transition-all cursor-pointer border-none"
   >
     <Icon className="w-4 h-4" />
     {badge !== undefined && badge > 0 && (
-      <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-[#C8380A] text-white text-[9px] font-bold flex items-center justify-center shadow-md">
+      <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-[var(--brand-brick)] text-white text-[9px] font-bold flex items-center justify-center shadow-md">
         {badge}
       </span>
     )}
-    <span className="absolute right-full mr-3 whitespace-nowrap bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] text-[10px] font-medium px-2 py-1 rounded-md shadow-md border border-[var(--border-subtle)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+    <span className="absolute right-full mr-3 whitespace-nowrap bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] text-[10px] font-medium px-2 py-1 rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
       {label}
     </span>
   </button>
@@ -107,9 +107,9 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-16 w-72 sm:w-80 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]/95 backdrop-blur-xl p-4 shadow-2xl space-y-3 pointer-events-auto"
+            className="absolute bottom-16 w-72 sm:w-80 rounded-2xl bg-[var(--bg-surface)]/80 backdrop-blur-2xl p-4 shadow-[0_16px_48px_rgba(0,0,0,0.1)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.4)] border-none space-y-3 pointer-events-auto"
           >
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+            <div className="flex items-center justify-between pb-2.5">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="font-heading text-xs font-bold text-[var(--text-primary)]">
@@ -125,16 +125,16 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-1">
+              <div className="p-2.5 rounded-xl bg-[var(--bg-surface-subtle)] space-y-1">
                 <div className="text-[var(--text-secondary)] flex items-center gap-1.5 font-medium text-[11px]">
-                  <Activity className="w-3.5 h-3.5 text-[#C8380A]" />
+                  <Activity className="w-3.5 h-3.5 text-[var(--brand-brick)]" />
                   <span>En imprenta</span>
                 </div>
                 <p className="font-heading text-sm font-bold text-[var(--text-primary)]">14 trabajos</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-1">
+              <div className="p-2.5 rounded-xl bg-[var(--bg-surface-subtle)] space-y-1">
                 <div className="text-[var(--text-secondary)] flex items-center gap-1.5 font-medium text-[11px]">
-                  <Clock className="w-3.5 h-3.5 text-[#C8380A]" />
+                  <Clock className="w-3.5 h-3.5 text-[var(--brand-brick)]" />
                   <span>Despacho</span>
                 </div>
                 <p className="font-heading text-sm font-bold text-[var(--text-primary)]">24 a 48 hs</p>
@@ -146,14 +146,14 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                 <span>Capacidad operativa</span>
                 <span className="font-bold text-[var(--text-primary)]">82%</span>
               </div>
-              <div className="w-full h-1.5 bg-[var(--bg-surface-subtle)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
-                <div className="h-full bg-[#C8380A] transition-all duration-500 rounded-full" style={{ width: "82%" }} />
+              <div className="w-full h-1.5 bg-[var(--bg-surface-subtle)] rounded-full overflow-hidden border-none">
+                <div className="h-full bg-[var(--brand-brick)] transition-all duration-500 rounded-full" style={{ width: "82%" }} />
               </div>
             </div>
 
             <button
               onClick={() => handleNavClick("pedidos")}
-              className="w-full mt-1 py-2 px-3 rounded-xl text-xs font-bold text-[#C8380A] hover:bg-[#C8380A] hover:text-white transition-all border border-[var(--border-subtle)] flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="w-full mt-1 py-2 px-3 rounded-xl text-xs font-bold text-[var(--brand-brick)] hover:bg-[var(--brand-brick)] hover:text-white transition-all border-none bg-[var(--brand-brick)]/10 flex items-center justify-center gap-2 cursor-pointer shadow-none"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Seguimiento de pedidos</span>
@@ -165,7 +165,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
       {/* DOCK CONTAINER */}
       <div
         ref={dockRef}
-        className="flex items-end gap-2 p-1.5 rounded-full bg-[var(--bg-surface)]/90 backdrop-blur-xl border border-[var(--border-strong)] shadow-2xl pointer-events-auto ring-1 ring-black/5 dark:ring-white/10"
+        className="flex items-end gap-2 p-1.5 rounded-full glass-panel shadow-2xl pointer-events-auto"
       >
         {/* INICIO */}
         <button
@@ -173,7 +173,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
           aria-label="Ir al inicio"
           title="Inicio"
           className={`relative p-3 rounded-full transition-all cursor-pointer ${
-            currentView === "home" ? "bg-[#C8380A] text-white shadow-md shadow-[#C8380A]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
+            currentView === "home" ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
           }`}
         >
           <Home className="w-5 h-5" />
@@ -205,7 +205,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
               toggleMenu("calc");
             }}
             className={`relative p-3 rounded-full transition-all cursor-pointer ${
-              currentView === "cotizador" || expandedMenu === "calc" ? "bg-[#C8380A] text-white shadow-md shadow-[#C8380A]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
+              currentView === "cotizador" || expandedMenu === "calc" ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
             }`}
           >
             <Calculator className="w-5 h-5" />
@@ -241,7 +241,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
             title="Cuenta"
             onClick={() => toggleMenu("user")}
             className={`relative p-3 rounded-full transition-all cursor-pointer ${
-              expandedMenu === "user" ? "bg-[#C8380A] text-white shadow-md shadow-[#C8380A]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
+              expandedMenu === "user" ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
             }`}
           >
             <User className="w-5 h-5" />
@@ -286,7 +286,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
             title="Ajustes"
             onClick={() => toggleMenu("modes")}
             className={`relative p-3 rounded-full transition-all cursor-pointer ${
-              expandedMenu === "modes" ? "bg-[#C8380A] text-white shadow-md shadow-[#C8380A]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
+              expandedMenu === "modes" ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)]"
             }`}
           >
             <Settings className="w-5 h-5" />

@@ -96,12 +96,13 @@ export const useNotificationStore = create<NotificationState>()(
         if (notifData.type === 'promotion' && !prefs.promotions) return;
         if (notifData.type === 'blog' && !prefs.blogUpdates) return;
 
+        const shouldSendEmail = prefs.emailNotifications && notifData.type !== 'system';
         const newNotif: AppNotification = {
           ...notifData,
           id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
           timestamp: new Date().toISOString(),
           read: false,
-          emailSent: prefs.emailNotifications
+          emailSent: shouldSendEmail
         };
 
         const updated = [newNotif, ...get().notifications];
@@ -118,7 +119,7 @@ export const useNotificationStore = create<NotificationState>()(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               ...newNotif,
-              recipientEmail: prefs.emailNotifications ? prefs.userEmail : undefined
+              recipientEmail: shouldSendEmail ? prefs.userEmail : undefined
             })
           });
         } catch (e) {

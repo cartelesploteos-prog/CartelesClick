@@ -278,6 +278,7 @@ export interface ServerMaterialCost {
   updatedAt?: string;
 }
 
+let CATALOG_VERSION = Date.now();
 let IN_MEMORY_PRODUCTS: ServerMaterialCost[] = [
   // --- LONAS ---
   { id: 'lona_front_9oz', name: 'Lonas Front Brillante 9 onzas', category: 'lonas', mode: 'm2', costARS: 7200, salePriceARS: 14400, marginPercent: 100, unitLabel: 'm²', stockStatus: 'disponible', shortDesc: 'Lona liviana económica brillante para eventos temporarios.', isActive: true },
@@ -1160,6 +1161,14 @@ app.post('/api/admin/blog/ai-generate', aiRateLimiter, async (req, res) => {
 // 🛠️ ADMIN PRODUCTS & GOOGLE SHEETS SYNC
 // ==========================================
 
+app.get('/api/products/version', (req, res) => {
+  res.json({ version: CATALOG_VERSION });
+});
+
+app.get('/api/products', (req, res) => {
+  res.json({ products: IN_MEMORY_PRODUCTS });
+});
+
 app.get('/api/admin/products', (req, res) => {
   res.json({ products: IN_MEMORY_PRODUCTS });
 });
@@ -1196,6 +1205,7 @@ app.post('/api/admin/products', (req, res) => {
   };
 
   IN_MEMORY_PRODUCTS.push(newProduct);
+  CATALOG_VERSION = Date.now();
   res.status(201).json({ success: true, product: newProduct });
 });
 
@@ -1220,6 +1230,7 @@ app.put('/api/admin/products/:id', (req, res) => {
   }
 
   IN_MEMORY_PRODUCTS[index] = updated;
+  CATALOG_VERSION = Date.now();
   res.json({ success: true, product: updated });
 });
 
@@ -1229,6 +1240,7 @@ app.delete('/api/admin/products/:id', (req, res) => {
   if (index === -1) return res.status(404).json({ error: 'Producto no encontrado' });
 
   IN_MEMORY_PRODUCTS.splice(index, 1);
+  CATALOG_VERSION = Date.now();
   res.json({ success: true, message: 'Producto eliminado correctamente' });
 });
 
@@ -2180,6 +2192,17 @@ app.post('/api/checkout/preference', async (req, res) => {
     };
 
     IN_MEMORY_ORDERS.unshift(newOrder);
+  IN_MEMORY_NOTIFICATIONS.unshift({
+    id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    type: 'admin_alert',
+    title: '🎉 Nuevo Pedido Recibido',
+    message: `El cliente ${newOrder.customerName} ingresó el pedido #${newOrder.orderNumber} por $${newOrder.totalAmountARS.toLocaleString('es-AR')}.`,
+    timestamp: new Date().toISOString(),
+    read: false,
+    orderId: newOrder.id,
+    link: 'pedidos',
+    priority: 'normal'
+  });
 
     const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 
@@ -2348,6 +2371,7 @@ app.post('/api/orders', (req, res) => {
   const { customerName, customerCompany, customerEmail, customerPhone, customerType, priority, shippingMethod, items, internalNotes, promisedDate } = req.body;
   
   if (!items || !items.length) {
+    IN_MEMORY_NOTIFICATIONS.unshift({ id: `notif-${Date.now()}`, type: 'admin_alert', title: '⚠️ Intento de Pedido Inválido', message: 'Un cliente intentó procesar un pedido sin items.', timestamp: new Date().toISOString(), read: false, priority: 'high' });
     return res.status(400).json({ error: 'El pedido debe incluir al menos un item.' });
   }
 
@@ -2396,6 +2420,17 @@ app.post('/api/orders', (req, res) => {
   };
 
   IN_MEMORY_ORDERS.unshift(newOrder);
+  IN_MEMORY_NOTIFICATIONS.unshift({
+    id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    type: 'admin_alert',
+    title: '🎉 Nuevo Pedido Recibido',
+    message: `El cliente ${newOrder.customerName} ingresó el pedido #${newOrder.orderNumber} por $${newOrder.totalAmountARS.toLocaleString('es-AR')}.`,
+    timestamp: new Date().toISOString(),
+    read: false,
+    orderId: newOrder.id,
+    link: 'pedidos',
+    priority: 'normal'
+  });
   res.status(201).json({ success: true, order: newOrder });
 });
 
@@ -2426,6 +2461,17 @@ app.patch('/api/admin/orders/:id', (req, res) => {
   const oldStatus = IN_MEMORY_ORDERS[orderIndex].status;
 
   if (status) IN_MEMORY_ORDERS[orderIndex].status = status;
+  IN_MEMORY_NOTIFICATIONS.unshift({
+    id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    type: 'admin_alert',
+    title: '🔄 Cambio de Estado',
+    message: `Pedido #${IN_MEMORY_ORDERS[orderIndex].orderNumber} cambió a "${status}".`,
+    timestamp: new Date().toISOString(),
+    read: false,
+    orderId: id,
+    link: 'pedidos',
+    priority: 'low'
+  });
   if (priority) IN_MEMORY_ORDERS[orderIndex].priority = priority;
   if (customerType) IN_MEMORY_ORDERS[orderIndex].customerType = customerType;
   if (internalNotes !== undefined) IN_MEMORY_ORDERS[orderIndex].internalNotes = internalNotes;
@@ -2479,6 +2525,17 @@ app.patch('/api/admin/orders/:id/status', (req, res) => {
 
   const oldStatus = IN_MEMORY_ORDERS[orderIndex].status;
   IN_MEMORY_ORDERS[orderIndex].status = status;
+  IN_MEMORY_NOTIFICATIONS.unshift({
+    id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    type: 'admin_alert',
+    title: '🔄 Cambio de Estado',
+    message: `Pedido #${IN_MEMORY_ORDERS[orderIndex].orderNumber} cambió a "${status}".`,
+    timestamp: new Date().toISOString(),
+    read: false,
+    orderId: id,
+    link: 'pedidos',
+    priority: 'low'
+  });
   IN_MEMORY_ORDERS[orderIndex].updatedAt = timestamp || new Date().toISOString();
   const currentOrder = IN_MEMORY_ORDERS[orderIndex];
 

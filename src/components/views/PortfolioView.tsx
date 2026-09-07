@@ -91,7 +91,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
     <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 max-w-7xl font-sans">
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF5520]/10 border border-[#FF5520]/20 text-[#FF5520] text-xs font-semibold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--brand-brick)]/10 border border-[var(--brand-brick)]/20 text-[var(--brand-brick)] text-xs font-semibold">
           <FolderOpen className="w-3.5 h-3.5" />
           <span>Sincronización en Vivo con Google Drive</span>
         </div>
@@ -111,7 +111,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
           <button
             onClick={handleManualDriveSync}
             disabled={isSyncingDrive}
-            className="px-3.5 py-1.5 rounded-[7px] bg-[#FF5520]/20 hover:bg-[#FF5520]/30 text-[#FF5520] border border-[#FF5520]/40 font-medium flex items-center gap-1.5 transition-all"
+            className="px-3.5 py-1.5 rounded-[7px] bg-[var(--brand-brick)]/20 hover:bg-[var(--brand-brick)]/30 text-[var(--brand-brick)] border border-[var(--brand-brick)]/40 font-medium flex items-center gap-1.5 transition-all"
             title="Refrescar fotos desde la carpeta de Google Drive"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSyncingDrive ? "animate-spin" : ""}`} />
@@ -176,7 +176,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onNavigate("poster", encodeURIComponent(item.title + " " + item.material))}
-                        className="flex-1 py-2 rounded-full bg-[#FF5520] hover:bg-[#FF6B38] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95"
+                        className="flex-1 py-2 rounded-full bg-[var(--brand-brick)] hover:bg-[#FF6B38] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Remix con IA</span>
@@ -193,7 +193,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="p-5 space-y-2">
-                  <span className="text-[10px] uppercase text-[#FF5520] tracking-wider block font-semibold">
+                  <span className="text-[10px] uppercase text-[var(--brand-brick)] tracking-wider block font-semibold">
                     {item.client}
                   </span>
                   <h3 className="text-base font-bold text-white line-clamp-1">
@@ -209,7 +209,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
               <div className="p-5 pt-0">
                 <button
                   onClick={() => onNavigate("cotizador")}
-                  className="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-[#FF5520] text-xs text-white font-semibold transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-[var(--brand-brick)] text-xs text-white font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <span>Cotizar medida personalizada</span>
                   <ArrowRight className="w-3.5 h-3.5" />

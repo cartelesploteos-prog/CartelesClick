@@ -196,15 +196,15 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setIsOpen(true)}
-                className="relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-[#FF5520] hover:bg-[#FF6B38] text-white font-bold shadow-2xl shadow-[#FF5520]/40 transition-all cursor-pointer border border-white/20"
+                className="relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-[var(--brand-brick)] hover:bg-[#FF6B38] text-white font-bold shadow-2xl shadow-[var(--brand-brick)]/40 transition-all cursor-pointer border border-white/20"
                 aria-label="Abrir Chat de Soporte en Vivo"
               >
                 <div className="relative">
                   <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
                     💬
                   </div>
-                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#FF5520] animate-ping" />
-                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#FF5520]" />
+                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[var(--brand-brick)] animate-ping" />
+                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[var(--brand-brick)]" />
                 </div>
 
                 <div className="flex flex-col items-start text-left">
@@ -213,7 +213,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                 </div>
 
                 {unreadCount > 0 && (
-                  <span className="ml-1 w-5 h-5 rounded-full bg-white text-[#FF5520] text-xs font-black flex items-center justify-center shadow-sm">
+                  <span className="ml-1 w-5 h-5 rounded-full bg-white text-[var(--brand-brick)] text-xs font-black flex items-center justify-center shadow-sm">
                     {unreadCount}
                   </span>
                 )}
@@ -236,7 +236,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
               <div className="px-4 py-3.5 bg-[var(--bg-surface-subtle)] border-b border-[var(--border-subtle)] flex items-center justify-between gap-2 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#FF5520] to-[#FF8855] flex items-center justify-center text-white font-bold shadow-md shadow-[#FF5520]/20">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[var(--brand-brick)] to-[#FF8855] flex items-center justify-center text-white font-bold shadow-md shadow-[var(--brand-brick)]/20">
                       <ShieldCheck className="w-5 h-5 text-white" />
                     </div>
                     <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-surface-elevated)]" />
@@ -247,7 +247,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                       <h3 className="text-sm font-bold text-[var(--text-primary)] leading-tight">
                         Sofi — Taller Carteles.Click
                       </h3>
-                      <span className="px-1.5 py-0.2 rounded-full bg-[#FF5520]/10 border border-[#FF5520]/30 text-[#FF5520] text-[9px] font-black uppercase">
+                      <span className="px-1.5 py-0.2 rounded-full bg-[var(--brand-brick)]/10 border border-[var(--brand-brick)]/30 text-[var(--brand-brick)] text-[9px] font-black uppercase">
                         AI TALLER
                       </span>
                     </div>
@@ -282,7 +282,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(qp.prompt)}
-                    className="px-2.5 py-1 rounded-full bg-[var(--bg-surface)] hover:bg-[#FF5520]/15 border border-[var(--border-subtle)] hover:border-[#FF5520]/40 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap transition-colors shrink-0 cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-full bg-[var(--bg-surface)] hover:bg-[var(--brand-brick)]/15 border border-[var(--border-subtle)] hover:border-[var(--brand-brick)]/40 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap transition-colors shrink-0 cursor-pointer flex items-center gap-1"
                   >
                     <span>{qp.label}</span>
                   </button>
@@ -309,7 +309,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                     <div
                       className={`p-3.5 rounded-2xl max-w-[88%] leading-relaxed ${
                         msg.role === "user"
-                          ? "bg-[#FF5520] text-white rounded-tr-none shadow-md shadow-[#FF5520]/15"
+                          ? "bg-[var(--brand-brick)] text-white rounded-tr-none shadow-md shadow-[var(--brand-brick)]/15"
                           : "bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-tl-none"
                       }`}
                     >
@@ -335,7 +335,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                             <p className="text-[11px] text-[var(--text-secondary)]">
                               Medida: {msg.detectedQuote.widthCm} × {msg.detectedQuote.heightCm} cm ({msg.detectedQuote.quantity} un.)
                             </p>
-                            <p className="text-sm font-black text-[#FF5520] pt-1">
+                            <p className="text-sm font-black text-[var(--brand-brick)] pt-1">
                               ${msg.detectedQuote.estimatedTotalARS.toLocaleString("es-AR")} ARS
                             </p>
                           </div>
@@ -364,7 +364,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                                 msg.suggestedAction!.param
                               );
                             }}
-                            className="w-full py-1.5 px-3 rounded-xl bg-[#FF5520] hover:bg-[#FF6B38] text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
+                            className="w-full py-1.5 px-3 rounded-xl bg-[var(--brand-brick)] hover:bg-[#FF6B38] text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
                           >
                             <span>{msg.suggestedAction.label}</span>
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -377,7 +377,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
 
                 {isLoading && (
                   <div className="flex items-center gap-2 p-3 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] w-fit text-xs text-[var(--text-secondary)]">
-                    <Bot className="w-4 h-4 text-[#FF5520] animate-bounce" />
+                    <Bot className="w-4 h-4 text-[var(--brand-brick)] animate-bounce" />
                     <span className="font-medium animate-pulse">Sofi está consultando stock y precios en taller...</span>
                   </div>
                 )}
@@ -415,13 +415,13 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Escribí tu consulta o medida a cotizar..."
-                  className="flex-1 px-3.5 py-2.5 rounded-full bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] focus:border-[#FF5520] focus:outline-none text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors"
+                  className="flex-1 px-3.5 py-2.5 rounded-full bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] focus:border-[var(--brand-brick)] focus:outline-none text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors"
                 />
 
                 <button
                   type="submit"
                   disabled={!inputMessage.trim() || isLoading}
-                  className="w-9 h-9 rounded-full bg-[#FF5520] hover:bg-[#FF6B38] disabled:opacity-40 disabled:hover:bg-[#FF5520] text-white flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-[var(--brand-brick)] hover:bg-[#FF6B38] disabled:opacity-40 disabled:hover:bg-[var(--brand-brick)] text-white flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer"
                   aria-label="Enviar mensaje"
                 >
                   <Send className="w-4 h-4" />

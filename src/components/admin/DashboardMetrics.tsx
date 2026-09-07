@@ -16,6 +16,8 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -79,6 +81,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
   // =========================================================================
   const {
     monthlyVolumeData,
+    materialStatsData,
     overallConversionRate,
     totalRevenueARS,
     totalOrdersCount,
@@ -121,6 +124,8 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
     let totalRevenue = 0;
     let inProdTotal = 0;
 
+    const materialMap: Record<string, { material: string; totalRevenue: number; orderCount: number }> = {};
+
     const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     activeOrders.forEach((ord) => {
@@ -145,7 +150,29 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
           monthlyMap[key].convertedOrders += 1;
         }
       }
+
+      // Material Stats
+      if (Array.isArray(ord.items)) {
+        ord.items.forEach((item: any) => {
+          const mat = item.materialName || "Otros / Sin Especificar";
+          const itemRev = Number(item.totalPriceARS) || 0;
+          if (!materialMap[mat]) {
+            materialMap[mat] = { material: mat, totalRevenue: 0, orderCount: 0 };
+          }
+          materialMap[mat].totalRevenue += itemRev;
+          // To approximate orderCount per material, we just increment it per item 
+          // or we can just count it once per order if we use a Set. We'll use a Set
+        });
+        
+        // Count distinct materials for this order
+        const uniqueMats = new Set(ord.items.map((i: any) => i.materialName || "Otros / Sin Especificar"));
+        uniqueMats.forEach(mat => {
+          if (materialMap[mat]) materialMap[mat].orderCount += 1;
+        });
+      }
     });
+
+    const materialStatsData = Object.values(materialMap).sort((a, b) => b.totalRevenue - a.totalRevenue);
 
     // Calculate conversion rate for each month
     const monthlyVolumeData = Object.values(monthlyMap).map((m) => {
@@ -163,6 +190,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
 
     return {
       monthlyVolumeData,
+      materialStatsData,
       overallConversionRate,
       totalRevenueARS: totalRevenue,
       totalOrdersCount: activeOrders.length,
@@ -388,9 +416,9 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
                   type="monotone"
                   dataKey="totalOrders"
                   name="Pedidos Totales"
-                  stroke="#C8380A"
+                  stroke="[var(--brand-brick)]"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: "#C8380A" }}
+                  dot={{ r: 4, fill: "[var(--brand-brick)]" }}
                   activeDot={{ r: 6 }}
                 />
                 <Line
@@ -478,6 +506,50 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
               </AreaChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 📊 GRÁFICO DE BARRAS DE RENDIMIENTO POR MATERIAL (RECHARTS)              */}
+      {/* ========================================================================= */}
+      <div className="p-[var(--space-md)] rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3 mt-[var(--space-md)]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-sky-500" />
+            <h3 className="font-heading text-sm font-medium text-[var(--text-primary)]">
+              Rendimiento de Ventas por Material
+            </h3>
+          </div>
+        </div>
+
+        <div className="h-64 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={materialStatsData} margin={{ top: 10, right: 15, left: -10, bottom: 0 }} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" horizontal={true} vertical={false} />
+              <XAxis type="number" tick={{ fill: "var(--text-secondary)" }} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `$${(val / 1000)}k`} />
+              <YAxis type="category" dataKey="material" width={100} tick={{ fill: "var(--text-secondary)" }} fontSize={11} tickLine={false} axisLine={false} />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="p-2.5 rounded-[6px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-lg text-xs space-y-1">
+                        <p className="font-semibold text-[var(--text-primary)]">{label}</p>
+                        <p className="text-sky-500 font-mono-num font-medium">
+                          Facturación: <strong>{formatARS(data.totalRevenue)}</strong>
+                        </p>
+                        <p className="text-[var(--text-secondary)] font-mono-num text-[11px]">
+                          Pedidos: {data.orderCount}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar dataKey="totalRevenue" fill="#0EA5E9" radius={[0, 4, 4, 0]} barSize={24} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

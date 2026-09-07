@@ -16,7 +16,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading, isAdmin } = useAuthStore();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {/* 1. ESTADO DE CARGA */}
       {loading && (
         <motion.div

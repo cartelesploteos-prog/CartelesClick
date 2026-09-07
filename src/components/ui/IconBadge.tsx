@@ -61,28 +61,28 @@ const VARIANT_MAP: Record<
 > = {
   primary: {
     subtle: {
-      container: "bg-[#C8380A]/10 dark:bg-[#FF5520]/15 border border-[#C8380A]/20 dark:border-[#FF5520]/30",
-      icon: "text-[#C8380A] dark:text-[#FF5520]",
+      container: "bg-[var(--brand-brick)]/10 dark:bg-[var(--brand-brick)]/15 border border-[var(--brand-brick)]/20 dark:border-[var(--brand-brick)]/30",
+      icon: "text-[var(--brand-brick)] dark:text-[var(--brand-brick)]",
     },
     ghost: {
       container: "bg-transparent",
-      icon: "text-[#C8380A] dark:text-[#FF5520]",
+      icon: "text-[var(--brand-brick)] dark:text-[var(--brand-brick)]",
     },
     solid: {
-      container: "bg-[#C8380A] dark:bg-[#FF5520] text-white shadow-xs",
+      container: "bg-[var(--brand-brick)] dark:bg-[var(--brand-brick)] text-white shadow-xs",
       icon: "text-white",
     },
     glass: {
-      container: "bg-[#C8380A]/10 dark:bg-[#FF5520]/15 backdrop-blur-md border border-[#C8380A]/25 dark:border-[#FF5520]/35",
-      icon: "text-[#C8380A] dark:text-[#FF5520]",
+      container: "bg-[var(--brand-brick)]/10 dark:bg-[var(--brand-brick)]/15 backdrop-blur-md border border-[var(--brand-brick)]/25 dark:border-[var(--brand-brick)]/35",
+      icon: "text-[var(--brand-brick)] dark:text-[var(--brand-brick)]",
     },
     bordered: {
-      container: "border border-[#C8380A]/40 dark:border-[#FF5520]/40 bg-transparent",
-      icon: "text-[#C8380A] dark:text-[#FF5520]",
+      container: "border border-[var(--brand-brick)]/40 dark:border-[var(--brand-brick)]/40 bg-transparent",
+      icon: "text-[var(--brand-brick)] dark:text-[var(--brand-brick)]",
     },
     none: {
       container: "",
-      icon: "text-[#C8380A] dark:text-[#FF5520]",
+      icon: "text-[var(--brand-brick)] dark:text-[var(--brand-brick)]",
     },
   },
   accent: {

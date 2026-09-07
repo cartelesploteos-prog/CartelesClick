@@ -23,6 +23,7 @@ import confetti from "canvas-confetti";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
 import { useCartStore } from "../store/useCartStore";
+import { sendHighValueOrderNotification } from "../utils/notifications";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import { useNotificationStore } from "../store/useNotificationStore";
@@ -191,6 +192,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
       const data = await response.json();
       if (data.success && data.order) {
         triggerOrderCelebration();
+        
+        // Dispara notificación push de alto valor (silencioso para no bloquear el flujo)
+        sendHighValueOrderNotification(data.order);
+
         clearCart();
         setIsOpen(false);
         

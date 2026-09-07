@@ -187,7 +187,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
       fontHeading: "display",
       alignment: "center",
       themePalette: "brand-brick",
-      primaryColor: "#FF5520",
+      primaryColor: "[var(--brand-brick)]",
       accentColor: "#C5BAAA",
       backgroundColor: "#18191E",
       textColor: "#FAF8F5",
@@ -198,7 +198,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
       backgroundMode: "solid",
       gradientConfig: {
         type: "linear",
-        color1: "#FF5520",
+        color1: "[var(--brand-brick)]",
         color2: "#18191E",
         angle: 135,
         presetId: "brick-graphite",
@@ -221,7 +221,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
           fontSize: 22,
           fontWeight: "bold",
           fontFamily: "display",
-          color: "#FF5520",
+          color: "[var(--brand-brick)]",
           align: "center",
         },
         {

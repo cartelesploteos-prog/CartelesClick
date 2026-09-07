@@ -52,13 +52,13 @@ export const triggerOrderCelebration = () => {
       particleCount: 70,
       spread: 75,
       origin: { y: 0.6, x: 0.2 },
-      colors: ["#FF5520", "#FFA048", "#FFFFFF", "#232736", "#25D366"],
+      colors: ["[var(--brand-brick)]", "#FFA048", "#FFFFFF", "#232736", "#25D366"],
     });
     confetti({
       particleCount: 70,
       spread: 75,
       origin: { y: 0.6, x: 0.8 },
-      colors: ["#FF5520", "#FFA048", "#FFFFFF", "#232736", "#25D366"],
+      colors: ["[var(--brand-brick)]", "#FFA048", "#FFFFFF", "#232736", "#25D366"],
     });
   } catch {
     // Graceful fallback
@@ -97,7 +97,7 @@ export const triggerBrindisCelebration = (
       spread: 60,
       startVelocity: 35,
       origin: { x: originX, y: originY },
-      colors: ["#FF5520", "#FFA048", "#F59E0B", "#10B981", "#FFFFFF"],
+      colors: ["[var(--brand-brick)]", "#FFA048", "#F59E0B", "#10B981", "#FFFFFF"],
       shapes: ["circle", "square"],
       ticks: 200,
     });
@@ -109,14 +109,14 @@ export const triggerBrindisCelebration = (
         angle: 60,
         spread: 45,
         origin: { x: Math.max(0.1, originX - 0.15), y: originY },
-        colors: ["#FF5520", "#FFA048", "#FDE047"],
+        colors: ["[var(--brand-brick)]", "#FFA048", "#FDE047"],
       });
       confetti({
         particleCount: 25,
         angle: 120,
         spread: 45,
         origin: { x: Math.min(0.9, originX + 0.15), y: originY },
-        colors: ["#FF5520", "#FFA048", "#FDE047"],
+        colors: ["[var(--brand-brick)]", "#FFA048", "#FDE047"],
       });
     }, 120);
 

@@ -25,7 +25,7 @@ export const OrderProgressBar: React.FC<OrderProgressBarProps> = ({ status }) =>
       </div>
       <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
         <motion.div 
-          className="h-full bg-[#C8380A] rounded-full"
+          className="h-full bg-[var(--brand-brick)] rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${(stepIndex / (steps.length - 1)) * 100}%` }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}

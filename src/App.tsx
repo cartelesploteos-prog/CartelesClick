@@ -17,6 +17,7 @@ import { AdminPanelView } from "./components/views/AdminPanelView";
 import { NotificationToast } from "./components/ui/NotificationToast";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { useThemeStore } from "./store/useThemeStore";
+import { useMaterialStore } from "./store/useMaterialStore";
 import { useI18nStore } from "./store/useI18nStore";
 import { getLocalBusinessSchema } from "./utils/schema";
 
@@ -24,13 +25,15 @@ export default function App() {
   const [currentView, setCurrentView] = useState<string>("home");
   const [viewParam, setViewParam] = useState<string | undefined>(undefined);
   const { initTheme } = useThemeStore();
+  const { fetchMaterials } = useMaterialStore();
   const { initI18n } = useI18nStore();
 
   // Initialize theme and i18n language persistence on mount
   useEffect(() => {
     initTheme();
+    fetchMaterials();
     initI18n();
-  }, [initTheme, initI18n]);
+  }, [initTheme, initI18n, fetchMaterials]);
 
   // Inject JSON-LD Schema for Local SEO
   useEffect(() => {

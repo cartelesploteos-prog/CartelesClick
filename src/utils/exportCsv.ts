@@ -99,11 +99,14 @@ export function exportOrdersToCsv(orders: Order[], filename = "carteles_click_pe
     "Resumen Ítems",
     "Total m²",
     "Método Envío",
+    "Costo Envío ($ ARS)",
     "Prioridad",
     "Estado Pedido",
     "Estado Pago",
     "Monto Total ($ ARS)",
-    "Fecha Creación"
+    "Fecha Creación",
+    "Fecha Prometida",
+    "Notas Internas"
   ];
 
   const rows = orders.map(o => {
@@ -122,11 +125,14 @@ export function exportOrdersToCsv(orders: Order[], filename = "carteles_click_pe
       itemsSummary,
       o.totalM2 || 0,
       o.shippingMethod || "retiro_taller",
+      o.shippingFeeARS || 0,
       o.priority || "normal",
       o.status || "pendiente",
       o.paymentStatus || "pendiente",
       o.totalAmountARS || 0,
-      o.createdAt ? new Date(o.createdAt).toLocaleDateString("es-AR") : new Date().toLocaleDateString("es-AR")
+      o.createdAt ? new Date(o.createdAt).toLocaleDateString("es-AR") : new Date().toLocaleDateString("es-AR"),
+      o.promisedDate ? new Date(o.promisedDate).toLocaleDateString("es-AR") : "",
+      o.internalNotes || ""
     ];
   });
 

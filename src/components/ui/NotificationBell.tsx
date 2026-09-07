@@ -55,7 +55,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
       case "order_status": 
         return <Package className="w-4 h-4 text-emerald-700 dark:text-emerald-400" strokeWidth={1.85} />;
       case "promotion": 
-        return <Sparkles className="w-4 h-4 text-[#C8380A] dark:text-[#FF5520]" strokeWidth={1.85} />;
+        return <Sparkles className="w-4 h-4 text-[var(--brand-brick)] dark:text-[var(--brand-brick)]" strokeWidth={1.85} />;
       case "blog": 
         return <BookOpen className="w-4 h-4 text-blue-700 dark:text-blue-400" strokeWidth={1.85} />;
       default: 
@@ -68,7 +68,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
       case "order_status":
         return <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 font-semibold">Pedido</span>;
       case "promotion":
-        return <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-primary/15 text-[#C8380A] dark:text-[#FFA048] font-semibold">Promo</span>;
+        return <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-primary/15 text-[var(--brand-brick)] dark:text-[#FFA048] font-semibold">Promo</span>;
       case "blog":
         return <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-blue-500/15 text-blue-800 dark:text-blue-300 font-semibold">Blog</span>;
       default:
@@ -123,8 +123,8 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
         <Bell className="w-5 h-5" strokeWidth={1.85} />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF5520] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-[#FF5520] text-[9px] font-bold text-white items-center justify-center">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--brand-brick)] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-[var(--brand-brick)] text-[9px] font-bold text-white items-center justify-center">
               {unreadCount > 9 ? '+9' : unreadCount}
             </span>
           </span>
@@ -137,12 +137,12 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
           {/* HEADER */}
           <div className="p-3.5 px-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-subtle)]">
             <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-[#C8380A] dark:text-[#FF5520]" strokeWidth={2} />
+              <Bell className="w-4 h-4 text-[var(--brand-brick)] dark:text-[var(--brand-brick)]" strokeWidth={2} />
               <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
                 Notificaciones
               </h3>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-[#C8380A] dark:text-[#FF5520] text-xs font-semibold">
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-[var(--brand-brick)] dark:text-[var(--brand-brick)] text-xs font-semibold">
                   {unreadCount}
                 </span>
               )}
@@ -183,7 +183,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               onClick={() => setActiveTab('all')}
               className={`pb-2 px-3 font-medium border-b-2 transition-all cursor-pointer ${
                 activeTab === 'all'
-                  ? 'border-primary text-[#C8380A] dark:text-[#FF5520]'
+                  ? 'border-primary text-[var(--brand-brick)] dark:text-[var(--brand-brick)]'
                   : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -193,7 +193,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               onClick={() => setActiveTab('unread')}
               className={`pb-2 px-3 font-medium border-b-2 transition-all cursor-pointer ${
                 activeTab === 'unread'
-                  ? 'border-primary text-[#C8380A] dark:text-[#FF5520]'
+                  ? 'border-primary text-[var(--brand-brick)] dark:text-[var(--brand-brick)]'
                   : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -203,7 +203,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               onClick={() => setActiveTab('settings')}
               className={`pb-2 px-3 font-medium border-b-2 transition-all ml-auto flex items-center gap-1 cursor-pointer ${
                 activeTab === 'settings'
-                  ? 'border-primary text-[#C8380A] dark:text-[#FF5520]'
+                  ? 'border-primary text-[var(--brand-brick)] dark:text-[var(--brand-brick)]'
                   : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -218,7 +218,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               <div className="p-4 space-y-4 text-xs">
                 <div>
                   <h4 className="font-semibold text-[var(--text-primary)] mb-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-[#C8380A] dark:text-[#FF5520]" strokeWidth={2} />
+                    <Mail className="w-3.5 h-3.5 text-[var(--brand-brick)] dark:text-[var(--brand-brick)]" strokeWidth={2} />
                     <span>Canales y Notificaciones</span>
                   </h4>
                   <p className="text-[var(--text-secondary)] leading-relaxed text-[11px]">
@@ -236,7 +236,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
                       type="checkbox"
                       checked={preferences.orderUpdates}
                       onChange={(e) => updatePreferences({ orderUpdates: e.target.checked })}
-                      className="accent-[#FF5520] w-4 h-4 rounded cursor-pointer"
+                      className="accent-[var(--brand-brick)] w-4 h-4 rounded cursor-pointer"
                     />
                   </label>
 
@@ -249,7 +249,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
                       type="checkbox"
                       checked={preferences.promotions}
                       onChange={(e) => updatePreferences({ promotions: e.target.checked })}
-                      className="accent-[#FF5520] w-4 h-4 rounded cursor-pointer"
+                      className="accent-[var(--brand-brick)] w-4 h-4 rounded cursor-pointer"
                     />
                   </label>
 
@@ -262,7 +262,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
                       type="checkbox"
                       checked={preferences.blogUpdates}
                       onChange={(e) => updatePreferences({ blogUpdates: e.target.checked })}
-                      className="accent-[#FF5520] w-4 h-4 rounded cursor-pointer"
+                      className="accent-[var(--brand-brick)] w-4 h-4 rounded cursor-pointer"
                     />
                   </label>
 
@@ -275,7 +275,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
                       type="checkbox"
                       checked={preferences.emailNotifications}
                       onChange={(e) => updatePreferences({ emailNotifications: e.target.checked })}
-                      className="accent-[#FF5520] w-4 h-4 rounded cursor-pointer"
+                      className="accent-[var(--brand-brick)] w-4 h-4 rounded cursor-pointer"
                     />
                   </label>
                 </div>

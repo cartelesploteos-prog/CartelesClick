@@ -56,7 +56,7 @@ const DESIGN_PRESETS = [
     headline: "BURGER CRAFT",
     subheadline: "Auténticas Hamburguesas a la Parrilla",
     themePalette: "brand-brick",
-    primaryColor: "#FF5520",
+    primaryColor: "[var(--brand-brick)]",
     backgroundColor: "#121316",
     textColor: "#FAF8F5",
   },
@@ -89,7 +89,7 @@ const DESIGN_PRESETS = [
     headline: "VINTAGE MOTORS",
     subheadline: "Custom Garage & Apparel",
     themePalette: "brand-brick",
-    primaryColor: "#FF5520",
+    primaryColor: "[var(--brand-brick)]",
     backgroundColor: "#222222",
     textColor: "#FFFFFF",
   },
@@ -123,7 +123,7 @@ export const AiDesignDrawer: React.FC<AiDesignDrawerProps> = ({
   const [subheadline, setSubheadline] = useState("Hasta 50% de descuento · Calidad garantizada");
   const [selectedStyle, setSelectedStyle] = useState("✨ Tipografía Neón");
   const [themePalette, setThemePalette] = useState("brand-brick");
-  const [primaryColor, setPrimaryColor] = useState("#FF5520");
+  const [primaryColor, setPrimaryColor] = useState("[var(--brand-brick)]");
   const [backgroundColor, setBackgroundColor] = useState("#121316");
   const [textColor, setTextColor] = useState("#FAF8F5");
   const [previewMode, setPreviewMode] = useState<"2d" | "3d">("2d");
@@ -218,7 +218,7 @@ export const AiDesignDrawer: React.FC<AiDesignDrawerProps> = ({
           {/* HEADER */}
           <div className="p-4 sm:p-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-subtle)]">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#FF5520] to-[#FFA048] flex items-center justify-center text-white shadow-sm">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--brand-brick)] to-[#FFA048] flex items-center justify-center text-white shadow-sm">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
