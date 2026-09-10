@@ -41,7 +41,7 @@ export const DictionaryView: React.FC<DictionaryViewProps> = ({
     DICTIONARY_TERMS[0];
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 max-w-7xl font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <span className="text-xs uppercase tracking-widest text-primary font-heading font-medium">

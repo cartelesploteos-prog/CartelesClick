@@ -7,13 +7,23 @@ import { AuthModal } from "./AuthModal";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  onNavigate?: (view: string, param?: string) => void;
+  defaultMode?: "login" | "register" | "forgot";
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  adminOnly = false 
+  adminOnly = false,
+  onNavigate,
+  defaultMode = "login"
 }) => {
   const { user, loading, isAdmin } = useAuthStore();
+
+  const handleClose = () => {
+    if (onNavigate) {
+      onNavigate("home");
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -62,7 +72,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               Esta sección requiere iniciar sesión en tu cuenta para acceder a la cola de pedidos o funciones del taller.
             </p>
           </div>
-          <AuthModal isOpen={true} />
+          <AuthModal 
+            isOpen={true} 
+            defaultMode={defaultMode} 
+            onClose={handleClose} 
+          />
         </motion.div>
       )}
 
@@ -88,11 +102,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </p>
             <div className="pt-2">
               <button
-                onClick={() => window.location.reload()}
-                className="w-full py-2.5 px-4 rounded-[7px] text-xs font-medium bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors flex items-center justify-center gap-2"
+                onClick={handleClose}
+                className="w-full py-2.5 px-4 rounded-[7px] text-xs font-medium bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Reintentar o Volver</span>
+                <span>Volver al catálogo principal</span>
               </button>
             </div>
           </div>

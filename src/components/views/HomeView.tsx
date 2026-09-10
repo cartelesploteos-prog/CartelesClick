@@ -618,7 +618,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
       <motion.section 
         id="hero"
         style={{ opacity: heroOpacity, y: heroY, scale: heroScale, rotateX: heroRotateX }}
-        className="relative w-full max-w-full overflow-x-hidden min-h-[80svh] sm:min-h-svh flex flex-col justify-center pt-[calc(var(--header-height,80px)+2rem)] sm:pt-[calc(var(--header-height,80px)+3rem)] pb-12 sm:pb-16 px-[5svw] max-w-7xl mx-auto origin-top"
+        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80svh] sm:min-h-svh flex flex-col justify-center pt-[calc(var(--header-height,80px)+2rem)] sm:pt-[calc(var(--header-height,80px)+3rem)] pb-12 sm:pb-16 origin-top"
       >
         <motion.div 
           style={{ y: heroGlowY }}
@@ -626,7 +626,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         />
 
         <div className="relative text-center max-w-4xl mx-auto space-y-4 mb-6 mt-6 sm:mt-10 lg:mt-12">
-          <h1 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12]">
+          <h1 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-[var(--text-primary)] leading-[1.12]">
             {t("hero_heading_1")}{" "}
             <span className="text-primary">
               {t("hero_heading_highlight")}
@@ -710,7 +710,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)]"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-elevated)] border border-primary/25 shadow-xl space-y-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -723,7 +723,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   Cálculo Instantáneo 24/7 en Pesos ($ ARS)
                 </span>
               </div>
-              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">
+              <h2 className="font-heading text-2xl sm:text-3xl font-normal text-[var(--text-primary)]">
                 Cotizador Instantáneo de Taller
               </h2>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
@@ -783,8 +783,15 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                       type="number"
                       min={10}
                       max={1000}
-                      value={simWidth}
-                      onChange={(e) => setSimWidth(Number(e.target.value))}
+                      value={simWidth === 0 ? "" : simWidth}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        setSimWidth(raw === "" ? 0 : Number(raw));
+                      }}
+                      onBlur={() => {
+                        if (!simWidth || simWidth < 10) setSimWidth(10);
+                        else if (simWidth > 1000) setSimWidth(1000);
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-sm font-bold text-[var(--text-primary)] focus:border-primary focus:outline-none"
                     />
                   </div>
@@ -796,8 +803,15 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                       type="number"
                       min={10}
                       max={1000}
-                      value={simHeight}
-                      onChange={(e) => setSimHeight(Number(e.target.value))}
+                      value={simHeight === 0 ? "" : simHeight}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        setSimHeight(raw === "" ? 0 : Number(raw));
+                      }}
+                      onBlur={() => {
+                        if (!simHeight || simHeight < 10) setSimHeight(10);
+                        else if (simHeight > 1000) setSimHeight(1000);
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-sm font-bold text-[var(--text-primary)] focus:border-primary focus:outline-none"
                     />
                   </div>
@@ -858,14 +872,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Lonas Publicitarias & Cartelería
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="font-heading text-2xl sm:text-3xl font-normal text-[var(--text-primary)] tracking-tight">
               Impresión de Lonas de Gran Formato
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -881,7 +895,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
@@ -983,6 +997,40 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               </button>
             </div>
           </div>
+
+          {/* TARJETA 4 BENTO XL+: ESPECIFICACIONES TÉCNICAS DE TALLER & CALIDAD */}
+          <div className="ideogram-card p-6 flex flex-col justify-between space-y-4 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-primary/20">
+            <div className="space-y-3">
+              <div className="aspect-video rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center p-4 text-center">
+                <ShieldCheck className="w-8 h-8 text-primary mb-1" strokeWidth={1.85} />
+                <span className="text-xs font-bold text-[var(--text-primary)]">Garantía de Taller</span>
+                <span className="text-[10px] text-primary font-mono font-semibold">1440 DPI Tintas UV</span>
+              </div>
+              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                Ficha Técnica & Confección
+              </h3>
+              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Bobinas continuas hasta 3.20m</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Soldadura Leister termofusión</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Ojales cincados antioxidantes</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigate("materiales")}
+              className="w-full py-2.5 rounded-xl border border-[var(--border-strong)] hover:border-primary text-xs font-bold text-[var(--text-primary)] hover:text-primary transition-colors cursor-pointer"
+            >
+              Ver Muestrario de Lonas
+            </button>
+          </div>
         </div>
       </motion.section>
 
@@ -994,7 +1042,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -1017,7 +1065,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
@@ -1104,6 +1152,40 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               Cotizar Ploteo Vehicular
             </button>
           </div>
+
+          {/* TARJETA 4 BENTO XL+: GUÍA DE SUPERFICIES Y APLICACIÓN */}
+          <div className="ideogram-card p-6 flex flex-col justify-between space-y-4 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-primary/20">
+            <div className="space-y-3">
+              <div className="aspect-video rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center p-4 text-center">
+                <Sparkles className="w-8 h-8 text-primary mb-1" strokeWidth={1.85} />
+                <span className="text-xs font-bold text-[var(--text-primary)]">Guía de Colocación</span>
+                <span className="text-[10px] text-primary font-mono font-semibold">Instalación Limpia</span>
+              </div>
+              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                Superficies Aptas
+              </h3>
+              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Vidrieras y Blindex comerciales</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Chapa vehicular y flotas</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Placas de PVC y paneles lisos</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigate("diccionario", "vinilo-microperforado")}
+              className="w-full py-2.5 rounded-xl border border-[var(--border-strong)] hover:border-primary text-xs font-bold text-[var(--text-primary)] hover:text-primary transition-colors cursor-pointer"
+            >
+              Consultar Guía Técnica
+            </button>
+          </div>
         </div>
       </motion.section>
 
@@ -1115,7 +1197,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -1138,7 +1220,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
@@ -1225,6 +1307,40 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               Consultar Acrílico
             </button>
           </div>
+
+          {/* TARJETA 4 BENTO XL+: MECANIZADO CNC & FIJACIONES */}
+          <div className="ideogram-card p-6 flex flex-col justify-between space-y-4 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-primary/20">
+            <div className="space-y-3">
+              <div className="aspect-video rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center p-4 text-center">
+                <Layers className="w-8 h-8 text-primary mb-1" strokeWidth={1.85} />
+                <span className="text-xs font-bold text-[var(--text-primary)]">Taller de Corte CNC</span>
+                <span className="text-[10px] text-primary font-mono font-semibold">Fresado Milimétrico</span>
+              </div>
+              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                Terminaciones Especiales
+              </h3>
+              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Corte recto y figuras especiales</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Distanciadores de acero inoxidable</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Cinta bifaz 3M VHB de alta fijación</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigate("materiales", "pvc-espumado-3mm")}
+              className="w-full py-2.5 rounded-xl border border-[var(--border-strong)] hover:border-primary text-xs font-bold text-[var(--text-primary)] hover:text-primary transition-colors cursor-pointer"
+            >
+              Ver Ficha Técnica Rígidos
+            </button>
+          </div>
         </div>
       </motion.section>
 
@@ -1236,7 +1352,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -1259,7 +1375,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {/* ROLL UP 83X200 */}
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4 border border-primary/30 relative">
             <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold uppercase tracking-wider">
@@ -1353,6 +1469,40 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               Pedir Banner 90x190
             </button>
           </div>
+
+          {/* TARJETA 4 BENTO XL+: ACCESORIOS & REPUESTOS */}
+          <div className="ideogram-card p-6 flex flex-col justify-between space-y-4 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-primary/20">
+            <div className="space-y-3">
+              <div className="aspect-video rounded-xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center p-4 text-center">
+                <Package className="w-8 h-8 text-primary mb-1" strokeWidth={1.85} />
+                <span className="text-xs font-bold text-[var(--text-primary)]">Sistemas Expositores</span>
+                <span className="text-[10px] text-primary font-mono font-semibold">Listos para Usar</span>
+              </div>
+              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                Equipamiento de Stands
+              </h3>
+              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Bolsos acolchados con correa</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Impresión en lona mate anti-reflejo</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Armado sin herramientas en 60s</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigate("cotizador", "portabanner_rollup_80x200")}
+              className="w-full py-2.5 rounded-xl border border-[var(--border-strong)] hover:border-primary text-xs font-bold text-[var(--text-primary)] hover:text-primary transition-colors cursor-pointer"
+            >
+              Pedir Expositores para Ferias
+            </button>
+          </div>
         </div>
       </motion.section>
 
@@ -1364,7 +1514,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] flex flex-col md:flex-row items-center gap-8">
           <div className="w-full md:w-1/2 space-y-4">
@@ -1422,7 +1572,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] space-y-6 border border-[var(--border-subtle)] shadow-xl">
           <div className="max-w-2xl space-y-3">
@@ -1481,7 +1631,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-6 sm:py-10 space-y-6 sm:space-y-8"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -1558,7 +1708,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-[5vw] py-[var(--space-lg)] sm:py-[var(--space-xl)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)]"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {[
@@ -1590,7 +1740,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="section-container py-[var(--space-md)] sm:py-[var(--space-lg)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)]"
       >
         <div className="ideogram-card p-8 sm:p-12 flex flex-col md:flex-row items-center gap-8 bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-elevated)] border border-primary/20">
           <div className="flex-1 space-y-3">
@@ -1819,43 +1969,65 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="section-container max-w-full overflow-x-hidden py-[var(--space-lg)] sm:py-[var(--space-xl)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)] max-w-4xl"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
-        <div className="text-center space-y-2">
-          <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
-            Soporte & Pre-prensa
-          </span>
-          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
-            Preguntas Frecuentes de Taller
-          </h2>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">Resolución de dudas sobre archivos, demasías y entregas.</p>
-        </div>
-
-        <div className="space-y-2.5">
-          {FAQ_LIST.map((faq) => (
-            <div
-              key={faq.id}
-              className="ideogram-card overflow-hidden transition-colors"
-            >
-              <button
-                onClick={() => setOpenFaqId(openFaqId === faq.id ? null : faq.id)}
-                className="w-full p-4 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[var(--text-primary)] cursor-pointer"
-              >
-                <span>{faq.question}</span>
-                <ChevronRight
-                  strokeWidth={1.85}
-                  className={`w-4 h-4 text-[var(--text-secondary)] transition-transform ${
-                    openFaqId === faq.id ? "rotate-90 text-primary" : ""
-                  }`}
-                />
-              </button>
-              {openFaqId === faq.id && (
-                <div className="px-4 pb-4 text-xs text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border-subtle)] pt-3">
-                  {faq.answer}
-                </div>
-              )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-4 space-y-4">
+            <div className="space-y-2">
+              <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
+                Soporte & Pre-prensa
+              </span>
+              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+                Preguntas Frecuentes de Taller
+              </h2>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                Resolución técnica sobre preparación de archivos (PDF/TIFF a escala 1:1, CMYK), demasías de soldadura, plazos de producción y despachos a todo el país.
+              </p>
             </div>
-          ))}
+
+            <div className="p-5 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                <Clock className="w-4 h-4 text-primary shrink-0" strokeWidth={1.85} />
+                <span>Horarios de Producción</span>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                Lunes a Viernes de 8:00 a 18:00 hs. Entregas express en 24/48 hs para archivos listos para imprimir.
+              </p>
+              <button
+                onClick={() => onNavigate("cotizador")}
+                className="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+              >
+                Ir al Cotizador en Línea
+              </button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-8 space-y-2.5">
+            {FAQ_LIST.map((faq) => (
+              <div
+                key={faq.id}
+                className="ideogram-card overflow-hidden transition-colors"
+              >
+                <button
+                  onClick={() => setOpenFaqId(openFaqId === faq.id ? null : faq.id)}
+                  className="w-full p-4 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[var(--text-primary)] cursor-pointer"
+                >
+                  <span>{faq.question}</span>
+                  <ChevronRight
+                    strokeWidth={1.85}
+                    className={`w-4 h-4 text-[var(--text-secondary)] transition-transform ${
+                      openFaqId === faq.id ? "rotate-90 text-primary" : ""
+                    }`}
+                  />
+                </button>
+                {openFaqId === faq.id && (
+                  <div className="px-4 pb-4 text-xs text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border-subtle)] pt-3">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </motion.section>
 
@@ -1867,7 +2039,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl max-w-full overflow-x-hidden mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)] lg:py-[var(--space-2xl)]"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)] lg:py-[var(--space-2xl)]"
       >
         <div className="relative rounded-2xl sm:rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-surface)] via-[var(--bg-surface-elevated)] to-[var(--bg-surface)] p-6 sm:p-10 lg:p-14 shadow-lg overflow-hidden">
           {/* Subtle Ambient Radial Glows */}

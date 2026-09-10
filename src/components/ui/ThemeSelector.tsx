@@ -3,45 +3,64 @@ import { Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useThemeStore } from "../../store/useThemeStore";
 
-export const ThemeSelector: React.FC<{ className?: string }> = ({ className = "" }) => {
-  const { resolvedTheme, setTheme } = useThemeStore();
+interface ThemeSelectorProps {
+  className?: string;
+  id?: string;
+  showLabel?: boolean;
+}
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
+export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
+  className = "",
+  id = "btn-theme-toggle",
+  showLabel = false,
+}) => {
+  const { resolvedTheme, toggleTheme } = useThemeStore();
+
+  const isDark = resolvedTheme === "dark";
 
   return (
     <button
+      id={id}
+      type="button"
       onClick={toggleTheme}
-      className={`relative w-11 h-11 flex items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/[0.08] hover:bg-black/[0.09] dark:hover:bg-white/[0.14] border border-black/10 dark:border-white/15 text-zinc-800 dark:text-zinc-200 transition-all active:scale-95 cursor-pointer overflow-hidden ${className}`}
-      aria-label={resolvedTheme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-      title={resolvedTheme === "dark" ? "Modo Claro" : "Modo Oscuro"}
+      className={`relative h-10 px-3 sm:h-11 sm:px-3.5 flex items-center justify-center gap-2 rounded-full bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer overflow-hidden shadow-xs select-none ${className}`}
+      aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+      title={isDark ? "Activar Modo Claro" : "Activar Modo Oscuro"}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {resolvedTheme === "dark" ? (
-          <motion.div
-            key="theme-sun"
-            initial={{ rotate: -90, scale: 0.6, opacity: 0 }}
-            animate={{ rotate: 0, scale: 1, opacity: 1 }}
-            exit={{ rotate: 90, scale: 0.6, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-            className="flex items-center justify-center"
-          >
-            <Sun className="w-5 h-5 text-amber-400" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="theme-moon"
-            initial={{ rotate: 90, scale: 0.6, opacity: 0 }}
-            animate={{ rotate: 0, scale: 1, opacity: 1 }}
-            exit={{ rotate: -90, scale: 0.6, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-            className="flex items-center justify-center"
-          >
-            <Moon className="w-5 h-5 text-zinc-800" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
+        <AnimatePresence mode="wait" initial={false}>
+          {isDark ? (
+            <motion.div
+              key="theme-sun"
+              initial={{ rotate: -90, scale: 0.6, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              exit={{ rotate: 90, scale: 0.6, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+              className="flex items-center justify-center"
+            >
+              <Sun className="w-4.5 h-4.5 text-amber-400" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="theme-moon"
+              initial={{ rotate: 90, scale: 0.6, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              exit={{ rotate: -90, scale: 0.6, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+              className="flex items-center justify-center"
+            >
+              <Moon className="w-4.5 h-4.5 text-[var(--text-primary)]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {showLabel && (
+        <span className="text-xs font-medium tracking-tight">
+          {isDark ? "Modo Claro" : "Modo Oscuro"}
+        </span>
+      )}
     </button>
   );
 };
+

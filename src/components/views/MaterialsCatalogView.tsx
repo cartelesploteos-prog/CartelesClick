@@ -64,7 +64,7 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
   });
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto space-y-2">
         <span className="text-xs uppercase tracking-widest text-primary font-heading font-medium">
@@ -114,7 +114,7 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
 
       {/* SKELETON LOADING OR MATERIALS BENTO GRID */}
       {isLoading ? (
-        <CatalogSkeletonGrid count={6} />
+        <CatalogSkeletonGrid count={8} />
       ) : filteredMaterials.length === 0 ? (
         <div className="p-8 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-none text-center space-y-3 max-w-md mx-auto font-sans">
           <Package className="w-10 h-10 text-[var(--text-muted)] mx-auto" />
@@ -135,7 +135,7 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {filteredMaterials.map((mat) => (
             <div
               key={mat.id}

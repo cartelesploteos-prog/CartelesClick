@@ -1261,7 +1261,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
   const formatDetails = getFormatDetails();
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12 font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12 font-sans">
       {/* HEADER BAR */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div className="space-y-1">
@@ -1810,10 +1810,25 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
                       max="1000"
                       value={customWidth}
                       onChange={(e) => {
-                        const val = parseInt(e.target.value, 10) || 100;
-                        setCustomWidth(val);
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setCustomWidth("" as any);
+                          return;
+                        }
+                        const val = parseInt(raw, 10);
+                        if (!isNaN(val)) {
+                          setCustomWidth(val);
+                          if (design.outputFormat === "especial_personalizada") {
+                            setDesign((prev) => ({ ...prev, customWidthCm: val }));
+                          }
+                        }
+                      }}
+                      onBlur={() => {
+                        const num = parseInt(String(customWidth), 10);
+                        const finalVal = isNaN(num) || num < 20 ? 100 : Math.min(1000, num);
+                        setCustomWidth(finalVal);
                         if (design.outputFormat === "especial_personalizada") {
-                          setDesign((prev) => ({ ...prev, customWidthCm: val }));
+                          setDesign((prev) => ({ ...prev, customWidthCm: finalVal }));
                         }
                       }}
                       className="w-full px-3 py-1.5 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] font-mono"
@@ -1828,10 +1843,25 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
                       max="1000"
                       value={customHeight}
                       onChange={(e) => {
-                        const val = parseInt(e.target.value, 10) || 100;
-                        setCustomHeight(val);
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setCustomHeight("" as any);
+                          return;
+                        }
+                        const val = parseInt(raw, 10);
+                        if (!isNaN(val)) {
+                          setCustomHeight(val);
+                          if (design.outputFormat === "especial_personalizada") {
+                            setDesign((prev) => ({ ...prev, customHeightCm: val }));
+                          }
+                        }
+                      }}
+                      onBlur={() => {
+                        const num = parseInt(String(customHeight), 10);
+                        const finalVal = isNaN(num) || num < 20 ? 100 : Math.min(1000, num);
+                        setCustomHeight(finalVal);
                         if (design.outputFormat === "especial_personalizada") {
-                          setDesign((prev) => ({ ...prev, customHeightCm: val }));
+                          setDesign((prev) => ({ ...prev, customHeightCm: finalVal }));
                         }
                       }}
                       className="w-full px-3 py-1.5 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-primary)] font-mono"

@@ -88,7 +88,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
   );
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 max-w-7xl font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--brand-brick)]/10 border border-[var(--brand-brick)]/20 text-[var(--brand-brick)] text-xs font-semibold">
@@ -148,9 +148,9 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({ onNavigate }) => {
 
       {/* GALLERY GRID OR SKELETON */}
       {isLoading ? (
-        <PortfolioSkeletonGrid count={6} />
+        <PortfolioSkeletonGrid count={8} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {filteredItems.map((item) => (
             <div
               key={item.id}

@@ -95,7 +95,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const { login, register, signInWithGoogle, signInWithGithub, forgotPassword } = useAuthStore();
+  const { login, register, signInWithGoogle, forgotPassword } = useAuthStore();
   const { addNotification } = useNotificationStore();
 
   const methods = useForm<AuthFormData>({
@@ -115,6 +115,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     reset,
     formState: { isSubmitting },
   } = methods;
+
+  // React to defaultMode prop updates
+  useEffect(() => {
+    if (defaultMode && defaultMode !== mode) {
+      setMode(defaultMode);
+      setValue("mode", defaultMode);
+    }
+  }, [defaultMode, setValue]);
 
   // Sync mode with react-hook-form state
   useEffect(() => {
@@ -139,18 +147,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSubmitError(null);
     setSuccessMessage(null);
 
+    const cleanEmail = data.email.trim().toLowerCase();
+
     try {
       if (data.mode === "forgot") {
-        await forgotPassword(data.email);
+        await forgotPassword(cleanEmail);
         setSuccessMessage("¡Enlace enviado! Revisa tu bandeja de entrada o spam para restablecer tu clave.");
         addNotification({
           type: "system",
           title: "Recuperación de Contraseña",
-          message: `Se ha enviado un correo de restablecimiento a ${data.email}.`,
+          message: `Se ha enviado un correo de restablecimiento a ${cleanEmail}.`,
           priority: "normal",
         });
       } else if (data.mode === "register") {
-        await register(data.email, data.password);
+        await register(cleanEmail, data.password);
         addNotification({
           type: "system",
           title: "¡Cuenta creada exitosamente!",
@@ -159,7 +169,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         });
         if (onClose) onClose();
       } else {
-        await login(data.email, data.password);
+        await login(cleanEmail, data.password);
         addNotification({
           type: "system",
           title: "Sesión iniciada",
@@ -186,23 +196,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       });
       if (onClose) onClose();
     } catch (err: any) {
+      const code = err?.code || "";
+      if (code.includes("auth/popup-closed-by-user")) {
+        return;
+      }
       setSubmitError(err.message || "Error al autenticar con Google.");
-    }
-  };
-
-  const handleGithubSignIn = async () => {
-    setSubmitError(null);
-    try {
-      await signInWithGithub();
-      addNotification({
-        type: "system",
-        title: "Sesión iniciada con GitHub",
-        message: "Has ingresado correctamente.",
-        priority: "normal",
-      });
-      if (onClose) onClose();
-    } catch (err: any) {
-      setSubmitError(err.message || "Error al autenticar con GitHub.");
     }
   };
 
@@ -275,10 +273,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <motion.div
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3.5 rounded-[7px] bg-red-950/40 border border-red-800 text-red-300 text-xs flex items-start gap-2.5"
+              className="mb-4 p-3.5 rounded-[7px] bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-start gap-2.5"
               role="alert"
             >
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
               <div className="leading-relaxed">{submitError}</div>
             </motion.div>
           )}
@@ -288,10 +286,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <motion.div
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3.5 rounded-[7px] bg-emerald-950/40 border border-emerald-800 text-emerald-300 text-xs flex items-start gap-2.5"
+              className="mb-4 p-3.5 rounded-[7px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-start gap-2.5"
               role="status"
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div className="leading-relaxed">{successMessage}</div>
             </motion.div>
           )}
@@ -303,6 +301,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 name="email"
                 label="Correo Electrónico"
                 type="email"
+                autoComplete="email"
                 placeholder="ej: taller@carteles.click"
               />
 
@@ -311,6 +310,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   name="password"
                   label="Contraseña"
                   type="password"
+                  autoComplete={mode === "register" ? "new-password" : "current-password"}
                   placeholder="••••••••"
                 />
               )}
@@ -320,6 +320,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   name="confirmPassword"
                   label="Confirmar Contraseña"
                   type="password"
+                  autoComplete="new-password"
                   placeholder="••••••••"
                 />
               )}
@@ -329,7 +330,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 id="auth-modal-submit-btn"
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 px-4 rounded-[7px] text-sm font-medium bg-primary text-white hover:brightness-105 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 rounded-[7px] text-sm font-medium bg-primary text-white hover:brightness-105 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -351,55 +352,50 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </FormProvider>
 
           {/* SOCIAL LOGIN & SECONDARY CONTROLS */}
-          <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] space-y-3">
+          <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] space-y-4">
             {mode !== "forgot" ? (
               <>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    id="auth-google-btn"
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    className="w-full py-2 px-3 rounded-[7px] text-xs font-medium border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24">
-                      <path
-                        fill="#4285F4"
-                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.34 24 12 24z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.98 0 12s.46 3.84 1.26 5.42l4.02-3.15z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                      />
-                    </svg>
-                    <span>Google</span>
-                  </button>
-
-                  <button
-                    id="auth-github-btn"
-                    type="button"
-                    onClick={handleGithubSignIn}
-                    className="w-full py-2 px-3 rounded-[7px] text-xs font-medium border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                    </svg>
-                    <span>GitHub</span>
-                  </button>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[var(--border-subtle)]" />
+                  </div>
+                  <div className="relative flex justify-center text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">
+                    <span className="bg-[var(--bg-surface)] px-2">o continuar con</span>
+                  </div>
                 </div>
+
+                <button
+                  id="auth-google-btn"
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="w-full py-2.5 px-4 rounded-[7px] text-xs font-semibold border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-sm active:scale-[0.99]"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.34 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.98 0 12s.46 3.84 1.26 5.42l4.02-3.15z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                    />
+                  </svg>
+                  <span>Continuar con Google</span>
+                </button>
 
                 <div className="flex items-center justify-between text-xs pt-1">
                   <button
                     type="button"
                     onClick={() => switchMode(mode === "login" ? "register" : "login")}
-                    className="text-primary hover:underline font-medium"
+                    className="text-primary hover:underline font-medium cursor-pointer"
                   >
                     {mode === "login"
                       ? "¿No tienes cuenta? Regístrate aquí"
@@ -410,7 +406,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <button
                       type="button"
                       onClick={() => switchMode("forgot")}
-                      className="text-[var(--text-secondary)] hover:text-primary hover:underline"
+                      className="text-[var(--text-secondary)] hover:text-primary hover:underline cursor-pointer"
                     >
                       ¿Olvidaste tu contraseña?
                     </button>
@@ -421,11 +417,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => switchMode("login")}
-                className="w-full flex items-center justify-center gap-1.5 text-xs text-primary hover:underline font-medium py-1"
+                className="w-full flex items-center justify-center gap-1.5 text-xs text-primary hover:underline font-medium py-1 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Volver al formulario de acceso</span>
               </button>
+            )}
+
+            {onClose && (
+              <div className="pt-2 text-center border-t border-[var(--border-subtle)]">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Cerrar y volver a la tienda</span>
+                </button>
+              </div>
             )}
           </div>
         </motion.div>

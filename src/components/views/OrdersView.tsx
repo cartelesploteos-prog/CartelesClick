@@ -480,7 +480,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-14 max-w-5xl font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-14 font-sans">
       {/* LIVE EVENT TOAST NOTIFICATION */}
       {activeToast && (
         <div className="fixed bottom-24 right-4 sm:right-8 z-50 max-w-sm p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-primary shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-300">

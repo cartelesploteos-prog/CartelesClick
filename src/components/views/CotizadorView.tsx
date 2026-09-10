@@ -43,6 +43,7 @@ import {
   Ruler,
   AlertTriangle,
   Paperclip,
+  RotateCcw,
 } from "lucide-react";
 import { IconBadge } from "../ui/IconBadge";
 import {
@@ -86,9 +87,9 @@ import { PrintReadinessChecklist } from "../ui/PrintReadinessChecklist";
 export interface BulkOrderItem {
   id: string;
   label: string;
-  widthCm: number;
-  heightCm: number;
-  quantity: number;
+  widthCm: number | string;
+  heightCm: number | string;
+  quantity: number | string;
   materialId?: string;
   printQuality?: PrintQualityType;
   inkType?: InkType;
@@ -146,6 +147,144 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
   const [widthCm, setWidthCm] = useState<number>(200);
   const [heightCm, setHeightCm] = useState<number>(100);
   const [quantity, setQuantity] = useState<number>(1);
+  const [widthInput, setWidthInput] = useState<string>("200");
+  const [heightInput, setHeightInput] = useState<string>("100");
+  const [quantityInput, setQuantityInput] = useState<string>("1");
+
+  const syncWidth = (val: number) => {
+    setWidthCm(val);
+    setWidthInput(String(val));
+  };
+  const syncHeight = (val: number) => {
+    setHeightCm(val);
+    setHeightInput(String(val));
+  };
+  const syncQuantity = (val: number) => {
+    setQuantity(val);
+    setQuantityInput(String(val));
+  };
+
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setWidthInput(val);
+    if (val.trim() === "") {
+      setWidthCm(0);
+      return;
+    }
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      setWidthCm(num);
+    } else {
+      setWidthCm(0);
+    }
+  };
+
+  const handleWidthBlur = () => {
+    if (widthInput.trim() === "") {
+      setWidthCm(0);
+      return;
+    }
+    const parsed = parseFloat(widthInput);
+    if (isNaN(parsed) || parsed <= 0) {
+      setWidthInput("");
+      setWidthCm(0);
+    } else if (parsed < 5) {
+      setWidthInput("5");
+      setWidthCm(5);
+    } else {
+      const clamped = Math.min(5000, parsed);
+      setWidthInput(String(clamped));
+      setWidthCm(clamped);
+    }
+  };
+
+  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setHeightInput(val);
+    if (val.trim() === "") {
+      setHeightCm(0);
+      return;
+    }
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      setHeightCm(num);
+    } else {
+      setHeightCm(0);
+    }
+  };
+
+  const handleHeightBlur = () => {
+    if (heightInput.trim() === "") {
+      setHeightCm(0);
+      return;
+    }
+    const parsed = parseFloat(heightInput);
+    if (isNaN(parsed) || parsed <= 0) {
+      setHeightInput("");
+      setHeightCm(0);
+    } else if (parsed < 5) {
+      setHeightInput("5");
+      setHeightCm(5);
+    } else {
+      const clamped = Math.min(5000, parsed);
+      setHeightInput(String(clamped));
+      setHeightCm(clamped);
+    }
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setQuantityInput(val);
+    if (val.trim() === "") return;
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 0) {
+      setQuantity(num);
+    }
+  };
+
+  const handleQuantityBlur = () => {
+    const parsed = parseInt(quantityInput, 10);
+    if (isNaN(parsed) || parsed < 1) {
+      const fallback = Math.max(1, quantity || 1);
+      setQuantityInput(String(fallback));
+      setQuantity(fallback);
+    } else {
+      const clamped = Math.min(10000, parsed);
+      setQuantityInput(String(clamped));
+      setQuantity(clamped);
+    }
+  };
+
+  const handleQuantityStep = (delta: number) => {
+    const curr = parseInt(quantityInput, 10) || quantity || 1;
+    const next = Math.max(1, curr + delta);
+    setQuantity(next);
+    setQuantityInput(String(next));
+  };
+
+  // Clear all measures and reset input states
+  const handleClearAll = () => {
+    if (orderMode === "individual") {
+      setWidthInput("");
+      setHeightInput("");
+      setWidthCm(0);
+      setHeightCm(0);
+      setQuantityInput("1");
+      setQuantity(1);
+      setQuoteData(null);
+      setQuoteError(null);
+    } else {
+      setBulkItems([
+        {
+          id: `item-${Date.now()}`,
+          label: "Medida 1",
+          widthCm: "",
+          heightCm: "",
+          quantity: 1,
+        },
+      ]);
+    }
+  };
 
   // Bulk mode: List of multiple measures, quantities and attachments with persistent draft
   const [bulkItems, setBulkItems] = useState<BulkOrderItem[]>(() => {
@@ -235,9 +374,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           },
           bulkItems: bulkItems.map((b) => ({
             label: b.label,
-            widthCm: b.widthCm,
-            heightCm: b.heightCm,
-            quantity: b.quantity,
+            widthCm: Number(b.widthCm) || 10,
+            heightCm: Number(b.heightCm) || 10,
+            quantity: Number(b.quantity) || 1,
             materialName: b.materialId
               ? MATERIALS_CATALOG.find((m) => m.id === b.materialId)?.name || currentMaterial?.name
               : currentMaterial?.name,
@@ -337,9 +476,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
   const handleSwitchToIndividual = () => {
     setOrderMode("individual");
     if (bulkItems.length > 0) {
-      setWidthCm(bulkItems[0].widthCm);
-      setHeightCm(bulkItems[0].heightCm);
-      setQuantity(bulkItems[0].quantity);
+      const w = Number(bulkItems[0].widthCm) || 200;
+      const h = Number(bulkItems[0].heightCm) || 100;
+      const q = Number(bulkItems[0].quantity) || 1;
+      syncWidth(w);
+      syncHeight(h);
+      syncQuantity(q);
     }
   };
 
@@ -488,6 +630,16 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
     let isMounted = true;
 
     const fetchServerQuote = async () => {
+      // If width or height are zero or not set yet (e.g. after clearing inputs), reset quote silently
+      if (currentMaterial?.mode !== "unidad" && (widthCm <= 0 || heightCm <= 0)) {
+        if (isMounted) {
+          setQuoteData(null);
+          setQuoteError(null);
+          setIsLoadingQuote(false);
+        }
+        return;
+      }
+
       const valResult = validateQuoteParams({
         materialId: selectedMaterialId,
         widthCm: currentMaterial?.mode !== "unidad" ? widthCm : 100,
@@ -583,9 +735,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
         const batchItems = bulkItems.map(item => ({
           id: item.id,
           materialId: item.materialId || selectedMaterialId,
-          widthCm: currentMaterial?.mode !== "unidad" ? item.widthCm : 100,
-          heightCm: currentMaterial?.mode !== "unidad" ? item.heightCm : 100,
-          quantity: item.quantity,
+          widthCm: currentMaterial?.mode !== "unidad" ? (Number(item.widthCm) || 100) : 100,
+          heightCm: currentMaterial?.mode !== "unidad" ? (Number(item.heightCm) || 100) : 100,
+          quantity: Number(item.quantity) || 1,
           printQuality: item.printQuality || printQuality,
           inkType: item.inkType || inkType,
           selectedColor: currentMaterial?.hasColorPalette ? selectedColor : undefined,
@@ -664,9 +816,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
     let validCount = 0;
 
     bulkItems.forEach((item) => {
-      totalUnits += item.quantity || 1;
-      const m2PerUnit = (item.widthCm * item.heightCm) / 10000;
-      totalM2 += m2PerUnit * item.quantity;
+      const q = Number(item.quantity) || 1;
+      const w = Number(item.widthCm) || 10;
+      const h = Number(item.heightCm) || 10;
+      totalUnits += q;
+      const m2PerUnit = (w * h) / 10000;
+      totalM2 += m2PerUnit * q;
 
       if (item.quoteData) {
         totalPriceARS += item.quoteData.totalPriceARS || 0;
@@ -855,8 +1010,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
       const newCartItems: CartItem[] = bulkItems.map((item, idx) => {
         const itemQuote = item.quoteData;
         const itemMat = item.materialId ? (MATERIALS_CATALOG.find((m) => m.id === item.materialId) || currentMaterial) : currentMaterial;
-        const unitPrice = itemQuote?.unitPriceARS || (itemQuote?.totalPriceARS ? Math.round(itemQuote.totalPriceARS / item.quantity) : 0);
-        const totalPrice = itemQuote?.totalPriceARS || unitPrice * item.quantity;
+        const qty = Number(item.quantity) || 1;
+        const unitPrice = itemQuote?.unitPriceARS || (itemQuote?.totalPriceARS ? Math.round(itemQuote.totalPriceARS / qty) : 0);
+        const totalPrice = itemQuote?.totalPriceARS || unitPrice * qty;
 
         return {
           id: `cart-bulk-${Date.now()}-${idx}`,
@@ -866,9 +1022,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           materialName: itemMat.name,
           category: itemMat.category,
           mode: itemMat.mode,
-          widthCm: itemMat.mode !== "unidad" ? item.widthCm : undefined,
-          heightCm: itemMat.mode !== "unidad" ? item.heightCm : undefined,
-          quantity: item.quantity,
+          widthCm: itemMat.mode !== "unidad" ? Number(item.widthCm) : undefined,
+          heightCm: itemMat.mode !== "unidad" ? Number(item.heightCm) : undefined,
+          quantity: Number(item.quantity) || 1,
           unitPriceARS: unitPrice,
           totalPriceARS: totalPrice,
           baseMaterialSubtotalARS: itemQuote?.baseMaterialSubtotalARS,
@@ -917,45 +1073,48 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
   ];
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12">
-      {/* WIZARD PROGRESS BAR & STEP INDICATOR */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12">
+      {/* WIZARD PROGRESS BAR & STEP INDICATOR - LIQUID GLASS */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2">
-            <span className="uppercase tracking-wider font-semibold text-[var(--text-primary)]">
-              Paso {currentStep} de {totalSteps}:
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono text-[11px] font-bold border border-primary/20 backdrop-blur-sm">
+              Paso {currentStep} de {totalSteps}
             </span>
-            <span className="text-primary font-bold">
+            <span className="font-heading text-xs sm:text-sm font-semibold text-[var(--text-primary)]">
               {stepTitles[currentStep - 1]}
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-primary font-bold">
-              {Math.round((currentStep / totalSteps) * 100)}%
-            </span>
-          </div>
+          <span className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur-md border border-white/60 dark:border-white/15 shadow-xs">
+            {Math.round((currentStep / totalSteps) * 100)}%
+          </span>
         </div>
-        <div className="w-full h-2.5 bg-[var(--border-subtle)] rounded-full overflow-hidden flex gap-1 p-0.5 bg-black/5 dark:bg-white/5">
-          {Array.from({ length: totalSteps }).map((_, i) => {
-            const stepNum = i + 1;
-            const isCompleted = stepNum < currentStep;
-            const isCurrent = stepNum === currentStep;
-            return (
+
+        {/* Liquid Glass Capsule Track */}
+        <div className="relative w-full h-3 rounded-full bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white/60 dark:border-white/15 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.03)] p-0.5 overflow-hidden">
+          {/* Liquid Gradient Fill */}
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-blue-600 via-sky-400 to-primary relative shadow-[0_0_14px_rgba(56,189,248,0.55)] transition-all duration-500 ease-out overflow-hidden"
+            style={{ width: `${Math.max(6, Math.round((currentStep / totalSteps) * 100))}%` }}
+          >
+            {/* Liquid Specular Reflection */}
+            <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/70 to-transparent rounded-full pointer-events-none" />
+            {/* Glow bead */}
+            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/60 rounded-full blur-[0.5px]" />
+          </div>
+
+          {/* Interactive Step Click Targets */}
+          <div className="absolute inset-0 flex">
+            {Array.from({ length: totalSteps }).map((_, i) => (
               <button
                 key={i}
                 type="button"
-                onClick={() => setCurrentStep(stepNum)}
-                title={`Paso ${stepNum}: ${stepTitles[i]}`}
-                className={`h-full flex-1 rounded-full transition-all duration-300 cursor-pointer ${
-                  isCurrent
-                    ? "bg-primary ring-2 ring-primary/40 shadow-xs"
-                    : isCompleted
-                    ? "bg-primary/80 hover:bg-primary"
-                    : "bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20"
-                }`}
+                onClick={() => setCurrentStep(i + 1)}
+                title={`Paso ${i + 1}: ${stepTitles[i]}`}
+                className="h-full flex-1 cursor-pointer focus:outline-none"
               />
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -1041,19 +1200,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>Línea: {mainFamilies.find((f) => f.id === selectedMainFamily)?.label}</span>
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Categorías</span>
-                </div>
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                   Categoría en {mainFamilies.find((f) => f.id === selectedMainFamily)?.label}
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -1115,27 +1262,8 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {mainFamilies.find((f) => f.id === selectedMainFamily)?.label}
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(2)}
-                    className="hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {currentSubcategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Sustratos</span>
-                </div>
                 <div className="flex items-center justify-between">
-                  <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                  <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                     Sustrato para {currentSubcategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}
                   </h2>
                   <span className="text-xs font-mono text-primary font-bold">
@@ -1333,114 +1461,99 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {/* ================= STEP 4: MEDIDAS Y CANTIDAD (CON MODO BULK ORDER) ================= */}
           {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {mainFamilies.find((f) => f.id === selectedMainFamily)?.label}
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(2)}
-                    className="hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {currentSubcategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(3)}
-                    className="hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {currentMaterial?.name?.split("(")[0]}
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Medidas y Cantidad</span>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="space-y-0.5">
+                  <h2 className="font-heading text-lg sm:text-xl text-[var(--text-primary)] font-medium">
                     Medidas y Cantidad
                   </h2>
-                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
+                  <p className="text-xs text-[var(--text-secondary)] font-sans">
                     Ingresá las dimensiones en centímetros o configurá un pedido por lote de múltiples cortes.
                   </p>
                 </div>
 
-                {/* MODE TOGGLE: INDIVIDUAL VS BULK ORDER */}
-                {currentMaterial?.mode !== "unidad" && (
-                  <div className="flex items-center p-1 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] self-start shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleSwitchToIndividual}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        orderMode === "individual"
-                          ? "bg-primary text-white shadow-sm"
-                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                      }`}
-                    >
-                      Medida Única
-                    </button>
-                    <button
-                      type="button"
-                      id="btn-switch-bulk-order"
-                      onClick={handleSwitchToBulk}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-                        orderMode === "bulk"
-                          ? "bg-primary text-white shadow-sm"
-                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                      }`}
-                    >
-                      <ListPlus className="w-3.5 h-3.5" />
-                      <span>Pedido por Lotes (Bulk)</span>
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                  {/* MODE TOGGLE: INDIVIDUAL VS BULK ORDER */}
+                  {currentMaterial?.mode !== "unidad" && (
+                    <div className="flex items-center p-0.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+                      <button
+                        type="button"
+                        onClick={handleSwitchToIndividual}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                          orderMode === "individual"
+                            ? "bg-primary text-white shadow-xs"
+                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        Medida Única
+                      </button>
+                      <button
+                        type="button"
+                        id="btn-switch-bulk-order"
+                        onClick={handleSwitchToBulk}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all cursor-pointer ${
+                          orderMode === "bulk"
+                            ? "bg-primary text-white shadow-xs"
+                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        <ListPlus className="w-3.5 h-3.5" />
+                        <span>Por Lote</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* CLEAR ALL BUTTON */}
+                  <button
+                    type="button"
+                    id="btn-clear-all-measures"
+                    onClick={handleClearAll}
+                    title="Limpiar medidas y reiniciar valores"
+                    className="px-2.5 py-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-red-500 hover:border-red-500/30 text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Limpiar</span>
+                  </button>
+                </div>
               </div>
 
               {/* INDIVIDUAL ORDER MODE */}
               {orderMode === "individual" ? (
-                <div className="p-6 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-6">
+                <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-3.5">
                   {currentMaterial?.mode !== "unidad" ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {/* PRESETS DE MEDIDAS ESTÁNDAR PARA RÍGIDOS / PLACAS */}
                       {(selectedCategory === "rigidos" || currentMaterial?.mode === "placa") && (
-                        <div className="p-3.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-[var(--text-primary)]">Medidas Estándar de Placas & Carteles:</span>
-                            <span className="text-[11px] text-[var(--text-secondary)]">Optimización de cortes y consumo</span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
+                        <div className="space-y-1">
+                          <span className="font-semibold text-[var(--text-secondary)] text-[11px] uppercase tracking-wider block">
+                            Medidas estándar:
+                          </span>
+                          <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-0.5 px-0.5">
                             {[
-                              { label: "Placa Entera (120×240 cm)", w: 120, h: 240 },
-                              { label: "Media Placa (120×120 cm)", w: 120, h: 120 },
-                              { label: "Placa PAI (100×200 cm)", w: 100, h: 200 },
-                              { label: "Cuadro Grande (70×100 cm)", w: 70, h: 100 },
-                              { label: "Cartel 60×40 cm", w: 60, h: 40 },
-                              { label: "Placa A3 (30×42 cm)", w: 30, h: 42 },
-                              { label: "Consultorio A4 (21×30 cm)", w: 21, h: 30 },
+                              { label: "120×240", full: "Placa Entera (120×240 cm)", w: 120, h: 240 },
+                              { label: "120×120", full: "Media Placa (120×120 cm)", w: 120, h: 120 },
+                              { label: "100×200", full: "Placa PAI (100×200 cm)", w: 100, h: 200 },
+                              { label: "70×100", full: "Cuadro Grande (70×100 cm)", w: 70, h: 100 },
+                              { label: "60×40", full: "Cartel 60×40 cm", w: 60, h: 40 },
+                              { label: "30×42", full: "A3 (30×42 cm)", w: 30, h: 42 },
+                              { label: "21×30", full: "A4 (21×30 cm)", w: 21, h: 30 },
                             ].map((preset) => {
                               const isPresetActive = widthCm === preset.w && heightCm === preset.h;
                               return (
                                 <button
-                                  key={preset.label}
+                                  key={preset.full}
                                   type="button"
+                                  title={preset.full}
                                   onClick={() => {
-                                    setWidthCm(preset.w);
-                                    setHeightCm(preset.h);
+                                    syncWidth(preset.w);
+                                    syncHeight(preset.h);
                                   }}
-                                  className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-medium border transition-all cursor-pointer ${
+                                  className={`px-2 py-0.5 rounded-lg text-xs font-mono font-medium border shrink-0 transition-all cursor-pointer ${
                                     isPresetActive
-                                      ? "bg-primary text-white border-primary shadow-sm"
-                                      : "bg-white dark:bg-black/40 border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-primary/50"
+                                      ? "bg-primary text-white border-primary shadow-xs"
+                                      : "bg-[var(--bg-surface-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-primary/50"
                                   }`}
                                 >
-                                  {preset.label}
+                                  {preset.label} cm
                                 </button>
                               );
                             })}
@@ -1448,185 +1561,264 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="block text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
-                            Ancho (centímetros)
+                      {/* ANCHO Y ALTO EN UNA SOLA LÍNEA (MOBILE Y DESKTOP) */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <label className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                            Dimensiones del corte
                           </label>
-                          <div className="relative">
-                            <input
-                              type="number"
-                              min="10"
-                              max="5000"
-                              value={widthCm}
-                              onChange={(e) => setWidthCm(Math.max(10, parseFloat(e.target.value) || 10))}
-                              className="w-full px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono-num text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                            <span className="absolute right-4 top-3 text-xs text-[var(--text-muted)]">cm</span>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={handleClearAll}
+                            className="text-[10px] text-[var(--text-muted)] hover:text-red-500 flex items-center gap-1 transition-colors cursor-pointer sm:hidden"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Borrar todo</span>
+                          </button>
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="block text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
-                            Alto (centímetros)
-                          </label>
-                          <div className="relative">
-                            <input
-                              type="number"
-                              min="10"
-                              max="5000"
-                              value={heightCm}
-                              onChange={(e) => setHeightCm(Math.max(10, parseFloat(e.target.value) || 10))}
-                              className="w-full px-4 py-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono-num text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                            <span className="absolute right-4 top-3 text-xs text-[var(--text-muted)]">cm</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+                          {/* ANCHO */}
+                          <div className="flex-1 min-w-0 relative">
+                            <div className="relative flex items-center">
+                              <span className="absolute left-2.5 text-[10px] sm:text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider pointer-events-none select-none">
+                                Ancho
+                              </span>
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                min="5"
+                                max="5000"
+                                value={widthInput}
+                                onChange={handleWidthChange}
+                                onBlur={handleWidthBlur}
+                                placeholder="0"
+                                className="w-full pl-13 sm:pl-16 pr-7 sm:pr-8 py-2 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                              />
+                              <span className="absolute right-2 sm:right-2.5 text-xs text-[var(--text-muted)] pointer-events-none font-mono select-none">
+                                cm
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* SEPARATOR MULTIPLIER */}
+                          <span className="text-[var(--text-muted)] font-mono text-sm sm:text-base font-bold shrink-0 select-none px-0.5">
+                            ×
+                          </span>
+
+                          {/* ALTO */}
+                          <div className="flex-1 min-w-0 relative">
+                            <div className="relative flex items-center">
+                              <span className="absolute left-2.5 text-[10px] sm:text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider pointer-events-none select-none">
+                                Alto
+                              </span>
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                min="5"
+                                max="5000"
+                                value={heightInput}
+                                onChange={handleHeightChange}
+                                onBlur={handleHeightBlur}
+                                placeholder="0"
+                                className="w-full pl-11 sm:pl-14 pr-7 sm:pr-8 py-2 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                              />
+                              <span className="absolute right-2 sm:right-2.5 text-xs text-[var(--text-muted)] pointer-events-none font-mono select-none">
+                                cm
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* INTERACTIVE 2D BLUEPRINT ASPECT-RATIO VISUALIZER */}
-                      <div className="p-4 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-3">
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
-                            <Maximize2 className="w-3.5 h-3.5 text-primary" />
-                            <span>Visualizador de Proporción & Escala Geométrica</span>
+                      {/* CANTIDAD Y SUPERFICIE EN UNA LÍNEA COMPACTA */}
+                      <div className="flex items-center justify-between gap-3 pt-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] uppercase font-mono tracking-wider text-[var(--text-secondary)] font-medium">
+                            Cantidad
+                          </span>
+                          <div className="flex items-center">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityStep(-1)}
+                              className="h-8 w-8 rounded-l-lg border border-r-0 border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                              aria-label="Disminuir cantidad"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min="1"
+                              value={quantityInput}
+                              onChange={handleQuantityChange}
+                              onBlur={handleQuantityBlur}
+                              className="h-8 w-12 text-center border-y border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary z-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityStep(1)}
+                              className="h-8 w-8 rounded-r-lg border border-l-0 border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                              aria-label="Aumentar cantidad"
+                            >
+                              +
+                            </button>
+                            <span className="ml-1.5 text-[11px] text-[var(--text-muted)] font-mono">u.</span>
                           </div>
-                          <span className="text-[11px] font-mono text-[var(--text-secondary)]">
-                            {widthCm > heightCm * 1.2
-                              ? "Horizontal / Paisaje"
-                              : heightCm > widthCm * 1.2
-                              ? "Vertical / Tótem"
-                              : "Formato Cuadrado"}
+                        </div>
+
+                        <div className="text-right">
+                          <span className="block text-[10px] uppercase font-mono text-[var(--text-muted)]">
+                            Superficie
+                          </span>
+                          <span className="text-xs font-mono font-bold text-[var(--text-primary)]">
+                            {widthCm > 0 && heightCm > 0 ? (
+                              <>
+                                {((widthCm * heightCm) / 10000).toFixed(2)} m²
+                                {quantity > 1 && (
+                                  <span className="text-[var(--text-secondary)] font-normal text-[10px] block">
+                                    total: {(((widthCm * heightCm) / 10000) * quantity).toFixed(2)} m²
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-[var(--text-muted)] font-normal">0.00 m²</span>
+                            )}
                           </span>
                         </div>
-
-                        {/* Animated Stage */}
-                        <div className="h-32 bg-[var(--bg-page)] rounded-lg border border-dashed border-[var(--border-subtle)] flex items-center justify-center p-3 relative overflow-hidden">
-                          {/* Technical grid backdrop */}
-                          <div
-                            className="absolute inset-0 opacity-15 pointer-events-none"
-                            style={{
-                              backgroundImage: `linear-gradient(to right, #888 1px, transparent 1px), linear-gradient(to bottom, #888 1px, transparent 1px)`,
-                              backgroundSize: "16px 16px",
-                            }}
-                          />
-
-                          <motion.div
-                            layout
-                            initial={false}
-                            animate={{
-                              width: `${Math.min(
-                                260,
-                                Math.max(70, (widthCm / Math.max(widthCm, heightCm)) * 240)
-                              )}px`,
-                              height: `${Math.min(
-                                100,
-                                Math.max(36, (heightCm / Math.max(widthCm, heightCm)) * 95)
-                              )}px`,
-                            }}
-                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                            className="rounded-md border-2 border-primary bg-primary/10 shadow-sm flex flex-col items-center justify-center relative p-1 text-center"
-                          >
-                            <span className="text-[10px] font-mono font-bold text-primary truncate px-1">
-                              {widthCm} × {heightCm} cm
-                            </span>
-                            <span className="text-[9px] font-mono text-[var(--text-muted)]">
-                              {((widthCm * heightCm) / 10000).toFixed(2)} m²
-                            </span>
-                          </motion.div>
-                        </div>
                       </div>
+
+                      {/* VISUALIZADOR PROPORCIONAL COMPACTO (SOLO CUANDO HAY MEDIDAS INGRESADAS) */}
+                      {widthCm > 0 && heightCm > 0 && (
+                        <div className="hidden sm:block p-2 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
+                              <Maximize2 className="w-3.5 h-3.5 text-primary" />
+                              <span>Proporción</span>
+                            </div>
+                            <span className="text-[11px] font-mono text-[var(--text-secondary)]">
+                              {widthCm > heightCm * 1.2
+                                ? "Horizontal / Paisaje"
+                                : heightCm > widthCm * 1.2
+                                ? "Vertical / Tótem"
+                                : "Formato Cuadrado"}
+                            </span>
+                          </div>
+
+                          <div className="h-10 bg-[var(--bg-page)] rounded-lg border border-dashed border-[var(--border-subtle)] flex items-center justify-center p-1 relative overflow-hidden">
+                            <motion.div
+                              layout
+                              initial={false}
+                              animate={{
+                                width: `${Math.min(
+                                  160,
+                                  Math.max(40, (widthCm / Math.max(widthCm, heightCm)) * 140)
+                                )}px`,
+                                height: `${Math.min(
+                                  32,
+                                  Math.max(18, (heightCm / Math.max(widthCm, heightCm)) * 30)
+                                )}px`,
+                              }}
+                              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                              className="rounded border border-primary bg-primary/10 shadow-xs flex items-center justify-center relative p-0.5 text-center"
+                            >
+                              <span className="text-[9px] font-mono font-bold text-primary truncate px-1">
+                                {widthCm} × {heightCm} cm
+                              </span>
+                            </motion.div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="p-4 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-1">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-1">
                       <p className="text-xs font-bold text-[var(--text-primary)]">
                         Producto unitario pre-armado ({currentMaterial.name})
                       </p>
                       <p className="text-xs text-[var(--text-secondary)]">
                         Incluye la estructura completa de exhibición y la gráfica impresa lista para montar.
                       </p>
+                      <div className="pt-2">
+                        <label className="block text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium mb-1">
+                          Cantidad
+                        </label>
+                        <div className="flex items-center">
+                          <button
+                            type="button"
+                            onClick={() => handleQuantityStep(-1)}
+                            className="h-8 w-8 rounded-l-lg border border-r-0 border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            min="1"
+                            value={quantityInput}
+                            onChange={handleQuantityChange}
+                            onBlur={handleQuantityBlur}
+                            className="h-8 w-12 text-center border-y border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary z-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleQuantityStep(1)}
+                            className="h-8 w-8 rounded-r-lg border border-l-0 border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                          >
+                            +
+                          </button>
+                          <span className="ml-2 text-xs text-[var(--text-secondary)]">unidades</span>
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  <div className="space-y-1.5">
-                    <label className="block text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
-                      Cantidad de unidades
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:border-primary font-bold cursor-pointer"
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                        className="w-24 text-center py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono-num text-sm font-bold"
-                      />
-                      <button
-                        onClick={() => setQuantity(quantity + 1)}
-                        className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] hover:border-primary font-bold cursor-pointer"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* ZOD VALIDATION FEEDBACK */}
-                  {quoteError ? (
-                    <div className="p-3.5 rounded-xl bg-red-950/20 border border-red-800/40 text-red-400 text-xs flex items-center gap-2">
+                  {/* ERROR FEEDBACK */}
+                  {quoteError && (
+                    <div className="p-2.5 rounded-xl bg-red-950/20 border border-red-800/40 text-red-400 text-xs flex items-center gap-2">
                       <Info className="w-4 h-4 shrink-0 text-red-400" />
                       <span>{quoteError}</span>
-                    </div>
-                  ) : (
-                    <div className="p-3.5 rounded-xl bg-emerald-950/10 border border-emerald-800/30 text-emerald-500 text-xs flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-500" />
-                      <span>
-                        Superficie calculada: {((widthCm * heightCm) / 10000).toFixed(2)} m² por paño (
-                        {(((widthCm * heightCm) / 10000) * quantity).toFixed(2)} m² totales).
-                      </span>
                     </div>
                   )}
 
                   {/* WHOLESALE VOLUME DISCOUNT BANNER (SINGLE MODE) */}
                   {isVolumeScaleEligible && (
-                    <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs">
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-2.5">
-                        <Building2 className="w-5 h-5 text-primary shrink-0 animate-bounce" />
+                        <Building2 className="w-4 h-4 text-primary shrink-0" />
                         <div>
                           <span className="font-bold text-[var(--text-primary)] block">
                             Escala de Volumen Detectada ({quantity} u · {(((widthCm * heightCm) / 10000) * quantity).toFixed(1)} m²)
                           </span>
                           <span className="text-[11px] text-[var(--text-secondary)]">
-                            Accedé a precios preferenciales para talleres y agencias en el Canal Mayorista.
+                            Precios preferenciales para talleres y gremio.
                           </span>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => onNavigate("mayoristas")}
-                        className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-[var(--color-primary-hover)] shrink-0 transition-colors cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-[var(--color-primary-hover)] shrink-0 transition-colors cursor-pointer"
                       >
-                        Ver Beneficios
+                        Ver Precios
                       </button>
                     </div>
                   )}
 
-                  {/* PROMPT TO SWITCH TO BULK FOR MULTIPLE ITEMS */}
-                  <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-                      <ListPlus className="w-4 h-4 text-primary shrink-0" />
-                      <span>¿Tenés varias medidas o paños con distintos tamaños para este material?</span>
-                    </div>
+                  {/* ACTION BUTTON (CONFIRMAR Y CONTINUAR) */}
+                  <div className="pt-3 flex justify-end border-t border-[var(--border-subtle)]">
                     <button
                       type="button"
-                      onClick={handleSwitchToBulk}
-                      className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-[var(--color-primary-hover)] shrink-0 transition-colors"
+                      id="btn-confirm-measures"
+                      disabled={currentMaterial?.mode !== "unidad" && (widthCm < 5 || heightCm < 5)}
+                      onClick={() => setCurrentStep(5)}
+                      className={`w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${
+                        currentMaterial?.mode !== "unidad" && (widthCm < 5 || heightCm < 5)
+                          ? "bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border-subtle)]"
+                          : "bg-primary hover:bg-[var(--color-primary-hover)] text-white cursor-pointer hover:shadow-md active:scale-95"
+                      }`}
                     >
-                      Activar Bulk Order
+                      <span>Confirmar Medidas y Continuar</span>
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1688,30 +1880,44 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      id="btn-add-bulk-row-top"
-                      onClick={handleAddBulkRow}
-                      className="px-4 py-2 rounded-xl bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Añadir otra medida</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleClearAll}
+                        title="Limpiar medidas y reiniciar lote"
+                        className="px-2.5 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-black text-[var(--text-secondary)] hover:text-red-500 hover:border-red-500/30 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Limpiar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        id="btn-add-bulk-row-top"
+                        onClick={handleAddBulkRow}
+                        className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Añadir corte</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* BULK ITEMS LIST */}
                   <div className="space-y-3">
                     {bulkItems.map((item, index) => {
-                      const itemAreaM2 = ((item.widthCm * item.heightCm) / 10000) * item.quantity;
+                      const itemAreaM2 =
+                        (((Number(item.widthCm) || 0) * (Number(item.heightCm) || 0)) / 10000) *
+                        (Number(item.quantity) || 1);
                       const hasFile = !!item.fileAttachment;
                       const hasAi = !!item.isAiDesign;
 
                       return (
                         <div
                           key={item.id}
-                          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] hover:border-primary/40 transition-all space-y-4 shadow-sm"
+                          className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] hover:border-primary/40 transition-all space-y-3.5 shadow-xs"
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] pb-2.5">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-mono font-bold flex items-center justify-center shrink-0">
                                 #{index + 1}
@@ -1721,7 +1927,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                 value={item.label}
                                 onChange={(e) => handleUpdateBulkRow(item.id, "label", e.target.value)}
                                 placeholder={`Medida ${index + 1} (ej. Fachada)`}
-                                className="px-2.5 py-1 rounded-lg border border-transparent hover:border-[var(--border-subtle)] focus:border-primary focus:bg-[var(--bg-surface-subtle)] text-xs font-bold text-[var(--text-primary)] focus:outline-none"
+                                className="px-2 py-0.5 rounded-lg border border-transparent hover:border-[var(--border-subtle)] focus:border-primary focus:bg-[var(--bg-surface-subtle)] text-xs font-bold text-[var(--text-primary)] focus:outline-none"
                               />
 
                               {/* ROW-LEVEL FILE UPLOAD STATUS INDICATOR */}
@@ -1769,92 +1975,144 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                             </div>
                           </div>
 
-                          {/* MEASURES & QUANTITY INPUTS */}
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="space-y-1">
-                              <label className="block text-[11px] uppercase font-mono text-[var(--text-secondary)]">
-                                Ancho (cm)
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type="number"
-                                  min="10"
-                                  max="5000"
-                                  value={item.widthCm}
-                                  onChange={(e) =>
-                                    handleUpdateBulkRow(
-                                      item.id,
-                                      "widthCm",
-                                      Math.max(10, parseFloat(e.target.value) || 10)
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono-num text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                                />
-                                <span className="absolute right-3 top-2 text-[10px] text-[var(--text-muted)] font-mono">
-                                  cm
-                                </span>
+                          {/* MEASURES & QUANTITY INPUTS: SINGLE ROW WITH MULTIPLIER */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2.5 p-2 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+                              {/* ANCHO */}
+                              <div className="flex-1 min-w-0 relative">
+                                <div className="relative flex items-center">
+                                  <span className="absolute left-2.5 text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider pointer-events-none select-none">
+                                    Ancho
+                                  </span>
+                                  <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    min="5"
+                                    max="5000"
+                                    value={item.widthCm}
+                                    onChange={(e) =>
+                                      handleUpdateBulkRow(
+                                        item.id,
+                                        "widthCm",
+                                        e.target.value
+                                      )
+                                    }
+                                    onBlur={() => {
+                                      const strVal = String(item.widthCm).trim();
+                                      if (strVal === "") {
+                                        handleUpdateBulkRow(item.id, "widthCm", "");
+                                        return;
+                                      }
+                                      const num = parseFloat(strVal);
+                                      const valid = isNaN(num) ? "" : num < 5 ? 5 : Math.min(5000, num);
+                                      handleUpdateBulkRow(item.id, "widthCm", valid);
+                                    }}
+                                    placeholder="0"
+                                    className="w-full pl-12 sm:pl-14 pr-7 sm:pr-8 py-1.5 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                                  />
+                                  <span className="absolute right-2 sm:right-2.5 text-[10px] text-[var(--text-muted)] pointer-events-none font-mono select-none">
+                                    cm
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* SEPARATOR MULTIPLIER */}
+                              <span className="text-[var(--text-muted)] font-mono text-xs sm:text-sm font-bold shrink-0 select-none px-0.5">
+                                ×
+                              </span>
+
+                              {/* ALTO */}
+                              <div className="flex-1 min-w-0 relative">
+                                <div className="relative flex items-center">
+                                  <span className="absolute left-2.5 text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider pointer-events-none select-none">
+                                    Alto
+                                  </span>
+                                  <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    min="5"
+                                    max="5000"
+                                    value={item.heightCm}
+                                    onChange={(e) =>
+                                      handleUpdateBulkRow(
+                                        item.id,
+                                        "heightCm",
+                                        e.target.value
+                                      )
+                                    }
+                                    onBlur={() => {
+                                      const strVal = String(item.heightCm).trim();
+                                      if (strVal === "") {
+                                        handleUpdateBulkRow(item.id, "heightCm", "");
+                                        return;
+                                      }
+                                      const num = parseFloat(strVal);
+                                      const valid = isNaN(num) ? "" : num < 5 ? 5 : Math.min(5000, num);
+                                      handleUpdateBulkRow(item.id, "heightCm", valid);
+                                    }}
+                                    placeholder="0"
+                                    className="w-full pl-10 sm:pl-12 pr-7 sm:pr-8 py-1.5 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                                  />
+                                  <span className="absolute right-2 sm:right-2.5 text-[10px] text-[var(--text-muted)] pointer-events-none font-mono select-none">
+                                    cm
+                                  </span>
+                                </div>
                               </div>
                             </div>
 
-                            <div className="space-y-1">
-                              <label className="block text-[11px] uppercase font-mono text-[var(--text-secondary)]">
-                                Alto (cm)
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type="number"
-                                  min="10"
-                                  max="5000"
-                                  value={item.heightCm}
-                                  onChange={(e) =>
-                                    handleUpdateBulkRow(
-                                      item.id,
-                                      "heightCm",
-                                      Math.max(10, parseFloat(e.target.value) || 10)
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono-num text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                                />
-                                <span className="absolute right-3 top-2 text-[10px] text-[var(--text-muted)] font-mono">
-                                  cm
+                            {/* CANTIDAD Y SUPERFICIE */}
+                            <div className="flex items-center justify-between gap-3 pt-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-secondary)]">
+                                  Cantidad
                                 </span>
+                                <div className="flex items-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const cur = parseInt(String(item.quantity), 10) || 1;
+                                      handleUpdateBulkRow(item.id, "quantity", Math.max(1, cur - 1));
+                                    }}
+                                    className="h-7 w-7 rounded-l-lg border border-r-0 border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] text-xs font-bold hover:bg-[var(--border-subtle)] cursor-pointer transition-colors flex items-center justify-center"
+                                  >
+                                    -
+                                  </button>
+                                  <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    min="1"
+                                    value={item.quantity}
+                                    onChange={(e) =>
+                                      handleUpdateBulkRow(
+                                        item.id,
+                                        "quantity",
+                                        e.target.value
+                                      )
+                                    }
+                                    onBlur={() => {
+                                      const num = parseInt(String(item.quantity), 10);
+                                      const valid = isNaN(num) || num < 1 ? 1 : num;
+                                      handleUpdateBulkRow(item.id, "quantity", valid);
+                                    }}
+                                    className="h-7 w-12 text-center border-y border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary z-10"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const cur = parseInt(String(item.quantity), 10) || 1;
+                                      handleUpdateBulkRow(item.id, "quantity", cur + 1);
+                                    }}
+                                    className="h-7 w-7 rounded-r-lg border border-l-0 border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] text-xs font-bold hover:bg-[var(--border-subtle)] cursor-pointer transition-colors flex items-center justify-center"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="space-y-1">
-                              <label className="block text-[11px] uppercase font-mono text-[var(--text-secondary)]">
-                                Cantidad
-                              </label>
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleUpdateBulkRow(item.id, "quantity", Math.max(1, item.quantity - 1))
-                                  }
-                                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] text-xs font-bold"
-                                >
-                                  -
-                                </button>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={item.quantity}
-                                  onChange={(e) =>
-                                    handleUpdateBulkRow(
-                                      item.id,
-                                      "quantity",
-                                      Math.max(1, parseInt(e.target.value, 10) || 1)
-                                    )
-                                  }
-                                  className="w-full text-center py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] font-mono-num text-xs font-bold"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => handleUpdateBulkRow(item.id, "quantity", item.quantity + 1)}
-                                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] text-xs font-bold"
-                                >
-                                  +
-                                </button>
+                              <div className="text-right">
+                                <span className="text-[11px] font-mono font-medium text-[var(--text-secondary)]">
+                                  {itemAreaM2 > 0 ? `${itemAreaM2.toFixed(2)} m²` : "0.00 m²"}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -2040,20 +2298,21 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <span>Añadir otra fila de medida y cantidad a este lote</span>
                     </button>
                   </div>
+
+                  {/* BULK MODE CONFIRM BUTTON */}
+                  <div className="pt-3 flex justify-end">
+                    <button
+                      type="button"
+                      id="btn-confirm-bulk-measures"
+                      onClick={() => setCurrentStep(5)}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer hover:shadow-md active:scale-95"
+                    >
+                      <span>Confirmar Lote y Continuar</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
-
-              {/* CONTINUAR DESDE MEDIDAS */}
-              <div className="pt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(5)}
-                  className="px-6 py-2.5 rounded-[7px] bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
-                >
-                  <span>Confirmar Medidas y Continuar</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
             </div>
           )}
 
@@ -2061,19 +2320,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 5 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(4)}
-                    className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>Medidas: {orderMode === "bulk" ? `${bulkItems.length} cortes` : `${widthCm}×${heightCm} cm`}</span>
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Calidad de Impresión</span>
-                </div>
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                   Elegir Calidad de Impresión
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2149,19 +2396,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 6 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(5)}
-                    className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>Calidad: {printQuality === "alta_resolucion" ? "Alta Resolución" : "Estándar"}</span>
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Tintas</span>
-                </div>
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                   Elegir Tipo de Tintas
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2261,19 +2496,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 7 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(6)}
-                    className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>Tintas: {inkType === "uv" ? "UV LED" : inkType === "directa_uv" ? "Directa UV" : "Solvente"}</span>
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Terminaciones</span>
-                </div>
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                   Terminaciones y Acabados
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2441,19 +2664,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 8 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(7)}
-                    className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>Terminaciones</span>
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Archivos & Diseño</span>
-                </div>
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                   {orderMode === "bulk" ? "Diseños y Archivos del Lote" : "¿Cómo vas a preparar el diseño?"}
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2657,19 +2868,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 9 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(8)}
-                    className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>Archivo y diseño</span>
-                  </button>
-                  <span className="text-[var(--text-muted)]">/</span>
-                  <span className="text-[var(--text-primary)] font-medium">Resumen Final</span>
-                </div>
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
                   {orderMode === "bulk" ? "Resumen de Pedido por Lotes" : "Resumen de tu Cotización"}
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2727,7 +2926,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                           </thead>
                           <tbody className="divide-y divide-[var(--border-subtle)]">
                             {bulkItems.map((item, idx) => {
-                              const m2 = ((item.widthCm * item.heightCm) / 10000) * item.quantity;
+                              const m2 =
+                                (((Number(item.widthCm) || 0) * (Number(item.heightCm) || 0)) / 10000) *
+                                (Number(item.quantity) || 1);
                               return (
                                 <tr key={item.id} className="hover:bg-[var(--bg-surface-subtle)]">
                                   <td className="py-2.5 px-3 font-medium text-[var(--text-primary)]">
@@ -2931,11 +3132,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* WIZARD NAVIGATION CONTROLS */}
-          <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
+          <div className="flex items-center justify-between pt-5 pb-24 sm:pb-10 border-t border-[var(--border-subtle)]">
             {currentStep > 1 ? (
               <button
+                type="button"
                 onClick={() => setCurrentStep(currentStep - 1)}
-                className="px-5 py-2.5 rounded-[7px] border border-[var(--border-subtle)] bg-white dark:bg-black text-xs font-medium text-[var(--text-primary)] hover:border-primary flex items-center gap-1.5 cursor-pointer transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm text-xs font-medium text-[var(--text-primary)] hover:border-primary flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-95"
               >
                 <ArrowLeft className="w-4 h-4" strokeWidth={1.85} />
                 <span>Ir atrás</span>
@@ -2946,9 +3148,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
 
             {currentStep > 1 && (
               <button
+                type="button"
                 onClick={() => setCurrentStep(1)}
-                className="px-5 py-2.5 rounded-[7px] bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-95"
               >
+                <RotateCcw className="w-3.5 h-3.5" />
                 <span>Ir a inicio</span>
               </button>
             )}
@@ -3293,8 +3497,8 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
         isOpen={isAiDesignDrawerOpen}
         onClose={() => setIsAiDesignDrawerOpen(false)}
         currentMaterialName={currentMaterial?.name || "Lona Frontlight"}
-        currentWidthCm={orderMode === "individual" ? widthCm : activeAttachItem?.widthCm || 200}
-        currentHeightCm={orderMode === "individual" ? heightCm : activeAttachItem?.heightCm || 100}
+        currentWidthCm={orderMode === "individual" ? widthCm : Number(activeAttachItem?.widthCm) || 200}
+        currentHeightCm={orderMode === "individual" ? heightCm : Number(activeAttachItem?.heightCm) || 100}
         onApplyDesign={handleApplyAiDesign}
       />
     </div>

@@ -123,17 +123,20 @@ export default function App() {
             )}
             {currentView === "blog" && <BlogView onNavigate={handleNavigate} />}
             {currentView === "pedidos" && (
-              <ProtectedRoute>
+              <ProtectedRoute onNavigate={handleNavigate}>
                 <OrdersView onNavigate={handleNavigate} />
               </ProtectedRoute>
             )}
             {currentView === "cuenta" && (
-              <ProtectedRoute>
+              <ProtectedRoute 
+                onNavigate={handleNavigate} 
+                defaultMode={viewParam === "register" ? "register" : "login"}
+              >
                 <OrdersView onNavigate={handleNavigate} />
               </ProtectedRoute>
             )}
             {currentView === "admin" && (
-              <ProtectedRoute adminOnly>
+              <ProtectedRoute adminOnly onNavigate={handleNavigate}>
                 <AdminPanelView onNavigate={handleNavigate} />
               </ProtectedRoute>
             )}

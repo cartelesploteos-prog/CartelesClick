@@ -255,6 +255,9 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
             </span>
           </button>
 
+          {/* THEME TOGGLE BUTTON */}
+          <ThemeSelector id="btn-header-theme-toggle" className="!w-10 !h-10 sm:!w-11 sm:!h-11 !px-0 shrink-0" />
+
           {/* BURGER MENU BUTTON WITH ANIMATEPRESENCE */}
           <motion.button
             id="btn-burger-menu"

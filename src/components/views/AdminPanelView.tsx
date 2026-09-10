@@ -714,7 +714,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
   });
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-14 font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-14 font-sans">
       
       {/* 🚀 ADMIN TOP HERO BANNER */}
       <div className="p-6 sm:p-8 rounded-[7px] bg-primary text-white flex flex-col md:flex-row md:items-center justify-between gap-6 border border-[var(--border-subtle)] shadow-none">

@@ -38,7 +38,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
 
   if (!material) {
     return (
-      <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 text-center space-y-6 font-sans">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 text-center space-y-6 font-sans">
         <h2 className="font-heading text-xl text-[var(--text-primary)] font-medium">Material no encontrado</h2>
         <button
           onClick={() => onNavigate("materiales")}
@@ -51,7 +51,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
   }
 
   return (
-    <div className="section-container pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-8 sm:space-y-10 max-w-5xl font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-8 sm:space-y-10 max-w-5xl font-sans">
       {/* BREADCRUMB */}
       <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-sans">
         <button

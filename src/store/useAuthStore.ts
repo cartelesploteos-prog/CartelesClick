@@ -6,7 +6,6 @@ import {
   onAuthStateChanged, 
   User,
   GoogleAuthProvider,
-  GithubAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail
 } from "firebase/auth";
@@ -24,7 +23,6 @@ interface AuthStore {
   loginAsClient?: (email?: string, pass?: string) => Promise<void>;
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signInWithGithub: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
 }
 
@@ -50,12 +48,16 @@ export const useAuthStore = create<AuthStore>((set) => {
 
   const notifyAuthError = (err: any) => {
     const message = getFirebaseAuthErrorMessage(err);
-    useNotificationStore.getState().addNotification({
-      type: "system",
-      title: "Error de autenticación",
-      message,
-      priority: "high"
-    });
+    const code = typeof err === "string" ? err : err?.code || "";
+    // Only dispatch toast notification for real system/network errors, not user closing the popup
+    if (!code.includes("auth/popup-closed-by-user")) {
+      useNotificationStore.getState().addNotification({
+        type: "system",
+        title: "Error de autenticación",
+        message,
+        priority: "high"
+      });
+    }
     return new Error(message);
   };
 
@@ -66,21 +68,21 @@ export const useAuthStore = create<AuthStore>((set) => {
     isAuthenticated: false,
     login: async (email, pass) => {
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, email.trim(), pass);
       } catch (err: any) {
         throw notifyAuthError(err);
       }
     },
     loginAsClient: async (email = "cliente@carteles.click", pass = "123456") => {
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, email.trim(), pass);
       } catch (err: any) {
         throw notifyAuthError(err);
       }
     },
     register: async (email, pass) => {
       try {
-        await createUserWithEmailAndPassword(auth, email, pass);
+        await createUserWithEmailAndPassword(auth, email.trim(), pass);
       } catch (err: any) {
         throw notifyAuthError(err);
       }
@@ -95,14 +97,7 @@ export const useAuthStore = create<AuthStore>((set) => {
     signInWithGoogle: async () => {
       try {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-      } catch (err: any) {
-        throw notifyAuthError(err);
-      }
-    },
-    signInWithGithub: async () => {
-      try {
-        const provider = new GithubAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
         await signInWithPopup(auth, provider);
       } catch (err: any) {
         throw notifyAuthError(err);
@@ -110,7 +105,7 @@ export const useAuthStore = create<AuthStore>((set) => {
     },
     forgotPassword: async (email: string) => {
       try {
-        await sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(auth, email.trim());
       } catch (err: any) {
         throw notifyAuthError(err);
       }
