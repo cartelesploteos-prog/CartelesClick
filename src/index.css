@@ -5,6 +5,31 @@
   --font-heading: 'Sansation', sans-serif;
   --font-display: 'Sansation', sans-serif;
   --font-logo: var(--font-heading);
+
+  /* CANONICAL RESPONSIVE BREAKPOINTS (TAILWIND CSS V4)
+     Ensures seamless transitions across mobile, tablet, desktop, and 1366px laptop standard */
+  --breakpoint-xs: 30rem;         /* 480px  - Phablets & large mobile phones */
+  --breakpoint-sm: 40rem;         /* 640px  - Small tablets & landscape mobile */
+  --breakpoint-md: 48rem;         /* 768px  - Tablets portrait (iPad standard) */
+  --breakpoint-lg: 64rem;         /* 1024px - Tablets landscape (iPad Pro) / Netbooks */
+  --breakpoint-xl: 80rem;         /* 1280px - Standard desktop & 1280 screens */
+  --breakpoint-laptop: 85.375rem; /* 1366px - WXGA Standard 1366x768 Laptops */
+  --breakpoint-2xl: 96rem;        /* 1536px - Large Full HD Displays */
+  --breakpoint-3xl: 120rem;       /* 1920px - Ultrawide & 4K density */
+
+  /* FLUID TYPOGRAPHY SCALE (360px Mobile to 1366px Laptop Continuous Monotonic Clamp) */
+  --text-2xs: clamp(0.7rem, 0.682rem + 0.08vw, 0.75rem);
+  --text-xs: clamp(0.75rem, 0.705rem + 0.20vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.83rem + 0.20vw, 1rem);
+  --text-base: clamp(1rem, 0.955rem + 0.20vw, 1.125rem);
+  --text-md: clamp(1.0625rem, 0.995rem + 0.30vw, 1.25rem);
+  --text-lg: clamp(1.15625rem, 1.033rem + 0.55vw, 1.5rem);
+  --text-xl: clamp(1.25rem, 1.071rem + 0.80vw, 1.75rem);
+  --text-2xl: clamp(1.5rem, 1.232rem + 1.19vw, 2.25rem);
+  --text-3xl: clamp(1.75rem, 1.437rem + 1.39vw, 2.625rem);
+  --text-4xl: clamp(2rem, 1.553rem + 1.99vw, 3.25rem);
+  --text-display: clamp(2.25rem, 1.713rem + 2.39vw, 3.75rem);
+  --text-hero: clamp(2.5rem, 1.784rem + 3.18vw, 4.5rem);
   
   /* IDEOGRAM.AI INSPIRED COLOR PALETTE - WCAG AA COMPLIANT (>= 4.5:1 CONTRAST) */
   --color-primary: #0055FF; /* WCAG AA >= 4.5:1 on light backgrounds */
@@ -30,38 +55,38 @@
     --font-display: 'Sansation', sans-serif;
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-    /* FLUID TYPOGRAPHY - SCALED PROPORTIONALLY FROM 320px TO 1920px (Safe for 1366px laptops) */
-    --text-2xs: clamp(0.7rem, 0.65rem + 0.15vw, 0.75rem);
-    --text-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
-    --text-sm: clamp(0.875rem, 0.82rem + 0.25vw, 1rem);
-    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-    --text-md: clamp(1.05rem, 0.98rem + 0.3vw, 1.25rem);
-    --text-lg: clamp(1.15rem, 1.05rem + 0.4vw, 1.5rem);
-    --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.75rem);
-    --text-2xl: clamp(1.5rem, 1.35rem + 0.6vw, 2.25rem);
-    --text-3xl: clamp(1.85rem, 1.55rem + 1vw, 2.75rem);
-    --text-4xl: clamp(2.25rem, 1.85rem + 1.25vw, 3.5rem);
-    --text-display: clamp(2.5rem, 2rem + 1.75vw, 4.25rem);
-    --text-hero: clamp(2.75rem, 2.2rem + 2vw, 5rem);
+    /* FLUID TYPOGRAPHY - MATHEMATICALLY CALIBRATED FROM 360px TO 1366px (ZERO PREMATURE CEILINGS) */
+    --text-2xs: clamp(0.7rem, 0.682rem + 0.08vw, 0.75rem);
+    --text-xs: clamp(0.75rem, 0.705rem + 0.20vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.83rem + 0.20vw, 1rem);
+    --text-base: clamp(1rem, 0.955rem + 0.20vw, 1.125rem);
+    --text-md: clamp(1.0625rem, 0.995rem + 0.30vw, 1.25rem);
+    --text-lg: clamp(1.15625rem, 1.033rem + 0.55vw, 1.5rem);
+    --text-xl: clamp(1.25rem, 1.071rem + 0.80vw, 1.75rem);
+    --text-2xl: clamp(1.5rem, 1.232rem + 1.19vw, 2.25rem);
+    --text-3xl: clamp(1.75rem, 1.437rem + 1.39vw, 2.625rem);
+    --text-4xl: clamp(2rem, 1.553rem + 1.99vw, 3.25rem);
+    --text-display: clamp(2.25rem, 1.713rem + 2.39vw, 3.75rem);
+    --text-hero: clamp(2.5rem, 1.784rem + 3.18vw, 4.5rem);
 
     --leading-tight: 1.15;
     --leading-snug: 1.25;
     --leading-normal: 1.5;
     --leading-relaxed: 1.65;
 
-    /* FLUID BASE SPACING TOKENS (PROPORTIONAL TO VIEWPORT WIDTH) */
-    --space-3xs: clamp(0.25rem, 0.2rem + 0.1vw, 0.375rem); /* 4px - 6px */
-    --space-2xs: clamp(0.375rem, 0.3rem + 0.15vw, 0.5rem);   /* 6px - 8px */
-    --space-xs:  clamp(0.5rem, 0.45rem + 0.2vw, 0.75rem);    /* 8px - 12px */
-    --space-sm:  clamp(0.75rem, 0.65rem + 0.3vw, 1.125rem);  /* 12px - 18px */
-    --space-md:  clamp(1rem, 0.85rem + 0.5vw, 1.5rem);       /* 16px - 24px */
-    --space-lg:  clamp(1.5rem, 1.25rem + 0.75vw, 2.25rem);   /* 24px - 36px */
-    --space-xl:  clamp(2rem, 1.6rem + 1vw, 3rem);            /* 32px - 48px */
-    --space-2xl: clamp(2.75rem, 2.2rem + 1.5vw, 4.25rem);    /* 44px - 68px */
-    --space-3xl: clamp(3.75rem, 3rem + 2vw, 5.5rem);         /* 60px - 88px */
-    --space-section: clamp(2.5rem, 2rem + 2.5vw, 5.5rem);
-    --space-gap: clamp(1rem, 0.85rem + 0.75vw, 2rem);
-    --container-fluid-padding: clamp(1rem, 2.5vw, 2rem);
+    /* FLUID BASE SPACING TOKENS (CALIBRATED 360px TO 1366px) */
+    --space-3xs: clamp(0.25rem, 0.205rem + 0.20vw, 0.375rem);  /* 4px - 6px */
+    --space-2xs: clamp(0.375rem, 0.33rem + 0.20vw, 0.5rem);     /* 6px - 8px */
+    --space-xs:  clamp(0.5rem, 0.41rem + 0.40vw, 0.75rem);      /* 8px - 12px */
+    --space-sm:  clamp(0.75rem, 0.615rem + 0.60vw, 1.125rem);   /* 12px - 18px */
+    --space-md:  clamp(1rem, 0.821rem + 0.80vw, 1.5rem);        /* 16px - 24px */
+    --space-lg:  clamp(1.5rem, 1.232rem + 1.19vw, 2.25rem);     /* 24px - 36px */
+    --space-xl:  clamp(2rem, 1.642rem + 1.59vw, 3rem);          /* 32px - 48px */
+    --space-2xl: clamp(2.75rem, 2.213rem + 2.39vw, 4.25rem);    /* 44px - 68px */
+    --space-3xl: clamp(3.75rem, 3.124rem + 2.78vw, 5.5rem);     /* 60px - 88px */
+    --space-section: clamp(2.5rem, 1.605rem + 3.98vw, 5.5rem);
+    --space-gap: clamp(1rem, 0.642rem + 1.59vw, 2rem);
+    --container-fluid-padding: clamp(1rem, 0.642rem + 1.59vw, 2rem);
     --container-fluid-max: min(100%, 80rem);
 
     /* LIGHT THEME BASE TOKENS - WCAG AA COMPLIANT */
@@ -182,12 +207,12 @@
     transition: color 350ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Canonical Scale: Step ratio ~1.25 (Major Third) with optical adjustments */
+  /* Canonical Scale: Step ratio ~1.25 (Major Third) with continuous 360px -> 1366px fluid scaling */
   
   /* H1: Primary Page Landmark / View Title */
   h1, .text-canonical-h1 {
     font-family: var(--font-heading);
-    font-size: clamp(2rem, 1.65rem + 1.25vw, 3rem); /* 32px -> 48px */
+    font-size: clamp(2rem, 1.642rem + 1.59vw, 3rem); /* 32px -> 48px smoothly reaching 48px at 1366px */
     line-height: 1.15;
     letter-spacing: -0.025em;
     font-weight: 400 !important;
@@ -196,7 +221,7 @@
   /* H2: Section Landmark */
   h2, .text-canonical-h2 {
     font-family: var(--font-heading);
-    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2.25rem); /* 24px -> 36px */
+    font-size: clamp(1.5rem, 1.232rem + 1.19vw, 2.25rem); /* 24px -> 36px */
     line-height: 1.2;
     letter-spacing: -0.02em;
     font-weight: 400 !important;
@@ -205,7 +230,7 @@
   /* H3: Major Card / Feature / Subsection Title */
   h3, .text-canonical-h3 {
     font-family: var(--font-heading);
-    font-size: clamp(1.25rem, 1.125rem + 0.5vw, 1.65rem); /* 20px -> 26.4px */
+    font-size: clamp(1.25rem, 1.071rem + 0.80vw, 1.75rem); /* 20px -> 28px */
     line-height: 1.25;
     letter-spacing: -0.015em;
     font-weight: 400 !important;
@@ -214,7 +239,7 @@
   /* H4: Module / Dialog / Secondary Card Title */
   h4, .text-canonical-h4 {
     font-family: var(--font-heading);
-    font-size: clamp(1.1rem, 1.025rem + 0.3vw, 1.35rem); /* 17.6px -> 21.6px */
+    font-size: clamp(1.09375rem, 0.993rem + 0.45vw, 1.375rem); /* 17.5px -> 22px */
     line-height: 1.3;
     letter-spacing: -0.01em;
     font-weight: 400 !important;
@@ -223,7 +248,7 @@
   /* H5: Component Subheading / Table Group Header */
   h5, .text-canonical-h5 {
     font-family: var(--font-heading);
-    font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.125rem); /* 15.2px -> 18px */
+    font-size: clamp(0.9375rem, 0.87rem + 0.30vw, 1.125rem); /* 15px -> 18px */
     line-height: 1.35;
     letter-spacing: -0.005em;
     font-weight: 400 !important;
@@ -232,7 +257,7 @@
   /* H6: Eyebrow / Micro-Header / Kicker */
   h6, .text-canonical-h6 {
     font-family: var(--font-heading);
-    font-size: clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem); /* 12px -> 14px */
+    font-size: clamp(0.75rem, 0.705rem + 0.20vw, 0.875rem); /* 12px -> 14px */
     line-height: 1.4;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -334,28 +359,12 @@ td {
 .section-container,
 .fluid-container {
   width: 100%;
-  max-width: 80rem; /* max-w-7xl */
+  max-width: var(--container-fluid-max, 80rem);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(1rem, 2.5vw, 2rem);
-  padding-right: clamp(1rem, 2.5vw, 2rem);
+  padding-left: var(--container-fluid-padding, clamp(1rem, 0.642rem + 1.59vw, 2rem));
+  padding-right: var(--container-fluid-padding, clamp(1rem, 0.642rem + 1.59vw, 2rem));
   box-sizing: border-box;
-}
-
-@media (min-width: 640px) {
-  .section-container,
-  .fluid-container {
-    padding-left: 1.5rem; /* px-6 */
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .section-container,
-  .fluid-container {
-    padding-left: 2rem; /* px-8 */
-    padding-right: 2rem;
-  }
 }
 
 /* ==========================================================================
@@ -432,23 +441,23 @@ td {
   }
 }
 
-/* FLUID RESPONSIVE CSS GRID SYSTEM */
+/* FLUID RESPONSIVE CSS GRID SYSTEM (CALIBRATED FOR SEAMLESS 1366px LAPTOP DENSITY) */
 .fluid-grid-auto {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(14.5rem, 22vw, 21rem)), 1fr));
-  gap: clamp(0.75rem, 1.8vw, 1.5rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(13.5rem, 16vw, 19.5rem)), 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
 }
 
 .fluid-grid-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(15rem, 20vw, 19.5rem)), 1fr));
-  gap: clamp(0.875rem, 1.8vw, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(14rem, 17vw, 19rem)), 1fr));
+  gap: clamp(0.875rem, 1.5vw, 1.5rem);
 }
 
 .fluid-grid-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(14rem, 18vw, 19rem)), 1fr));
-  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(13.5rem, 16vw, 18.5rem)), 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
 }
 
 /* Mid-sized viewport sticky containment to prevent vertical cut-off on 768px laptop screens */
@@ -456,9 +465,10 @@ td {
   .sticky-sidebar-contained {
     position: sticky;
     top: 5rem;
-    max-height: calc(100vh - 6rem);
+    max-height: min(calc(100vh - 6rem), calc(100dvh - 6rem));
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-gutter: stable;
   }
 }
 
