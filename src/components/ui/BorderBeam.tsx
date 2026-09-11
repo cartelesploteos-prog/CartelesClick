@@ -19,14 +19,14 @@ export const BorderBeam: React.FC<BorderBeamProps> = ({
   duration = 3.5,
   borderWidth = 2,
   colorFrom = "#FFFFFF",
-  colorTo = "#F1F5F9",
+  colorTo = "#FFFFFF",
   delay = 0,
   style,
 }) => {
   const durationVal = typeof duration === "number" ? `${duration}s` : duration || "3.5s";
   const borderWidthVal = typeof borderWidth === "number" ? `${borderWidth}px` : borderWidth || "2px";
   const colorFromVal = colorFrom || "#FFFFFF";
-  const colorToVal = colorTo || "#F1F5F9";
+  const colorToVal = colorTo || "#FFFFFF";
 
   return (
     <div

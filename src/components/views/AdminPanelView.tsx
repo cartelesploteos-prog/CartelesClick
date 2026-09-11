@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ShieldCheck,
   Lock,
@@ -422,6 +423,11 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
 
   // Bulk Order Management
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const selectedOrdersTotal = useMemo(() => {
+    return orders
+      .filter((o) => selectedOrders.includes(o.id))
+      .reduce((sum, o) => sum + (Number(o.totalAmountARS) || Number((o as any).totalPriceARS) || 0), 0);
+  }, [orders, selectedOrders]);
 
   // Audit Log & Production Verification Modal States
   const [auditLogOrder, setAuditLogOrder] = useState<Order | null>(null);
@@ -1030,6 +1036,9 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                 </div>
 
               </div>
+
+              {/* 📊 RECHARTS METRICS & PIPELINE WIDGETS */}
+              <AdminMetricsWidgets orders={orders} />
 
               {/* TOP SELLING MATERIALS */}
               <div className="p-6 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4">
@@ -2889,6 +2898,70 @@ Placa PVC 3mm	rigidos	placa	42000	100"
         order={selectedOrderDetail}
         onClose={() => setSelectedOrderDetail(null)}
       />
+
+      {/* ⚡ BARRA FLOTANTE DE ACCIONES MASIVAS (LIQUID GLASS) */}
+      <AnimatePresence>
+        {selectedOrders.length > 0 && activeTab === "pedidos" && (
+          <motion.div
+            initial={{ y: 60, opacity: 0, scale: 0.96 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 60, opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100vw-2rem)] max-w-3xl p-3.5 sm:p-4 rounded-2xl liquid-glass-dropdown shadow-2xl border border-primary/30 flex flex-wrap items-center justify-between gap-3 text-xs"
+          >
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-full bg-primary text-white font-mono font-bold text-xs shadow-xs">
+                {selectedOrders.length} {selectedOrders.length === 1 ? "pedido" : "pedidos"}
+              </span>
+              <div className="hidden sm:flex flex-col">
+                <span className="text-[11px] text-[var(--text-secondary)]">Total seleccionado</span>
+                <span className="font-mono-num font-bold text-sm text-[var(--text-primary)]">
+                  ${selectedOrdersTotal.toLocaleString("es-AR")}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 bg-[var(--bg-surface-subtle)] px-2.5 py-1.5 rounded-[7px] border border-[var(--border-subtle)]">
+                <span className="text-[11px] text-[var(--text-secondary)] font-medium">Estado:</span>
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) handleBulkStatusUpdate(e.target.value);
+                  }}
+                  defaultValue=""
+                  className="bg-transparent text-xs text-[var(--text-primary)] font-semibold border-0 focus:outline-none cursor-pointer"
+                >
+                  <option value="" disabled>Cambiar estado masivo...</option>
+                  <option value="pendiente">A: Pendiente</option>
+                  <option value="en_produccion">A: En Producción</option>
+                  <option value="terminaciones">A: Terminaciones</option>
+                  <option value="despachado">A: Despachado</option>
+                  <option value="entregado">A: Entregado</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleExportSelected}
+                className="px-3 py-1.5 rounded-[7px] text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                title="Descargar pedidos seleccionados a CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Exportar CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedOrders([])}
+                className="px-2.5 py-1.5 rounded-[7px] text-xs font-medium bg-[var(--bg-surface-subtle)] hover:bg-rose-500/10 hover:text-rose-500 border border-[var(--border-subtle)] text-[var(--text-secondary)] transition-colors cursor-pointer"
+                title="Limpiar selección"
+              >
+                Deseleccionar
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

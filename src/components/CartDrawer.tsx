@@ -19,7 +19,6 @@ import {
   Building2,
   Share2,
 } from "lucide-react";
-import confetti from "canvas-confetti";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
 import { useCartStore } from "../store/useCartStore";

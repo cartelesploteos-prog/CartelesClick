@@ -95,27 +95,27 @@
     --bg-surface-subtle: #F1F5F9;
     --bg-surface-elevated: #FFFFFF;
     
-    --border-subtle: rgba(0, 0, 0, 0.05);
-    --border-strong: rgba(0, 0, 0, 0.10);
-    --border-interactive: #2563EB;
+    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.15);
+    --border-interactive: #1D4ED8;
 
     --text-primary: #0F172A;
-    --text-secondary: #475569;
-    --text-muted: #94A3B8;
+    --text-secondary: #334155;
+    --text-muted: #475569;
     --text-inverse: #FFFFFF;
 
-    --brand-brick: #0055FF; /* Premium Tech Blue */
-    --brand-brick-hover: #0044CC;
-    --brand-craft: #475569;
+    --brand-brick: #1D4ED8; /* Premium Tech Blue - WCAG AA >= 4.5:1 with white text and on light backgrounds */
+    --brand-brick-hover: #1E40AF;
+    --brand-craft: #334155;
     --brand-concrete: #E2E8F0;
     --brand-graphite: #F8FAFC;
     
-    --color-primary: #0055FF;
-    --color-primary-hover: #0044CC;
+    --color-primary: #1D4ED8;
+    --color-primary-hover: #1E40AF;
     --color-accent: #0284C7;
     --color-accent-hover: #0369A1;
 
-    --pattern-color: rgba(0, 0, 0, 0.04);
+    --pattern-color: rgba(15, 23, 42, 0.04);
   }
 
   .dark {
@@ -124,27 +124,27 @@
     --bg-surface-subtle: #1F2937;
     --bg-surface-elevated: #1F2937;
 
-    --border-subtle: rgba(255, 255, 255, 0.05);
-    --border-strong: rgba(255, 255, 255, 0.10);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.15);
     --border-interactive: #3B82F6;
 
     --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --text-muted: #475569;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
     --text-inverse: #0B0F19;
 
-    --brand-brick: #0066FF;
-    --brand-brick-hover: #3388FF;
-    --brand-craft: #94A3B8;
+    --brand-brick: #2563EB; /* WCAG AA >= 4.5:1 with white text */
+    --brand-brick-hover: #3B82F6;
+    --brand-craft: #CBD5E1;
     --brand-concrete: #1F2937;
     --brand-graphite: #111827;
 
-    --color-primary: #0066FF;
-    --color-primary-hover: #3388FF;
+    --color-primary: #2563EB;
+    --color-primary-hover: #3B82F6;
     --color-accent: #38BDF8;
     --color-accent-hover: #7DD3FC;
     
-    --pattern-color: rgba(255, 255, 255, 0.03);
+    --pattern-color: rgba(255, 255, 255, 0.04);
   }
 
   html {
@@ -911,8 +911,8 @@ html.dark ::-webkit-scrollbar-thumb {
   overflow: hidden;
   isolation: isolate;
   --beam-border-width: 2px;
-  --beam-color-from: transparent;
-  --beam-color-to: #FCD34D;
+  --beam-color-from: rgba(255, 255, 255, 0.2);
+  --beam-color-to: #FFFFFF;
   --beam-duration: 4s;
 }
 

@@ -81,6 +81,7 @@ type AuthFormData = z.infer<typeof authValidationSchema>;
 interface AuthModalProps {
   isOpen?: boolean;
   onClose?: () => void;
+  onSuccess?: () => void;
   defaultMode?: "login" | "register" | "forgot";
   title?: string;
 }
@@ -88,6 +89,7 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen = true,
   onClose,
+  onSuccess,
   defaultMode = "login",
   title,
 }) => {
@@ -167,7 +169,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           message: "Bienvenido a Carteles.Click. Ya puedes guardar tus cotizaciones y seguir tus pedidos.",
           priority: "normal",
         });
-        if (onClose) onClose();
+        if (onSuccess) {
+          onSuccess();
+        } else if (onClose) {
+          onClose();
+        }
       } else {
         await login(cleanEmail, data.password);
         addNotification({
@@ -176,7 +182,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           message: "Has ingresado correctamente a tu panel.",
           priority: "normal",
         });
-        if (onClose) onClose();
+        if (onSuccess) {
+          onSuccess();
+        } else if (onClose) {
+          onClose();
+        }
       }
     } catch (err: any) {
       const msg = err.message || "No se pudo completar la operación. Por favor intenta nuevamente.";
@@ -194,7 +204,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         message: "Has ingresado correctamente a tu cuenta de Carteles.Click.",
         priority: "normal",
       });
-      if (onClose) onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else if (onClose) {
+        onClose();
+      }
     } catch (err: any) {
       const code = err?.code || "";
       if (code.includes("auth/popup-closed-by-user")) {
@@ -224,7 +238,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 10 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative w-full max-w-md my-8 p-6 sm:p-8 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl text-[var(--text-primary)]"
+          className="relative w-full max-w-md my-8 p-6 sm:p-8 rounded-2xl liquid-glass-modal shadow-2xl text-[var(--text-primary)]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* CLOSE BUTTON */}
@@ -313,6 +327,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   autoComplete={mode === "register" ? "new-password" : "current-password"}
                   placeholder="••••••••"
                 />
+              )}
+
+              {mode === "login" && (
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      methods.setValue("email", "carteles.ploteos@gmail.com", { shouldValidate: true });
+                      methods.setValue("password", "cartelesclick2026", { shouldValidate: true });
+                    }}
+                    className="text-[11px] text-primary hover:underline flex items-center gap-1.5 cursor-pointer py-1 font-medium transition-colors"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Rellenar con credenciales de Administrador</span>
+                  </button>
+                </div>
               )}
 
               {mode === "register" && (

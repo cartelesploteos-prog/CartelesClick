@@ -40,6 +40,25 @@ const playCelebrationChime = () => {
   }
 };
 
+// Palette of system blues, celestes, and electric cyans matching the UI
+const SYSTEM_CONFETTI_COLORS = [
+  "#0284C7", // Sky 600 / Primario de sistema
+  "#0EA5E9", // Sky 500
+  "#38BDF8", // Sky 400 celeste claro
+  "#06B6D4", // Cyan 500
+  "#22D3EE", // Cyan 400 celeste cian
+  "#3B82F6", // Blue 500 eléctrico
+  "#FFFFFF", // Blanco puro
+];
+
+const SYSTEM_SPARKLE_COLORS = [
+  "#38BDF8", // Celeste cielo
+  "#22D3EE", // Celeste cian brillante
+  "#67E8F9", // Cian claro
+  "#0EA5E9", // Azul cielo
+  "#FFFFFF", // Brillo blanco
+];
+
 /**
  * Triggers order placement celebration (checkout completed)
  */
@@ -47,18 +66,18 @@ export const triggerOrderCelebration = () => {
   try {
     playCelebrationChime();
 
-    // 1. Confetti burst from both sides
+    // 1. Confetti burst from both sides in system blue & cyan tones
     confetti({
-      particleCount: 70,
+      particleCount: 75,
       spread: 75,
       origin: { y: 0.6, x: 0.2 },
-      colors: ["[var(--brand-brick)]", "#FFA048", "#FFFFFF", "#232736", "#25D366"],
+      colors: SYSTEM_CONFETTI_COLORS,
     });
     confetti({
-      particleCount: 70,
+      particleCount: 75,
       spread: 75,
       origin: { y: 0.6, x: 0.8 },
-      colors: ["[var(--brand-brick)]", "#FFA048", "#FFFFFF", "#232736", "#25D366"],
+      colors: SYSTEM_CONFETTI_COLORS,
     });
   } catch {
     // Graceful fallback
@@ -66,7 +85,7 @@ export const triggerOrderCelebration = () => {
 };
 
 /**
- * Triggers a "Brindis" celebration with champagne confetti & toast feedback
+ * Triggers a "Brindis" celebration with confetti & toast feedback
  * when clicking CTAs or entering Click Mode
  */
 export const triggerBrindisCelebration = (
@@ -90,14 +109,14 @@ export const triggerBrindisCelebration = (
   try {
     playCelebrationChime();
 
-    // Confetti cannon blast
+    // Confetti cannon blast in system blue & cyan tones
     confetti({
-      particleCount: 45,
+      particleCount: 50,
       angle: 90,
-      spread: 60,
+      spread: 65,
       startVelocity: 35,
       origin: { x: originX, y: originY },
-      colors: ["[var(--brand-brick)]", "#FFA048", "#F59E0B", "#10B981", "#FFFFFF"],
+      colors: SYSTEM_CONFETTI_COLORS,
       shapes: ["circle", "square"],
       ticks: 200,
     });
@@ -105,18 +124,18 @@ export const triggerBrindisCelebration = (
     // Secondary sparkle burst
     setTimeout(() => {
       confetti({
-        particleCount: 25,
+        particleCount: 28,
         angle: 60,
         spread: 45,
         origin: { x: Math.max(0.1, originX - 0.15), y: originY },
-        colors: ["[var(--brand-brick)]", "#FFA048", "#FDE047"],
+        colors: SYSTEM_SPARKLE_COLORS,
       });
       confetti({
-        particleCount: 25,
+        particleCount: 28,
         angle: 120,
         spread: 45,
         origin: { x: Math.min(0.9, originX + 0.15), y: originY },
-        colors: ["[var(--brand-brick)]", "#FFA048", "#FDE047"],
+        colors: SYSTEM_SPARKLE_COLORS,
       });
     }, 120);
 

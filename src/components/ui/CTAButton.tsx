@@ -20,18 +20,18 @@ export interface CTAButtonProps extends Omit<ButtonProps, "onClick"> {
 export const CTAButton: React.FC<CTAButtonProps> = ({
   children,
   onClick,
-  celebrationMessage = "¡Acción completada con éxito! 🥂✨",
+  celebrationMessage = "¡Acción completada con éxito! ✨",
   hideBorderBeam = false,
   borderWidth = 2,
   colorTo,
   borderColor,
-  colorFrom = "#FFE600",
+  colorFrom = "#FFFFFF",
   duration = 3.5,
   enableConfetti = true,
   className = "",
   ...props
 }) => {
-  const resolvedColorTo = colorTo || borderColor || "#FCD34D";
+  const resolvedColorTo = colorTo || borderColor || "#FFFFFF";
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (enableConfetti) {
@@ -40,7 +40,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
           particleCount: 65,
           spread: 60,
           origin: { y: 0.7 },
-          colors: ["[var(--brand-brick)]", "#FCD34D", "#FFE600", "#FF7744", "#FFFFFF"],
+          colors: ["#0284C7", "#0EA5E9", "#38BDF8", "#06B6D4", "#22D3EE", "#3B82F6", "#FFFFFF"],
         });
       } catch (err) {
         console.warn("Canvas confetti effect unavailable:", err);

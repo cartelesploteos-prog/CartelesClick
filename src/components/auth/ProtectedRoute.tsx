@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ShieldAlert, Loader2, ArrowLeft } from "lucide-react";
+import { ShieldAlert, Loader2, ArrowLeft, ShieldCheck, LogIn } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { AuthModal } from "./AuthModal";
 
@@ -17,16 +17,24 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   onNavigate,
   defaultMode = "login"
 }) => {
-  const { user, loading, isAdmin } = useAuthStore();
+  const { user, loading, isAdmin, logout } = useAuthStore();
+  const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
 
-  const handleClose = () => {
+  // If user dismisses without authenticating, return to home
+  const handleDismiss = () => {
+    setShowAdminLoginModal(false);
     if (onNavigate) {
       onNavigate("home");
     }
   };
 
+  const handleAuthSuccess = () => {
+    setShowAdminLoginModal(false);
+    // User is now authenticated, stay on this protected view!
+  };
+
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {/* 1. ESTADO DE CARGA */}
       {loading && (
         <motion.div
@@ -37,7 +45,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           transition={{ duration: 0.2 }}
           className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center"
         >
-          <div className="p-8 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] max-w-sm w-full flex flex-col items-center gap-4">
+          <div className="p-8 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] max-w-sm w-full flex flex-col items-center gap-4 shadow-lg">
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
             <div className="space-y-1">
               <p className="text-sm font-medium text-[var(--text-primary)]">
@@ -61,7 +69,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           transition={{ duration: 0.2 }}
           className="min-h-[70vh] flex flex-col items-center justify-center p-6"
         >
-          <div className="text-center max-w-md p-8 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4">
+          <div className="text-center max-w-md p-8 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xl">
             <div className="w-12 h-12 rounded-[7px] bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
               <ShieldAlert className="w-6 h-6" />
             </div>
@@ -75,7 +83,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <AuthModal 
             isOpen={true} 
             defaultMode={defaultMode} 
-            onClose={handleClose} 
+            onClose={handleDismiss}
+            onSuccess={handleAuthSuccess}
           />
         </motion.div>
       )}
@@ -98,18 +107,38 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               Permiso de Administrador Requerido
             </h2>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              La cuenta <strong>{user.email}</strong> no cuenta con privilegios administrativos (Custom Claim <code className="px-1 py-0.5 bg-[var(--bg-surface-subtle)] rounded text-[11px]">admin: true</code>) para acceder al panel de producción y catálogo.
+              La cuenta <strong>{user.email}</strong> no cuenta con privilegios administrativos para acceder al panel de control y taller central.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
               <button
-                onClick={handleClose}
-                className="w-full py-2.5 px-4 rounded-[7px] text-xs font-medium bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                onClick={async () => {
+                  await logout();
+                  setShowAdminLoginModal(true);
+                }}
+                className="w-full py-2.5 px-4 rounded-[7px] text-xs font-medium bg-primary hover:bg-primary-hover text-white transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Ingresar como Administrador (carteles.ploteos@gmail.com)</span>
+              </button>
+              <button
+                onClick={handleDismiss}
+                className="w-full py-2 px-4 rounded-[7px] text-xs font-medium bg-[var(--bg-surface-subtle)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Volver al catálogo principal</span>
               </button>
             </div>
           </div>
+
+          {showAdminLoginModal && (
+            <AuthModal
+              isOpen={true}
+              defaultMode="login"
+              title="Acceso de Administrador"
+              onClose={() => setShowAdminLoginModal(false)}
+              onSuccess={handleAuthSuccess}
+            />
+          )}
         </motion.div>
       )}
 
