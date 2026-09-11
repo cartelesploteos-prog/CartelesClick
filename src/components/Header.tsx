@@ -219,7 +219,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
       role="banner"
       className="fixed top-3 sm:top-4 left-0 right-0 z-50 w-full px-3 sm:px-6 pointer-events-none transition-all"
     >
-      <div ref={headerContainerRef} className="max-w-5xl mx-auto pointer-events-auto rounded-full glass-panel px-4 sm:px-5 py-2.5 flex items-center justify-between gap-3 transition-all shadow-sm">
+      <div ref={headerContainerRef} className="max-w-5xl mx-auto pointer-events-auto rounded-full liquid-glass px-4 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-3 transition-all">
         {/* LOGO */}
         <motion.button
           id="btn-logo-header"
@@ -229,7 +229,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
           className="flex items-center gap-2.5 sm:gap-3 text-left rounded-full focus-visible:ring-2 focus-visible:ring-[var(--brand-brick)] group pl-0.5 cursor-pointer"
           aria-label="Carteles.Click - Inicio"
         >
-          <div className="w-11 h-11 rounded-full bg-[var(--brand-brick)] hover:bg-[var(--brand-brick-hover)] flex items-center justify-center text-white shrink-0 shadow-md shadow-[var(--brand-brick)]/25 transition-all">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[var(--brand-brick)] hover:bg-[var(--brand-brick-hover)] flex items-center justify-center text-white shrink-0 shadow-md shadow-[var(--brand-brick)]/25 transition-all">
             <Zap className="w-5 h-5 fill-current text-white" aria-hidden="true" />
           </div>
           <div className="font-heading">
@@ -246,11 +246,11 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
             onClick={() => setIsMobileSearchOpen(true)}
             aria-label="Buscar materiales, blog o portfolio"
             title="Buscar (⌘K)"
-            className="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-full bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer border border-[var(--border-subtle)]"
+            className="flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-full liquid-glass-control text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer"
           >
             <Search className="w-4 h-4 text-[var(--brand-brick)]" strokeWidth={2} />
             <span className="hidden sm:inline">Buscar...</span>
-            <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+            <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-muted)] border border-black/5 dark:border-white/10">
               ⌘K
             </span>
           </button>
@@ -264,10 +264,10 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               isOpen
-                ? "bg-[var(--brand-brick)] dark:bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/25 dark:shadow-[var(--brand-brick)]/30"
-                : "bg-[var(--bg-surface-subtle)] text-[var(--text-primary)]"
+                ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/25 border border-[var(--brand-brick)] ring-1 ring-white/25"
+                : "liquid-glass-control text-[var(--text-primary)]"
             }`}
             aria-label={isOpen ? "Cerrar menú" : "Abrir menú de navegación"}
             title={isOpen ? "Cerrar menú" : "Abrir menú"}
@@ -405,7 +405,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                                 className={`w-full flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                                   isCurrent
                                     ? "bg-[var(--brand-brick)]/10 border-[var(--brand-brick)]/40 text-[var(--brand-brick)] font-bold"
-                                    : "bg-[var(--bg-surface-subtle)] text-[var(--text-primary)]"
+                                    : "bg-[var(--bg-surface-subtle)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-[var(--text-primary)]"
                                 }`}
                               >
                                 <div
@@ -506,7 +506,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="relative z-50 w-full max-w-lg bg-[var(--bg-surface-elevated)] rounded-2xl shadow-2xl overflow-hidden p-4 space-y-3"
+                className="relative z-50 w-full max-w-lg liquid-glass-modal rounded-2xl shadow-2xl overflow-hidden p-4 space-y-3"
               >
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
                   <div className="flex items-center gap-2">

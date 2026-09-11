@@ -59,13 +59,18 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
 
   // Click outside to close dropdown
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node | null;
+      if (containerRef.current && target && !containerRef.current.contains(target)) {
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   // Compute fuzzy search results across Materials, Dictionary, Blog, and Portfolio
@@ -193,7 +198,8 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-0 right-0 top-full mt-2 z-50 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] shadow-2xl overflow-hidden max-h-[80vh] sm:max-h-[480px] flex flex-col text-[var(--text-primary)]"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute left-0 right-0 top-full mt-2 z-50 rounded-2xl liquid-glass-dropdown shadow-2xl overflow-hidden max-h-[80vh] sm:max-h-[480px] flex flex-col text-[var(--text-primary)]"
           >
             {/* CATEGORY FILTER CHIPS */}
             {query.trim().length > 0 && (

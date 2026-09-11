@@ -895,7 +895,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
@@ -1065,7 +1065,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
@@ -1220,7 +1220,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
@@ -1375,7 +1375,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {/* ROLL UP 83X200 */}
           <div className="ideogram-card p-6 flex flex-col justify-between space-y-4 border border-primary/30 relative">
             <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold uppercase tracking-wider">

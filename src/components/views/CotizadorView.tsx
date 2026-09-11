@@ -3160,7 +3160,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
         </div>
 
         {/* RIGHT COLUMN: STICKY LIVE SERVER PRICE PANEL */}
-        <div className="lg:col-span-4 sticky top-20">
+        <div className="lg:col-span-4 sticky-sidebar-contained pr-1 custom-scrollbar">
           <div className="p-5 sm:p-6 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-4 shadow-sm">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
               <div>

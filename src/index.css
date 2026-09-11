@@ -435,31 +435,54 @@ td {
 /* FLUID RESPONSIVE CSS GRID SYSTEM */
 .fluid-grid-auto {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(16rem, 28vw, 24rem)), 1fr));
-  gap: clamp(0.75rem, 2vw, 1.5rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(14.5rem, 22vw, 21rem)), 1fr));
+  gap: clamp(0.75rem, 1.8vw, 1.5rem);
 }
 
 .fluid-grid-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(17rem, 24vw, 22rem)), 1fr));
-  gap: clamp(1rem, 2.2vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(15rem, 20vw, 19.5rem)), 1fr));
+  gap: clamp(0.875rem, 1.8vw, 1.5rem);
 }
 
 .fluid-grid-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(15rem, 20vw, 20rem)), 1fr));
-  gap: clamp(0.75rem, 1.8vw, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(14rem, 18vw, 19rem)), 1fr));
+  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+}
+
+/* Mid-sized viewport sticky containment to prevent vertical cut-off on 768px laptop screens */
+@media (min-width: 1024px) {
+  .sticky-sidebar-contained {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }
 
 /* ==========================================================================
-   IDEOGRAM GLASS PANELS & GLOW UTILITIES (HARDWARE-ACCELERATED)
+   ULTRA-MODERN LIQUID GLASS (CRYSTALLINE OPTICAL REFRACTION & CHROMATIC BALANCE)
    ========================================================================== */
+.liquid-glass,
 .glass-panel {
-  background-color: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02) inset;
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.52) 50%,
+    rgba(255, 255, 255, 0.68) 100%
+  );
+  backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 
+    0 0 0 1px rgba(15, 23, 42, 0.05),
+    0 16px 40px -8px rgba(15, 23, 42, 0.12),
+    0 4px 14px -2px rgba(15, 23, 42, 0.04),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px 0 rgba(15, 23, 42, 0.04);
   /* Hardware acceleration for ultra-fluid fixed rendering during scroll */
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
@@ -468,17 +491,149 @@ td {
   will-change: transform, backdrop-filter;
 }
 
+.liquid-glass::before,
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 75% 45% at 50% 0%,
+    rgba(255, 255, 255, 0.65) 0%,
+    transparent 70%
+  );
+  opacity: 0.85;
+  transition: opacity 300ms ease;
+}
+
+.dark .liquid-glass,
 .dark .glass-panel {
-  background-color: rgba(17, 24, 39, 0.6);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  background: linear-gradient(
+    135deg,
+    rgba(20, 27, 44, 0.78) 0%,
+    rgba(15, 23, 42, 0.65) 50%,
+    rgba(24, 32, 52, 0.75) 100%
+  );
+  backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    0 20px 48px -10px rgba(0, 0, 0, 0.65),
+    0 6px 18px -2px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35);
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   will-change: transform, backdrop-filter;
+}
+
+.dark .liquid-glass::before,
+.dark .glass-panel::before {
+  background: radial-gradient(
+    ellipse 75% 45% at 50% 0%,
+    rgba(255, 255, 255, 0.14) 0%,
+    transparent 70%
+  );
+  opacity: 0.85;
+}
+
+/* High-Legibility Liquid Glass for Dropdowns, Popovers and Modals */
+.liquid-glass-dropdown,
+.liquid-glass-modal {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.84) 50%,
+    rgba(255, 255, 255, 0.90) 100%
+  );
+  backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 0 0 1px rgba(15, 23, 42, 0.06),
+    0 24px 48px -12px rgba(15, 23, 42, 0.16),
+    0 8px 24px -4px rgba(15, 23, 42, 0.06),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+  will-change: backdrop-filter;
+}
+
+.liquid-glass-dropdown::before,
+.liquid-glass-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 40% at 50% 0%,
+    rgba(255, 255, 255, 0.70) 0%,
+    transparent 65%
+  );
+  opacity: 0.9;
+}
+
+.dark .liquid-glass-dropdown,
+.dark .liquid-glass-modal {
+  background: linear-gradient(
+    135deg,
+    rgba(22, 29, 45, 0.92) 0%,
+    rgba(15, 23, 42, 0.85) 50%,
+    rgba(26, 35, 56, 0.90) 100%
+  );
+  backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(104%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 24px 52px -12px rgba(0, 0, 0, 0.75),
+    0 8px 24px -4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.20);
+  will-change: backdrop-filter;
+}
+
+.dark .liquid-glass-dropdown::before,
+.dark .liquid-glass-modal::before {
+  background: radial-gradient(
+    ellipse 80% 40% at 50% 0%,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 65%
+  );
+  opacity: 0.9;
+}
+
+/* Fluid inner controls resting inside liquid glass */
+.liquid-glass-control {
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.70), 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-control:hover {
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: var(--text-primary);
+}
+
+.dark .liquid-glass-control {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.dark .liquid-glass-control:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--text-primary);
 }
 
 .ideogram-card {

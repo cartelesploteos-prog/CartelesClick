@@ -41,13 +41,19 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target || !dropdownRef.current) return;
+      if (!dropdownRef.current.contains(target)) {
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const getIcon = (type: NotificationType) => {
@@ -133,7 +139,12 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
 
       {/* DROPDOWN POPUP */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-[380px] rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-elevated)] shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[540px]">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-[360px] sm:w-[380px] rounded-2xl liquid-glass-dropdown shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[min(520px,calc(100vh-6rem))] overscroll-contain"
+        >
           {/* HEADER */}
           <div className="p-3.5 px-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-subtle)]">
             <div className="flex items-center gap-2">

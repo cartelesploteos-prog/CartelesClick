@@ -100,7 +100,7 @@ export const OrderQRCodeModal: React.FC<OrderQRCodeModalProps> = ({
       aria-modal="true"
       aria-labelledby="qr-modal-title"
     >
-      <div className="relative w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-md liquid-glass-modal rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[min(640px,90vh)]">
         {/* HEADER */}
         <div className="p-4 sm:p-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-page)]">
           <div className="flex items-center gap-2.5">

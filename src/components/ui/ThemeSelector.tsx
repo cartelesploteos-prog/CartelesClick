@@ -23,7 +23,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       id={id}
       type="button"
       onClick={toggleTheme}
-      className={`relative h-10 px-3 sm:h-11 sm:px-3.5 flex items-center justify-center gap-2 rounded-full bg-[var(--bg-surface-subtle)] hover:bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer overflow-hidden shadow-xs select-none ${className}`}
+      className={`relative h-10 px-3 sm:h-11 sm:px-3.5 flex items-center justify-center gap-2 rounded-full liquid-glass-control text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer overflow-hidden select-none ${className}`}
       aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
       title={isDark ? "Activar Modo Claro" : "Activar Modo Oscuro"}
     >

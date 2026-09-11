@@ -230,7 +230,7 @@ export const LiveChatSupport: React.FC<LiveChatSupportProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="w-[calc(100svw-2rem)] sm:w-[420px] max-h-[85svh] h-[580px] flex flex-col rounded-3xl bg-[var(--bg-surface-elevated)] border border-[var(--border-strong)] shadow-2xl overflow-hidden backdrop-blur-2xl z-50 text-[var(--text-primary)]"
+              className="w-[calc(100svw-2rem)] sm:w-[420px] max-h-[85svh] h-[580px] flex flex-col rounded-3xl liquid-glass-modal shadow-2xl overflow-hidden z-50 text-[var(--text-primary)]"
             >
               {/* CHAT HEADER */}
               <div className="px-4 py-3.5 bg-[var(--bg-surface-subtle)] border-b border-[var(--border-subtle)] flex items-center justify-between gap-2 shrink-0">
