@@ -100,7 +100,7 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ onNavigate
               </button>
             </div>
 
-            <h4 className="text-xs font-semibold text-[var(--text-primary)] leading-tight pt-0.5">
+            <h4 className="text-canonical-h4">
               {activeToast.title}
             </h4>
 

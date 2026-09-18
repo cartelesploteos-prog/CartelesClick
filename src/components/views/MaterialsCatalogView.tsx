@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Package,
   ArrowRight,
@@ -17,6 +18,8 @@ import { MaterialOption } from "../../types";
 import { CatalogSkeletonGrid } from "../ui/Skeleton";
 import { TextureMagnifier } from "../ui/TextureMagnifier";
 import { RigidsComparisonTable } from "../ui/RigidsComparisonTable";
+import { useMaterialStore } from "../../store/useMaterialStore";
+import { trackMaterialSeleccionado } from "../../utils/analytics";
 
 interface MaterialsCatalogViewProps {
   onNavigate: (view: string, param?: string) => void;
@@ -32,8 +35,9 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
   const [inspectingMaterial, setInspectingMaterial] = useState<MaterialOption | null>(null);
   const [macroZoom, setMacroZoom] = useState<number>(3.0);
   const [lightMode, setLightMode] = useState<"direct" | "grazing">("direct");
+  const { materials: storeMaterials, isLoading: isStoreLoading } = useMaterialStore();
 
-  // Initial and transition loading state for smooth data transitions
+  // Initial and transition loading state for smooth skeleton transitions
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
@@ -41,6 +45,8 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
     }, 280);
     return () => clearTimeout(timer);
   }, [selectedCategory]);
+
+  const showLoading = isLoading || isStoreLoading;
 
   const categories = [
     { id: "all", label: "Todos los Materiales" },
@@ -51,7 +57,22 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
     { id: "estampados", label: "Textil & DTF" },
   ];
 
-  const filteredMaterials = MATERIALS_CATALOG.filter((mat) => {
+  // Merge catalog with any store materials if present
+  const baseMaterials = React.useMemo(() => {
+    if (!storeMaterials || storeMaterials.length === 0) return MATERIALS_CATALOG;
+    return MATERIALS_CATALOG.map((mat) => {
+      const match = storeMaterials.find((sm) => sm.id === mat.id);
+      if (match) {
+        return {
+          ...mat,
+          costARS: match.salePriceARS || mat.costARS,
+        };
+      }
+      return mat;
+    });
+  }, [storeMaterials]);
+
+  const filteredMaterials = baseMaterials.filter((mat) => {
     const matchesCat =
       selectedCategory === "all" || mat.category === selectedCategory;
     const query = searchQuery.trim().toLowerCase();
@@ -63,14 +84,19 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
     return matchesCat && matchesSearch;
   });
 
+  const handleSelectMaterial = (mat: MaterialOption, targetView: "cotizador" | "material-detail") => {
+    trackMaterialSeleccionado(mat.id, mat.name, mat.category);
+    onNavigate(targetView, mat.id);
+  };
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto space-y-2">
         <span className="text-xs uppercase tracking-widest text-primary font-heading font-medium">
           Sustratos Industriales Certificados
         </span>
-        <h1 className="font-heading text-3xl sm:text-4xl text-[var(--text-primary)] tracking-tight font-medium">
+        <h1 className="text-canonical-h1">
           {t("materials_title")}
         </h1>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans font-normal">
@@ -113,12 +139,12 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
       </div>
 
       {/* SKELETON LOADING OR MATERIALS BENTO GRID */}
-      {isLoading ? (
+      {showLoading ? (
         <CatalogSkeletonGrid count={8} />
       ) : filteredMaterials.length === 0 ? (
         <div className="p-8 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-none text-center space-y-3 max-w-md mx-auto font-sans">
           <Package className="w-10 h-10 text-[var(--text-muted)] mx-auto" />
-          <h3 className="font-heading text-base text-[var(--text-primary)] font-medium">
+          <h3 className="text-canonical-h3">
             No se encontraron sustratos
           </h3>
           <p className="text-xs text-[var(--text-secondary)] font-normal">
@@ -135,11 +161,41 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-          {filteredMaterials.map((mat) => (
-            <div
+        <motion.div
+          layout
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.05,
+              },
+            },
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6"
+        >
+          {filteredMaterials.map((mat, index) => (
+            <motion.div
               key={mat.id}
-              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-none overflow-hidden flex flex-col justify-between group transition-all hover:border-primary/40"
+              layout
+              variants={{
+                hidden: { opacity: 0, y: 16 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    duration: 0.28,
+                    ease: [0.2, 0.8, 0.2, 1],
+                  },
+                },
+              }}
+              whileHover={{
+                y: -4,
+                transition: { duration: 0.2 },
+              }}
+              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-none overflow-hidden flex flex-col justify-between group transition-colors hover:border-primary/40"
             >
               <div>
                 {/* HOVER-ACTIVATED TEXTURE MAGNIFIER */}
@@ -153,15 +209,17 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
                     onInspectMacro={() => setInspectingMaterial(mat)}
                   />
                   {mat.badge && (
-                    <span className="absolute top-3 right-3 text-[10px] px-2.5 py-0.5 rounded-full bg-accent text-black font-sans font-bold shadow-md z-10">
+                    <span className="absolute top-3 right-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-900/90 dark:bg-sky-400 text-white dark:text-sky-950 font-sans font-bold shadow-md z-20">
                       {mat.badge}
                     </span>
                   )}
-                  <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none z-10">
-                    <span className="text-[10px] uppercase tracking-wider text-white/80 block font-heading font-semibold">
+                  {/* SCRIM DE PROTECCION PARA CONTRASTE WCAG AAA SOBRE MATERIALES BLANCOS/CLAROS */}
+                  <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/90 via-black/55 to-transparent pointer-events-none rounded-b-[7px] z-10" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none z-20">
+                    <span className="text-[10px] uppercase tracking-wider text-white/90 block font-heading font-semibold drop-shadow-sm">
                       {mat.category} · {mat.mode.toUpperCase()}
                     </span>
-                    <h3 className="text-sm text-white font-heading font-bold leading-tight mt-0.5">
+                    <h3 className="text-canonical-h3 !text-white drop-shadow-sm">
                       {mat.name}
                     </h3>
                   </div>
@@ -214,23 +272,23 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
               <div className="p-5 pt-0 grid grid-cols-2 gap-2 font-sans">
                 <button
                   type="button"
-                  onClick={() => onNavigate("material-detail", mat.id)}
+                  onClick={() => handleSelectMaterial(mat, "material-detail")}
                   className="py-2.5 px-3 rounded-xl border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] hover:border-primary transition-colors text-center font-medium cursor-pointer"
                 >
                   Ficha Técnica
                 </button>
                 <button
                   type="button"
-                  onClick={() => onNavigate("cotizador", mat.id)}
+                  onClick={() => handleSelectMaterial(mat, "cotizador")}
                   className="py-2.5 px-3 rounded-xl bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs transition-colors flex items-center justify-center gap-1 font-bold cursor-pointer shadow-xs"
                 >
                   <span>Cotizar</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* SIDE-BY-SIDE RIGIDS COMPARISON TABLE */}
@@ -256,7 +314,7 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
                   <ZoomIn className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 id="macro-modal-title" className="font-heading text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                  <h3 id="macro-modal-title" className="font-heading text-sm sm:text-base font-semibold text-[var(--text-primary)]">
                     Inspección Macro de Textura: {inspectingMaterial.name}
                   </h3>
                   <p className="text-xs text-[var(--text-secondary)]">
@@ -348,7 +406,7 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
 
               {/* TECHNICAL SPEC SUMMARY */}
               <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-subtle)] space-y-2 text-xs">
-                <h4 className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                <h4 className="text-canonical-h4">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   Propiedades de Superficie y Tacto
                 </h4>

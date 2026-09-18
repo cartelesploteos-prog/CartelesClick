@@ -52,6 +52,7 @@ import {
 } from "../../types";
 import { useCartStore } from "../../store/useCartStore";
 import { useCurrencyStore } from "../../store/useCurrencyStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useTranslation } from "react-i18next";
 import { PosterWallR3F } from "../PosterWallR3F";
 import { runPreflightInspection, PreflightResult } from "../../utils/preflightCheck";
@@ -118,6 +119,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
   const { t } = useTranslation();
   const { addItem } = useCartStore();
   const { formatPrice } = useCurrencyStore();
+  const { user } = useAuthStore();
   const posterRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<
     "texts" | "background" | "images" | "stickers" | "canvas"
@@ -161,6 +163,53 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
     },
   });
 
+  // AI Quota & Limiting State
+  const [aiQuota, setAiQuota] = useState<{
+    monthlyCount: number;
+    monthlyLimit: number;
+    remainingMonthly: number;
+    isMonthlyBlocked: boolean;
+    dailyCount: number;
+    dailyLimit: number;
+    remainingDaily: number;
+    isDailyBlocked: boolean;
+    isBlocked: boolean;
+    fixedFeeARS: number;
+  }>({
+    monthlyCount: 0,
+    monthlyLimit: 15,
+    remainingMonthly: 15,
+    isMonthlyBlocked: false,
+    dailyCount: 0,
+    dailyLimit: 5,
+    remainingDaily: 5,
+    isDailyBlocked: false,
+    isBlocked: false,
+    fixedFeeARS: 3500,
+  });
+
+  // Toast / Banner de aviso de cuota o bloqueo
+  const [aiQuotaAlert, setAiQuotaAlert] = useState<{
+    type: "error" | "warning" | "success";
+    title: string;
+    message: string;
+  } | null>(null);
+
+  const fetchAiQuota = async () => {
+    try {
+      const email = user?.email || "carteles.ploteos@gmail.com";
+      const res = await fetch(`/api/ai/user-quota?email=${encodeURIComponent(email)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.monthlyLimit !== undefined) {
+          setAiQuota(data);
+        }
+      }
+    } catch (e) {
+      console.warn("No se pudo cargar la cuota de IA del usuario:", e);
+    }
+  };
+
   useEffect(() => {
     fetch("/api/pricing-config")
       .then((res) => (res.ok ? res.json() : null))
@@ -170,7 +219,9 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
         }
       })
       .catch((err) => console.log("Usando configuración de precios por defecto:", err));
-  }, []);
+
+    fetchAiQuota();
+  }, [user?.email]);
 
   // Initial Design State with interactive, movable, and scalable text layers
   const [design, setDesign] = useState<PosterDesignState>(() => {
@@ -678,9 +729,24 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
   };
 
   const handleGenerateAi = async () => {
+    // 1. Verificación en cliente para bloqueo inmediato si agotó cuota
+    if (aiQuota.isBlocked) {
+      setAiQuotaAlert({
+        type: "error",
+        title: aiQuota.isMonthlyBlocked ? "Límite mensual de IA alcanzado" : "Límite diario de IA alcanzado",
+        message: aiQuota.isMonthlyBlocked
+          ? `Alcanzaste el cupo de ${aiQuota.monthlyLimit} generaciones de este mes. Se requiere recarga de saldo o aguardar al próximo ciclo para proteger recursos de cómputo.`
+          : `Alcanzaste el cupo diario de ${aiQuota.dailyLimit} consultas con IA. Podrás generar nuevamente mañana o solicitar ampliación al taller.`
+      });
+      return;
+    }
+
     setIsGeneratingAi(true);
     setAiAdvice(null);
     try {
+      const userEmail = user?.email || "carteles.ploteos@gmail.com";
+      const userId = user?.uid || "usr_carteles_click";
+
       const response = await fetch("/api/ai/poster-assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -688,9 +754,26 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
           promptTopic: aiTopic || "Comercio local / Promoción",
           purpose: aiPurpose || "Atracción peatonal y venta directa",
           currentHeadline: design.headline,
+          userEmail,
+          userId,
         }),
       });
+
       const data = await response.json();
+
+      // Si el backend rechazó por cupo excedido
+      if (response.status === 403 || data.isBlocked) {
+        setAiQuotaAlert({
+          type: "error",
+          title: data.error || "Cupo de IA agotado",
+          message: data.message || "Has alcanzado el límite permitido de consultas de IA."
+        });
+        if (data.quota) {
+          setAiQuota(data.quota);
+        }
+        return;
+      }
+
       if (data && data.headline) {
         setDesign((prev) => {
           const newHeadline = data.headline || prev.headline;
@@ -725,9 +808,34 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
         if (data.compositionAdvice) {
           setAiAdvice(data.compositionAdvice);
         }
+
+        // Actualizar cuota disponible tras éxito
+        if (data.aiBilling) {
+          setAiQuota((prev) => ({
+            ...prev,
+            remainingMonthly: data.aiBilling.remainingMonthly,
+            remainingDaily: data.aiBilling.remainingDaily,
+            monthlyCount: prev.monthlyLimit - data.aiBilling.remainingMonthly,
+            isMonthlyBlocked: data.aiBilling.remainingMonthly <= 0,
+            isDailyBlocked: data.aiBilling.remainingDaily <= 0,
+            isBlocked: data.aiBilling.remainingMonthly <= 0 || data.aiBilling.remainingDaily <= 0,
+          }));
+
+          setAiQuotaAlert({
+            type: "success",
+            title: "Diseño con IA generado exitosamente",
+            message: `Cargo aplicado: ${formatPrice(data.aiBilling.costARS)}. Te quedan ${data.aiBilling.remainingMonthly} de ${data.aiBilling.monthlyLimit} generaciones este mes.`
+          });
+          setTimeout(() => setAiQuotaAlert(null), 5500);
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generando póster con IA:", error);
+      setAiQuotaAlert({
+        type: "error",
+        title: "Error en la consulta de IA",
+        message: "Ocurrió un error al contactar el modelo. Intentá nuevamente o verificá tu conexión."
+      });
     } finally {
       setIsGeneratingAi(false);
     }
@@ -1261,12 +1369,12 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
   const formatDetails = getFormatDetails();
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12 font-sans">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12 font-sans">
       {/* HEADER BAR */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h1 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)] font-bold">
+            <h1 className="text-canonical-h1">
               Póster & Cartel Creator
             </h1>
             <span className="text-xs px-2.5 py-0.5 rounded-[7px] bg-primary text-white font-medium flex items-center gap-1">
@@ -1301,14 +1409,81 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
 
       {/* AI ASSISTANT PROMPT BAR WITH HANDS-FREE VOICE-TO-TEXT */}
       <div className="p-5 rounded-[7px] bg-[var(--bg-surface)] border border-primary/20 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-xs uppercase tracking-wider flex items-center gap-1.5 font-medium text-[var(--text-primary)]">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" /> Asistente Creativo de Mensajes
           </span>
-          <span className="text-[10px] text-[var(--text-secondary)] font-mono">
-            Optimizado para visión a distancia y legibilidad en calle
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              Tarifa: {formatPrice(aiQuota.fixedFeeARS || pricingConfig.aiDesignFeeARS || 3500)} / diseño
+            </span>
+            <span
+              className={`text-[11px] font-mono font-medium px-2 py-0.5 rounded-full border ${
+                aiQuota.isBlocked
+                  ? "bg-red-500/10 text-red-500 border-red-500/20"
+                  : aiQuota.remainingMonthly <= 3
+                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              }`}
+            >
+              {aiQuota.isBlocked
+                ? "Límite Alcanzado"
+                : `Disponibles: ${aiQuota.remainingMonthly} de ${aiQuota.monthlyLimit} este mes`}
+            </span>
+          </div>
         </div>
+
+        {/* BANNER EN TIEMPO REAL / ALERTA DE CUOTA Y BLOQUEO */}
+        {aiQuotaAlert && (
+          <div
+            className={`p-3 rounded-lg border text-xs flex items-start gap-2.5 animate-in fade-in duration-200 ${
+              aiQuotaAlert.type === "error"
+                ? "bg-red-500/10 border-red-500/30 text-red-400"
+                : aiQuotaAlert.type === "warning"
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+            }`}
+          >
+            {aiQuotaAlert.type === "error" ? (
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            ) : aiQuotaAlert.type === "warning" ? (
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1 space-y-0.5">
+              <strong className="font-semibold block">{aiQuotaAlert.title}</strong>
+              <p className="text-[11px] opacity-90">{aiQuotaAlert.message}</p>
+            </div>
+            <button
+              onClick={() => setAiQuotaAlert(null)}
+              className="text-[10px] font-mono uppercase underline opacity-70 hover:opacity-100"
+            >
+              Cerrar
+            </button>
+          </div>
+        )}
+
+        {/* BANNER PREVENTIVO SI LA CUOTA ESTÁ BLOQUEADA */}
+        {aiQuota.isBlocked && !aiQuotaAlert && (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-1">
+              <strong className="font-semibold">Generación de IA en pausa por límite alcanzado</strong>
+              <p className="text-[11px] opacity-90">
+                Has consumido tu cupo de {aiQuota.monthlyLimit} generaciones mensuales ({aiQuota.monthlyCount} utilizadas). Contactá al taller para recargar cupo o esperá al próximo ciclo mensual.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate("pedidos")}
+              className="px-2 py-1 rounded bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[10px] font-bold shrink-0"
+            >
+              Ver Historial
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
           <div className="sm:col-span-8 relative flex items-center">
             <input
@@ -1316,17 +1491,19 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
               placeholder="Ej: Hamburguesería gourmet, Taller de ploteo, Feria de ropa, Inmobiliaria..."
               value={aiTopic}
               onChange={(e) => setAiTopic(e.target.value)}
-              className="w-full pl-4 pr-12 py-2.5 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-page)] text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary min-h-[2.75rem]"
+              disabled={aiQuota.isBlocked}
+              className="w-full pl-4 pr-12 py-2.5 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-page)] text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary min-h-[2.75rem] disabled:opacity-60"
             />
             {isVoiceSupported && (
               <button
                 type="button"
                 id="btn-voice-prompt-poster"
+                disabled={aiQuota.isBlocked}
                 onClick={isVoiceListening ? stopVoiceListening : startVoiceListening}
                 title={isVoiceListening ? "Detener dictado por voz" : "Dictar con tu voz (manos libres)"}
                 className={`absolute right-2 p-2 rounded-md transition-all cursor-pointer flex items-center justify-center ${
                   isVoiceListening
-                    ? "bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30 ring-2 ring-red-300"
+                    ? "bg-red-800 text-white animate-pulse shadow-md shadow-red-500/30 ring-2 ring-red-300"
                     : "text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--border-subtle)]"
                 }`}
                 aria-label={isVoiceListening ? "Detener micrófono" : "Activar micrófono para dictar"}
@@ -1341,15 +1518,23 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
           </div>
           <button
             onClick={handleGenerateAi}
-            disabled={isGeneratingAi}
-            className="sm:col-span-4 px-4 py-2.5 rounded-[7px] bg-primary text-white text-xs font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 min-h-[2.75rem] cursor-pointer"
+            disabled={isGeneratingAi || aiQuota.isBlocked}
+            className={`sm:col-span-4 px-4 py-2.5 rounded-[7px] text-white text-xs font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 min-h-[2.75rem] cursor-pointer ${
+              aiQuota.isBlocked ? "bg-stone-700 cursor-not-allowed" : "bg-primary"
+            }`}
           >
             {isGeneratingAi ? (
               <RefreshCw className="w-4 h-4 animate-spin" />
             ) : (
               <Sparkles className="w-4 h-4" />
             )}
-            <span>{isGeneratingAi ? "Redactando diseño..." : "Generar Textos con IA"}</span>
+            <span>
+              {aiQuota.isBlocked
+                ? "Límite Agotado"
+                : isGeneratingAi
+                ? "Redactando diseño..."
+                : "Generar Textos con IA"}
+            </span>
           </button>
         </div>
 
@@ -2369,7 +2554,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
                         <div
                           className={`px-2 py-1 select-none leading-snug ${
                             elem.fontFamily === "display"
-                              ? "font-heading uppercase font-bold"
+                              ? "font-heading uppercase font-semibold"
                               : elem.fontFamily === "serif"
                               ? "font-serif"
                               : elem.fontFamily === "mono"
@@ -2397,7 +2582,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
                       ) : (
                         /* RENDER BADGE / STAMP */
                         <div
-                          className="px-3.5 py-1.5 rounded-[7px] text-[11px] font-bold font-heading uppercase tracking-wide border-2 shadow-lg flex items-center gap-1.5 whitespace-nowrap"
+                          className="px-3.5 py-1.5 rounded-[7px] text-[11px] font-semibold font-heading uppercase tracking-wide border-2 shadow-lg flex items-center gap-1.5 whitespace-nowrap"
                           style={{
                             backgroundColor: badgeBg,
                             color: badgeText,
@@ -2459,7 +2644,7 @@ export const PosterCreatorView: React.FC<PosterCreatorViewProps> = ({
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-heading font-bold text-[var(--text-primary)]">
+                    <h3 className="text-canonical-h3">
                       Control Técnico Pre-Flight (1440 DPI)
                     </h3>
                     <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-medium ${

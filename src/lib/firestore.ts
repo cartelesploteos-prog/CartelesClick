@@ -16,6 +16,7 @@ import {
   CollectionReference,
   DocumentData
 } from "firebase/firestore";
+import { User } from "firebase/auth";
 import { 
   CustomerType, 
   OrderPriority, 
@@ -48,6 +49,7 @@ export interface Usuario {
   companyName?: string;
   cuit?: string;
   taxCondition?: string;
+  photoURL?: string;
   address?: {
     street?: string;
     number?: string;
@@ -58,6 +60,34 @@ export interface Usuario {
   isActive: boolean;
   createdAt: string | Timestamp;
   updatedAt?: string | Timestamp;
+}
+
+/**
+ * Interface del modelo de datos de Presupuesto / Cotización Guardada (/saved_quotes)
+ */
+export interface SavedQuote {
+  id: string;
+  quoteNumber: string;
+  userId?: string;
+  userEmail?: string;
+  customerName?: string;
+  customerCompany?: string;
+  createdAt: string;
+  materialId: string;
+  materialName: string;
+  category?: MaterialCategory | string;
+  widthCm?: number;
+  heightCm?: number;
+  quantity: number;
+  totalAreaM2?: number;
+  unitPriceARS: number;
+  totalPriceARS: number;
+  printQuality?: string;
+  inkType?: string;
+  selectedColor?: string;
+  finishingsSummary?: string[];
+  notes?: string;
+  customNotes?: string;
 }
 
 /**
@@ -198,6 +228,7 @@ export const usersCollection = collection(db, "users") as CollectionReference<Us
 export const ordersCollection = collection(db, "orders") as CollectionReference<Pedido>;
 export const materialsCollection = collection(db, "materials") as CollectionReference<Material>;
 export const auditLogsCollection = collection(db, "audit_logs") as CollectionReference<OrderAuditLog>;
+export const savedQuotesCollection = collection(db, "saved_quotes") as CollectionReference<SavedQuote>;
 
 /* ========================================================================= */
 /* 📝 ORDER AUDIT LOGGING HELPER FUNCTIONS                                   */
@@ -420,4 +451,182 @@ export async function getOrderAuditLogs(orderId: string): Promise<OrderAuditLog[
     return [];
   }
 }
+
+/* ========================================================================= */
+/* 👤 FIRESTORE USER PROFILE SYNCHRONIZATION                                 */
+/* ========================================================================= */
+
+const ADMIN_EMAIL_LOWER = "carteles.ploteos@gmail.com";
+
+/**
+ * Sincroniza y persiste de manera segura el perfil de un usuario en la colección /users
+ * de Firestore tras el registro o inicio de sesión con Google o Email.
+ */
+export async function syncUserDocument(user: User, additionalData?: Partial<Usuario>): Promise<Usuario> {
+  if (!user || !user.uid) {
+    throw new Error("Usuario inválido para sincronización en Firestore");
+  }
+
+  const userRef = doc(db, "users", user.uid);
+  const nowIso = new Date().toISOString();
+  const isAdmin = (user.email || "").toLowerCase().trim() === ADMIN_EMAIL_LOWER;
+
+  try {
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      const existing = snap.data() as Usuario;
+      const updatedFields: Partial<Usuario> = {
+        email: user.email || existing.email || "",
+        displayName: user.displayName || existing.displayName || (user.email ? user.email.split("@")[0] : "Cliente"),
+        photoURL: user.photoURL || existing.photoURL || undefined,
+        phoneNumber: user.phoneNumber || existing.phoneNumber || undefined,
+        role: isAdmin ? "admin" : (existing.role || "customer"),
+        customerType: existing.customerType || (isAdmin ? "corporativo" : "consumidor_final"),
+        isActive: existing.isActive !== undefined ? existing.isActive : true,
+        updatedAt: nowIso,
+        ...additionalData,
+      };
+
+      await updateDoc(userRef, updatedFields);
+      const mergedUser: Usuario = { ...existing, ...updatedFields, uid: user.uid };
+      return mergedUser;
+    } else {
+      const newUser: Usuario = {
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || (user.email ? user.email.split("@")[0] : "Cliente"),
+        photoURL: user.photoURL || undefined,
+        phoneNumber: user.phoneNumber || undefined,
+        role: isAdmin ? "admin" : "customer",
+        customerType: isAdmin ? "corporativo" : "consumidor_final",
+        isActive: true,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        ...additionalData,
+      };
+
+      await setDoc(userRef, newUser);
+      return newUser;
+    }
+  } catch (error) {
+    console.warn("[Firestore] Advertencia al sincronizar perfil de usuario en /users:", error);
+    // Fallback gracefully so login does not block if Firestore network rules are strict
+    const fallbackUser: Usuario = {
+      uid: user.uid,
+      email: user.email || "",
+      displayName: user.displayName || (user.email ? user.email.split("@")[0] : "Cliente"),
+      photoURL: user.photoURL || undefined,
+      role: isAdmin ? "admin" : "customer",
+      customerType: "consumidor_final",
+      isActive: true,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      ...additionalData,
+    };
+    return fallbackUser;
+  }
+}
+
+/* ========================================================================= */
+/* 📄 SAVED QUOTES & CLIENT ESTIMATE HISTORY                                 */
+/* ========================================================================= */
+
+const LOCAL_STORAGE_QUOTES_KEY = "cc_saved_quotes_history";
+
+/**
+ * Guarda una cotización en Firestore (/saved_quotes) y en caché local
+ */
+export async function saveUserQuote(quote: SavedQuote): Promise<SavedQuote> {
+  const quoteWithDefaults: SavedQuote = {
+    ...quote,
+    id: quote.id || `quote-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    quoteNumber: quote.quoteNumber || `COT-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`,
+    createdAt: quote.createdAt || new Date().toISOString(),
+  };
+
+  // 1. Guardar en localStorage para disponibilidad inmediata y offline
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_QUOTES_KEY);
+    const localList: SavedQuote[] = raw ? JSON.parse(raw) : [];
+    const filtered = localList.filter((q) => q.id !== quoteWithDefaults.id);
+    filtered.unshift(quoteWithDefaults);
+    localStorage.setItem(LOCAL_STORAGE_QUOTES_KEY, JSON.stringify(filtered.slice(0, 50)));
+  } catch (e) {
+    // Ignore localStorage quota errors
+  }
+
+  // 2. Persistir en Firestore si hay conexión
+  try {
+    const quoteDocRef = doc(db, "saved_quotes", quoteWithDefaults.id);
+    await setDoc(quoteDocRef, quoteWithDefaults);
+  } catch (err) {
+    console.warn("[Firestore] Advertencia al guardar cotización en nube:", err);
+  }
+
+  return quoteWithDefaults;
+}
+
+/**
+ * Recupera el historial de cotizaciones guardadas para un usuario (Firestore + LocalStorage)
+ */
+export async function getUserSavedQuotes(userIdOrEmail?: string): Promise<SavedQuote[]> {
+  const quotesMap = new Map<string, SavedQuote>();
+
+  // 1. Cargar desde LocalStorage
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_QUOTES_KEY);
+    if (raw) {
+      const localList: SavedQuote[] = JSON.parse(raw);
+      localList.forEach((q) => quotesMap.set(q.id, q));
+    }
+  } catch (e) {}
+
+  // 2. Consultar en Firestore si tenemos credenciales
+  if (userIdOrEmail) {
+    try {
+      const cleanFilter = userIdOrEmail.trim().toLowerCase();
+      // Consultar por userId o por userEmail
+      const qUser = query(collection(db, "saved_quotes"), where("userId", "==", userIdOrEmail));
+      const snapUser = await getDocs(qUser);
+      snapUser.docs.forEach((d) => quotesMap.set(d.id, { id: d.id, ...d.data() } as SavedQuote));
+
+      const qEmail = query(collection(db, "saved_quotes"), where("userEmail", "==", cleanFilter));
+      const snapEmail = await getDocs(qEmail);
+      snapEmail.docs.forEach((d) => quotesMap.set(d.id, { id: d.id, ...d.data() } as SavedQuote));
+    } catch (err) {
+      console.warn("[Firestore] Error recuperando presupuestos remotos:", err);
+    }
+  }
+
+  // Retornar ordenados por fecha descendente
+  return Array.from(quotesMap.values()).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+/**
+ * Elimina una cotización guardada
+ */
+export async function deleteUserSavedQuote(quoteId: string): Promise<boolean> {
+  // 1. Eliminar de local storage
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_QUOTES_KEY);
+    if (raw) {
+      const localList: SavedQuote[] = JSON.parse(raw);
+      const filtered = localList.filter((q) => q.id !== quoteId);
+      localStorage.setItem(LOCAL_STORAGE_QUOTES_KEY, JSON.stringify(filtered));
+    }
+  } catch (e) {}
+
+  // 2. Eliminar de Firestore
+  try {
+    await deleteDoc(doc(db, "saved_quotes", quoteId));
+  } catch (e) {
+    console.warn("[Firestore] Error eliminando presupuesto remoto:", e);
+  }
+
+  return true;
+}
+
 

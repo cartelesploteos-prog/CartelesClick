@@ -148,7 +148,7 @@ export const BentoGridSkeleton: React.FC<{ count?: number }> = ({
 
 export const MaterialDetailSkeleton: React.FC = () => {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-8 space-y-8">
       {/* Breadcrumb Skeleton */}
       <div className="flex items-center gap-2">
         <Skeleton className="w-12 h-4 rounded-[7px]" />
@@ -377,6 +377,53 @@ export const AiDesignPanelSkeleton: React.FC = () => {
       <div className="space-y-2">
         <Skeleton className="w-full h-8 rounded-[8px]" />
         <Skeleton className="w-full h-8 rounded-[8px]" />
+      </div>
+    </div>
+  );
+};
+
+export const CotizadorSkeletonScreen: React.FC = () => {
+  return (
+    <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-36 space-y-8 animate-pulse">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-6">
+        <div className="space-y-2">
+          <Skeleton className="w-36 h-3 rounded-[4px]" />
+          <Skeleton className="w-64 h-7 rounded-[6px]" />
+          <Skeleton className="w-80 h-3.5 rounded-[4px]" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="w-24 h-9 rounded-xl" />
+          <Skeleton className="w-28 h-9 rounded-xl" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-8 space-y-6">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="w-28 h-10 rounded-xl shrink-0" />
+            ))}
+          </div>
+          <div className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-4">
+            <Skeleton className="w-48 h-5 rounded-[6px]" />
+            <Skeleton className="w-full h-3 rounded-[4px]" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Skeleton key={i} className="h-32 rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-4">
+          <div className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-[var(--border-subtle)]">
+              <Skeleton className="w-32 h-4 rounded-[4px]" />
+              <Skeleton className="w-16 h-6 rounded-full" />
+            </div>
+            <QuoteLiveSummarySkeleton />
+          </div>
+        </div>
       </div>
     </div>
   );

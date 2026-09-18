@@ -17,28 +17,11 @@ export const Logo: React.FC<LogoProps> = ({
   };
 
   return (
-    <span
-      className={`inline-flex items-baseline tracking-tight select-none ${sizeClasses[size]} ${className}`}
-      style={{
-        fontFamily: "var(--font-logo)",
-      }}
-    >
-      <span
-        className="font-bold text-[#2C2C2C] dark:text-white transition-colors"
-        style={{
-          fontFamily: "var(--font-logo)",
-          fontWeight: 700,
-        }}
-      >
+    <span className={`inline-flex items-baseline tracking-tight select-none font-heading ${sizeClasses[size]} ${className}`}>
+      <span className="font-bold text-[var(--text-primary)] transition-colors">
         Carteles.
       </span>
-      <span
-        className="font-black transition-colors text-[var(--color-primary)]"
-        style={{
-          fontFamily: "var(--font-logo)",
-          fontWeight: 900,
-        }}
-      >
+      <span className="font-black text-primary transition-colors">
         Click
       </span>
     </span>

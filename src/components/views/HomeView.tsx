@@ -36,10 +36,10 @@ import {
   FAQ_LIST,
   WHOLESALE_TIERS,
 } from "../../data/materials";
-import heroLuminousSign from "../../assets/images/hero_luminous_signage_1787222580744.jpg";
-import heroWindowGraphics from "../../assets/images/hero_window_graphics_1787222592025.jpg";
-import heroPrinterWorkshop from "../../assets/images/hero_large_format_printer_1787222604243.jpg";
-import hero3dAcroSign from "../../assets/images/hero_3d_acrylic_sign_1787222615631.jpg";
+const heroLuminousSign = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80";
+const heroWindowGraphics = "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80";
+const heroPrinterWorkshop = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80";
+const hero3dAcroSign = "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80";
 import { useTranslation } from "react-i18next";
 import { useCurrencyStore } from "../../store/useCurrencyStore";
 import { motion } from "motion/react";
@@ -100,7 +100,7 @@ const BentoGridCell = React.memo(({
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFC] dark:from-[#0C0D11] via-[#FAFAFC]/60 dark:via-[#0C0D11]/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 space-y-3">
-          <p className="text-xs text-white line-clamp-2 leading-relaxed">
+          <p className="text-xs text-[var(--text-primary)] line-clamp-2 leading-relaxed">
             "{item.prompt}"
           </p>
 
@@ -116,7 +116,7 @@ const BentoGridCell = React.memo(({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => onNavigate("cotizador", item.materialId)}
-              className="min-h-[2.75rem] py-2 px-3 rounded-[7px] bg-black/[0.15] dark:bg-white/[0.15] hover:bg-white/[0.25] text-white text-xs font-medium flex items-center justify-center gap-1 backdrop-blur-md transition-all"
+              className="min-h-[2.75rem] py-2 px-3 rounded-[7px] bg-[var(--bg-surface)]/90 hover:bg-[var(--bg-surface)]/80 dark:hover:bg-black text-[var(--text-primary)] dark:text-white text-xs font-medium flex items-center justify-center gap-1 backdrop-blur-md transition-all"
               title="Cotizar m² en vivo"
             >
               <Calculator className="w-3.5 h-3.5" />
@@ -124,7 +124,7 @@ const BentoGridCell = React.memo(({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedItemDetail(item)}
-              className="min-h-[2.75rem] py-2 px-3 rounded-[7px] bg-black/[0.15] dark:bg-white/[0.15] hover:bg-white/[0.25] text-white text-xs font-medium flex items-center justify-center gap-1 backdrop-blur-md transition-all"
+              className="min-h-[2.75rem] py-2 px-3 rounded-[7px] bg-[var(--bg-surface)]/90 hover:bg-[var(--bg-surface)]/80 dark:hover:bg-black text-[var(--text-primary)] dark:text-white text-xs font-medium flex items-center justify-center gap-1 backdrop-blur-md transition-all"
               title="Ver Detalle"
             >
               <Maximize2 className="w-3.5 h-3.5" />
@@ -140,7 +140,7 @@ const BentoGridCell = React.memo(({
           </span>
           <span className="text-[11px] text-[var(--text-secondary)]">{item.author}</span>
         </div>
-        <div className="flex items-center justify-between text-[11px] text-[#6B7280]">
+        <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
           <span>{item.material}</span>
           <motion.button
             whileTap={{ scale: 0.95 }}
@@ -240,6 +240,22 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
   // Doble carrousel con fotos enteras de trabajos reales
   const heroPhotosRow1 = [
     {
+      id: "p-mesh-tennis",
+      title: "Cartelería Perimetral Canchas de Tenis",
+      material: "Lona Mesh Microperforada Cortaviento",
+      materialId: "lona_mesh",
+      tag: "Deportes & Vallas",
+      image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      id: "p-mesh-confeccion",
+      title: "Detalle de Confección Dobladillo y Ojales",
+      material: "Lona Mesh 1440 DPI + Soldadura Térmica",
+      materialId: "lona_mesh",
+      tag: "Taller & Confección",
+      image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+    },
+    {
       id: "p1",
       title: "Marquesina Backlight 'BURGER CRAFT'",
       material: "Lona Backlight 24hs",
@@ -271,25 +287,33 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
       tag: "Letras 3D & Corpóreos",
       image: hero3dAcroSign,
     },
-    {
-      id: "p5",
-      title: "Portabanner Roll-Up 'TECH EXPO LATAM'",
-      material: "Roll-Up 80x200cm + Lona Mate",
-      materialId: "portabanner_rollup_80x200",
-      tag: "Eventos & Stands",
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&auto=format&fit=crop&q=80",
-    },
-    {
-      id: "p6",
-      title: "Cartel Neón 3D 'COFFEE ROASTERS'",
-      material: "Lona Backlight Translúcida",
-      materialId: "lona_back_doble",
-      tag: "Neón Gastro",
-      image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=900&auto=format&fit=crop&q=80",
-    },
   ];
 
   const heroPhotosRow2 = [
+    {
+      id: "p10",
+      title: "Banners Mesh Microperforada en Predio Deportivo",
+      material: "Lona Mesh Cortaviento con Ojales",
+      materialId: "lona_mesh",
+      tag: "Predios & Clubes",
+      image: "/samples/lona_mesh_predio_cat.jpg",
+    },
+    {
+      id: "p-mesh-clay",
+      title: "Cerramiento Cortaviento en Polvo de Ladrillo",
+      material: "Lona Mesh con Reducción Efecto Vela",
+      materialId: "lona_mesh",
+      tag: "Canchas & Cerramientos",
+      image: "/samples/lona_mesh_clay_court_1787354344453.jpg",
+    },
+    {
+      id: "p-mesh-fence",
+      title: "Montaje con Precintos de Tensión sobre Alambrado",
+      material: "Lona Mesh con Precintos UV cada 50cm",
+      materialId: "lona_mesh",
+      tag: "Instalación Real",
+      image: "/samples/lona_mesh_fence_detail_1787354357149.jpg",
+    },
     {
       id: "p7",
       title: "Caja de Luz con Perfil Tensor",
@@ -315,28 +339,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
       image: hero3dAcroSign,
     },
     {
-      id: "p10",
-      title: "Banners Mesh Microperforada en Predio Deportivo",
-      material: "Lona Mesh Cortaviento con Ojales",
-      materialId: "lona_mesh",
-      tag: "Deportes & Vallas",
-      image: "/samples/lona_mesh_predio_cat.jpg",
-    },
-    {
       id: "p11",
       title: "Ploteo de Vidriera y Vinilo Esmerilado",
       material: "Vinilo Microperforado & Esmerilado",
       materialId: "vinilo_microperforado",
       tag: "Comercial & Vidrieras",
       image: heroWindowGraphics,
-    },
-    {
-      id: "p12",
-      title: "Calibración CMYK en Taller Central",
-      material: "Plotter Roland / Mimaki 1440 DPI",
-      materialId: "lona_front",
-      tag: "Impresión Industrial",
-      image: heroPrinterWorkshop,
     },
   ];
 
@@ -618,7 +626,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
       <motion.section 
         id="hero"
         style={{ opacity: heroOpacity, y: heroY, scale: heroScale, rotateX: heroRotateX }}
-        className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80svh] sm:min-h-svh flex flex-col justify-center pt-[calc(var(--header-height,80px)+2rem)] sm:pt-[calc(var(--header-height,80px)+3rem)] pb-12 sm:pb-16 origin-top"
+        className="relative container-safe min-h-[80svh] sm:min-h-svh flex flex-col justify-center pt-[calc(var(--header-height,80px)+2rem)] sm:pt-[calc(var(--header-height,80px)+3rem)] pb-12 sm:pb-16 origin-top"
       >
         <motion.div 
           style={{ y: heroGlowY }}
@@ -626,7 +634,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         />
 
         <div className="relative text-center max-w-4xl mx-auto space-y-4 mb-6 mt-6 sm:mt-10 lg:mt-12">
-          <h1 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-[var(--text-primary)] leading-[1.12]">
+          <h1 className="text-canonical-h1">
             {t("hero_heading_1")}{" "}
             <span className="text-primary">
               {t("hero_heading_highlight")}
@@ -667,7 +675,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
             {heroPhotosRow1.concat(heroPhotosRow1).map((item, idx) => (
               <div
                 key={`r1-${idx}`}
-                className="group relative w-60 sm:w-80 h-36 sm:h-48 rounded-2xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-md transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
+                className="group relative w-60 sm:w-80 h-36 sm:h-48 rounded-2xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-md transition-transform duration-300 hover:scale-[1.02] cursor-pointer flex items-center justify-center text-center p-4 text-[var(--text-secondary)] text-sm font-medium"
                 onClick={() => onNavigate("cotizador", item.materialId)}
               >
                 {/* Foto Entera HD Minimalista */}
@@ -675,8 +683,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   src={item.image}
                   alt={item.title}
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-10 bg-[var(--bg-surface)]"
+                  onError={(e) => {
+                     // Hide broken image icon, let fallback text show
+                     (e.target as HTMLImageElement).style.opacity = '0';
+                  }}
                 />
+                {/* Fallback Text for broken images */}
+                <span className="absolute z-0 px-4">{item.title}</span>
               </div>
             ))}
           </div>
@@ -686,7 +700,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
             {heroPhotosRow2.concat(heroPhotosRow2).map((item, idx) => (
               <div
                 key={`r2-${idx}`}
-                className="group relative w-60 sm:w-80 h-36 sm:h-48 rounded-2xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-md transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
+                className="group relative w-60 sm:w-80 h-36 sm:h-48 rounded-2xl overflow-hidden shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-md transition-transform duration-300 hover:scale-[1.02] cursor-pointer flex items-center justify-center text-center p-4 text-[var(--text-secondary)] text-sm font-medium"
                 onClick={() => onNavigate("cotizador", item.materialId)}
               >
                 {/* Foto Entera HD Minimalista */}
@@ -694,8 +708,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   src={item.image}
                   alt={item.title}
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-10 bg-[var(--bg-surface)]"
+                  onError={(e) => {
+                     // Hide broken image icon, let fallback text show
+                     (e.target as HTMLImageElement).style.opacity = '0';
+                  }}
                 />
+                {/* Fallback Text for broken images */}
+                <span className="absolute z-0 px-4">{item.title}</span>
               </div>
             ))}
           </div>
@@ -710,7 +730,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)]"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-elevated)] border border-primary/25 shadow-xl space-y-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -723,7 +743,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   Cálculo Instantáneo 24/7 en Pesos ($ ARS)
                 </span>
               </div>
-              <h2 className="font-heading text-2xl sm:text-3xl font-normal text-[var(--text-primary)]">
+              <h2 className="text-canonical-h2">
                 Cotizador Instantáneo de Taller
               </h2>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
@@ -820,7 +840,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* PANEL RESULTADO Y BANDEROLA DE PRECIO */}
-            <div className="lg:col-span-5 p-6 rounded-2xl bg-black/20 dark:bg-white/5 border border-[var(--border-subtle)] space-y-4 text-center sm:text-left flex flex-col justify-between h-full">
+            <div className="lg:col-span-5 p-6 rounded-2xl bg-black/20 dark:bg-[var(--bg-surface)]/5 border border-[var(--border-subtle)] space-y-4 text-center sm:text-left flex flex-col justify-between h-full">
               <div>
                 <span className="text-[10px] uppercase font-mono text-primary tracking-wider font-extrabold">
                   Presupuesto Estimado Instantáneo
@@ -872,14 +892,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Lonas Publicitarias & Cartelería
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-normal text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               Impresión de Lonas de Gran Formato
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -906,7 +926,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Lona Frontlight 13 oz
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -940,7 +960,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Lona Backlight 24hs
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -968,13 +988,13 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
             <div className="space-y-3">
               <div className="aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-subtle)]">
                 <img
-                  src="/samples/lona_mesh_canchas_tenis.jpg"
+                  src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
                   alt="Lona Mesh Microperforada en Canchas de Tenis"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Lona Mesh Cortaviento
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1006,7 +1026,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 <span className="text-xs font-bold text-[var(--text-primary)]">Garantía de Taller</span>
                 <span className="text-[10px] text-primary font-mono font-semibold">1440 DPI Tintas UV</span>
               </div>
-              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Ficha Técnica & Confección
               </h3>
               <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -1042,14 +1062,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Ploteos & Adhesivos
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               Vinilos Ploteados & Microperforados
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -1076,7 +1096,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Vinilo Microperforado
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1105,7 +1125,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Vinilo Brillante / Mate
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1134,7 +1154,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Vinilo Laminado UV (Vehicular)
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1161,7 +1181,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 <span className="text-xs font-bold text-[var(--text-primary)]">Guía de Colocación</span>
                 <span className="text-[10px] text-primary font-mono font-semibold">Instalación Limpia</span>
               </div>
-              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Superficies Aptas
               </h3>
               <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -1197,14 +1217,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Materiales Rígidos & Placas
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               PVC Espumado, PAI & Acrílico Cristal
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -1231,7 +1251,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   PVC Espumado 3mm / 5mm
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1260,7 +1280,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   PAI (Alto Impacto) 1mm/2mm
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1289,7 +1309,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Acrílico Cristal Prémium
                 </h3>
                 <span className="text-xs font-bold text-primary bg-primary/10 dark:bg-primary/15 border border-primary/20 px-2.5 py-0.5 rounded-full">
@@ -1316,7 +1336,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 <span className="text-xs font-bold text-[var(--text-primary)]">Taller de Corte CNC</span>
                 <span className="text-[10px] text-primary font-mono font-semibold">Fresado Milimétrico</span>
               </div>
-              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Terminaciones Especiales
               </h3>
               <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -1352,14 +1372,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Expositores Portátiles
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               Portabanners, Roll-Up 83x200 y Banners Económicos
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -1391,7 +1411,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Roll-Up Aluminio 83 × 200 cm
                 </h3>
                 <p className="text-xs text-primary font-bold mt-0.5">
@@ -1421,7 +1441,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Portabanner 2 Velas (Fibra)
                 </h3>
                 <p className="text-xs text-primary font-bold mt-0.5">
@@ -1451,7 +1471,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Banner Económico 90×190 Doble Tensor
                 </h3>
                 <p className="text-xs text-primary font-bold mt-0.5">
@@ -1478,7 +1498,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 <span className="text-xs font-bold text-[var(--text-primary)]">Sistemas Expositores</span>
                 <span className="text-[10px] text-primary font-mono font-semibold">Listos para Usar</span>
               </div>
-              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Equipamiento de Stands
               </h3>
               <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -1514,14 +1534,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] flex flex-col md:flex-row items-center gap-8">
           <div className="w-full md:w-1/2 space-y-4">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Seguridad & Arquitectura
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               Señalética Institucional, Industrial & Fotoluminiscente
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -1572,14 +1592,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] space-y-6 border border-[var(--border-subtle)] shadow-xl">
           <div className="max-w-2xl space-y-3">
             <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
               Estructuras & Frentes de Local
             </span>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               Cartelería de Gran Formato & Marquesinas Comerciales
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -1589,19 +1609,19 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <div className="p-4 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-2">
-              <h4 className="font-heading font-bold text-sm text-primary">Marquesinas con Bastidor</h4>
+              <h4 className="text-canonical-h4">Marquesinas con Bastidor</h4>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Estructura de caño estructural 20x20 ó 30x30 con lona Frontlight tensada e iluminación por reflectores LED.
               </p>
             </div>
             <div className="p-4 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-2">
-              <h4 className="font-heading font-bold text-sm text-primary">Cajas de Luz Backlight</h4>
+              <h4 className="text-canonical-h4">Cajas de Luz Backlight</h4>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Cajas de aluminio y acrílico o lona translúcida con módulos LED impermeables IP67 para brillo parejo 24hs.
               </p>
             </div>
             <div className="p-4 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-2">
-              <h4 className="font-heading font-bold text-sm text-primary">Corpóreos 3D Polifán / Acrílico</h4>
+              <h4 className="text-canonical-h4">Corpóreos 3D Polifán / Acrílico</h4>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Letras con volumen ahuecadas o retroiluminadas para frentes de marcas, recepciones y locales.
               </p>
@@ -1631,14 +1651,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8"
+        className="container-safe py-6 sm:py-10 space-y-6 sm:space-y-8"
       >
         <div className="p-6 sm:p-10 rounded-3xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-mono font-bold uppercase text-[var(--brand-brick)] tracking-wider">
               Canal B2B & Gremio Taller
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">
+            <h2 className="text-canonical-h2">
               Cuentas Mayoristas y Agencias de Publicidad
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -1658,7 +1678,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-base text-[var(--text-primary)]">
+                    <h3 className="text-canonical-h3">
                       {tier.name}
                     </h3>
                     {tier.highlight && (
@@ -1708,7 +1728,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)]"
+        className="container-safe py-[var(--space-lg)] sm:py-[var(--space-xl)]"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {[
@@ -1725,7 +1745,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 containerStyle="subtle"
                 className="group-hover:scale-105 transition-transform"
               />
-              <h3 className="font-heading font-bold text-sm text-[var(--text-primary)]">{step.title}</h3>
+              <h3 className="text-canonical-h3">{step.title}</h3>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{step.desc}</p>
             </div>
           ))}
@@ -1740,7 +1760,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-md)] sm:py-[var(--space-lg)]"
+        className="container-safe py-[var(--space-md)] sm:py-[var(--space-lg)]"
       >
         <div className="ideogram-card p-8 sm:p-12 flex flex-col md:flex-row items-center gap-8 bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-elevated)] border border-primary/20">
           <div className="flex-1 space-y-3">
@@ -1748,7 +1768,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               <Sparkles className="w-4 h-4 text-primary shrink-0" strokeWidth={1.85} />
               <span>Generador Creativo Asistido</span>
             </div>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-canonical-h2">
               Diseñá con Inteligencia Artificial
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl">
@@ -1788,13 +1808,13 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   className="shrink-0"
                 />
                 <div>
-                  <h3 className="font-heading text-lg font-bold text-[var(--text-primary)]">Compra Ágil en 6 Pasos</h3>
+                  <h3 className="text-canonical-h3">Compra Ágil en 6 Pasos</h3>
                   <p className="text-xs text-[var(--text-secondary)]">Proceso transparente de fabricación y despacho directo de taller</p>
                 </div>
               </div>
               <button
                 onClick={() => setIs6StepsModalOpen(false)}
-                className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-[var(--bg-surface)]/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                 aria-label="Cerrar modal"
               >
                 <X className="w-5 h-5" strokeWidth={1.85} />
@@ -1817,7 +1837,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                     </div>
                     <div className="flex items-center gap-2 pt-1">
                       <Icon className="w-4 h-4 text-primary shrink-0" strokeWidth={1.85} />
-                      <h4 className="font-heading text-sm font-bold text-[var(--text-primary)]">{s.title}</h4>
+                      <h4 className="text-canonical-h4">{s.title}</h4>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       {s.desc}
@@ -1872,20 +1892,20 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                     <span className="text-[10px] font-mono uppercase text-primary tracking-wider font-bold">
                       Detalles de Generación
                     </span>
-                    <h3 className="font-heading text-lg font-bold text-[var(--text-primary)]">
+                    <h3 className="text-canonical-h3">
                       {selectedItemDetail.title}
                     </h3>
                   </div>
                   <button
                     onClick={() => setSelectedItemDetail(null)}
-                    className="w-8 h-8 rounded-full bg-black/[0.08] dark:bg-white/[0.08] hover:bg-black/[0.15] dark:bg-white/[0.15] text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/[0.08] dark:bg-[var(--bg-surface)]/[0.08] hover:bg-black/[0.15] dark:bg-[var(--bg-surface)]/[0.15] text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label="Cerrar detalle"
                   >
                     <X className="w-4 h-4" strokeWidth={1.85} />
                   </button>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] border border-[var(--border-subtle)] space-y-2">
+                <div className="p-3.5 rounded-xl bg-black/[0.04] dark:bg-[var(--bg-surface)]/[0.04] border border-[var(--border-subtle)] space-y-2">
                   <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
                     <span>Prompt</span>
                     <button
@@ -1909,23 +1929,23 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-[var(--border-subtle)]">
+                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-[var(--bg-surface)]/[0.03] border border-[var(--border-subtle)]">
                     <span className="text-[var(--text-secondary)] block text-[10px]">Relación de Aspecto</span>
                     <span className="font-semibold text-[var(--text-primary)]">
                       {selectedItemDetail.aspectRatio} ({selectedItemDetail.aspectRatioLabel})
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-[var(--border-subtle)]">
+                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-[var(--bg-surface)]/[0.03] border border-[var(--border-subtle)]">
                     <span className="text-[var(--text-secondary)] block text-[10px]">Sustrato Recomendado</span>
                     <span className="font-semibold text-[var(--text-primary)]">
                       {selectedItemDetail.material}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-[var(--border-subtle)]">
+                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-[var(--bg-surface)]/[0.03] border border-[var(--border-subtle)]">
                     <span className="text-[var(--text-secondary)] block text-[10px]">Plazo Fabricación</span>
                     <span className="font-semibold text-[var(--text-primary)]">24 a 48 hs hábiles</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-[var(--border-subtle)]">
+                  <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-[var(--bg-surface)]/[0.03] border border-[var(--border-subtle)]">
                     <span className="text-[var(--text-secondary)] block text-[10px]">Resolución</span>
                     <span className="font-semibold text-[var(--text-primary)]">1440 DPI CMYK</span>
                   </div>
@@ -1950,7 +1970,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                     setSelectedItemDetail(null);
                     onNavigate("cotizador", mat);
                   }}
-                  className="w-full py-2.5 rounded-full bg-black/[0.08] dark:bg-white/[0.08] hover:bg-black/[0.15] dark:bg-white/[0.15] text-[var(--text-primary)] text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full py-2.5 rounded-full bg-black/[0.08] dark:bg-[var(--bg-surface)]/[0.08] hover:bg-black/[0.15] dark:bg-[var(--bg-surface)]/[0.15] text-[var(--text-primary)] text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   <Calculator className="w-4 h-4 text-primary" strokeWidth={1.85} />
                   <span>Calcular Costo en Cotizador</span>
@@ -1969,7 +1989,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
+        className="container-safe py-[var(--space-lg)] sm:py-[var(--space-xl)] space-y-[var(--space-md)] sm:space-y-[var(--space-lg)]"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-4 space-y-4">
@@ -1977,7 +1997,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               <span className="text-[11px] sm:text-xs font-mono font-bold uppercase text-primary tracking-wider">
                 Soporte & Pre-prensa
               </span>
-              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+              <h2 className="text-canonical-h2">
                 Preguntas Frecuentes de Taller
               </h2>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -2039,7 +2059,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[var(--space-lg)] sm:py-[var(--space-xl)] lg:py-[var(--space-2xl)]"
+        className="container-safe py-[var(--space-lg)] sm:py-[var(--space-xl)] lg:py-[var(--space-2xl)]"
       >
         <div className="relative rounded-2xl sm:rounded-3xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-surface)] via-[var(--bg-surface-elevated)] to-[var(--bg-surface)] p-6 sm:p-10 lg:p-14 shadow-lg overflow-hidden">
           {/* Subtle Ambient Radial Glows */}
@@ -2072,7 +2092,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Fluid Heading */}
-                <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl xl:text-[2.5rem] font-bold text-[var(--text-primary)] leading-[1.18] tracking-tight">
+                <h2 className="text-canonical-h2">
                   Impulsá tu marca con cartelería de alta precisión y entrega ágil
                 </h2>
 
@@ -2170,7 +2190,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   />
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] group-hover:text-primary transition-colors">
+                      <h4 className="text-canonical-h4">
                         Cotizador Online en Tiempo Real
                       </h4>
                       <span className="text-[10px] px-1.5 py-0.2 rounded bg-accent/20 text-accent-foreground font-mono font-semibold">
@@ -2199,11 +2219,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                     size="lg"
                     variant="accent"
                     containerStyle="subtle"
-                    className="shrink-0 group-hover:bg-accent group-hover:text-black transition-colors"
+                    className="shrink-0 group-hover:bg-accent group-hover:text-[var(--text-primary)] transition-colors"
                   />
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] group-hover:text-primary transition-colors">
+                      <h4 className="text-canonical-h4">
                         Diseñador Asistido por IA
                       </h4>
                       <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/20 text-primary font-mono font-semibold">
@@ -2236,7 +2256,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   />
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] group-hover:text-primary transition-colors">
+                      <h4 className="text-canonical-h4">
                         Canal Mayorista & Revendedores
                       </h4>
                       <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-mono font-semibold">

@@ -108,7 +108,7 @@ export const OrderQRCodeModal: React.FC<OrderQRCodeModalProps> = ({
               <QrCode className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="qr-modal-title" className="font-heading text-sm sm:text-base font-bold text-[var(--text-primary)]">
+              <h3 id="qr-modal-title" className="font-heading text-sm sm:text-base font-semibold text-[var(--text-primary)]">
                 QR de Orden & Seguimiento Móvil
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">
@@ -156,7 +156,7 @@ export const OrderQRCodeModal: React.FC<OrderQRCodeModalProps> = ({
         {/* BODY CONTENT */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-5 text-center flex-1">
           {/* QR CODE CONTAINER */}
-          <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-gray-200 shadow-inner max-w-[240px] mx-auto">
+          <div className="flex flex-col items-center justify-center p-4 bg-[var(--bg-surface)] rounded-xl border border-gray-200 shadow-inner max-w-[240px] mx-auto">
             {qrDataUrl ? (
               <img
                 src={qrDataUrl}
@@ -164,11 +164,11 @@ export const OrderQRCodeModal: React.FC<OrderQRCodeModalProps> = ({
                 className="w-48 h-48 sm:w-52 sm:h-52 object-contain"
               />
             ) : (
-              <div className="w-48 h-48 flex items-center justify-center text-xs text-gray-400">
+              <div className="w-48 h-48 flex items-center justify-center text-xs text-[var(--text-muted)]">
                 Generando código QR...
               </div>
             )}
-            <div className="mt-2 text-[11px] text-gray-500 font-mono">
+            <div className="mt-2 text-[11px] text-[var(--text-secondary)] font-mono">
               Escanear con cámara de smartphone
             </div>
           </div>
@@ -226,7 +226,7 @@ export const OrderQRCodeModal: React.FC<OrderQRCodeModalProps> = ({
           <button
             type="button"
             onClick={handleShareWhatsApp}
-            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            className="w-full py-3 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
           >
             <Share2 className="w-4 h-4" />
             <span>Compartir por WhatsApp</span>

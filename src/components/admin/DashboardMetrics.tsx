@@ -165,8 +165,8 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
         });
         
         // Count distinct materials for this order
-        const uniqueMats = new Set(ord.items.map((i: any) => i.materialName || "Otros / Sin Especificar"));
-        uniqueMats.forEach(mat => {
+        const uniqueMats = new Set<string>(ord.items.map((i: any) => String(i.materialName || "Otros / Sin Especificar")));
+        uniqueMats.forEach((mat: string) => {
           if (materialMap[mat]) materialMap[mat].orderCount += 1;
         });
       }
@@ -226,7 +226,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
                 Base de datos centralizada
               </span>
             </div>
-            <h3 className="font-heading text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+            <h3 className="text-canonical-h3">
               Tasa de Conversión Global: <span className="text-emerald-400 font-mono-num">{overallConversionRate}%</span>
             </h3>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
@@ -357,7 +357,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-[var(--brand-brick)]" />
-              <h3 className="font-heading text-sm font-medium text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Volumen de Pedidos Mensuales (Gráfico de Líneas)
               </h3>
             </div>
@@ -441,7 +441,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
-              <h3 className="font-heading text-sm font-medium text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Evolución de Tasa de Conversión (%)
               </h3>
             </div>
@@ -516,7 +516,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ orders: init
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-sky-500" />
-            <h3 className="font-heading text-sm font-medium text-[var(--text-primary)]">
+            <h3 className="text-canonical-h3">
               Rendimiento de Ventas por Material
             </h3>
           </div>

@@ -38,8 +38,8 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
 
   if (!material) {
     return (
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 text-center space-y-6 font-sans">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] font-medium">Material no encontrado</h2>
+      <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 text-center space-y-6 font-sans">
+        <h2 className="text-canonical-h2">Material no encontrado</h2>
         <button
           onClick={() => onNavigate("materiales")}
           className="px-4 py-2 rounded-[7px] bg-primary text-white text-xs font-sans font-medium"
@@ -51,7 +51,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-8 sm:space-y-10 max-w-5xl font-sans">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-8 sm:space-y-10 max-w-5xl font-sans">
       {/* BREADCRUMB */}
       <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-sans">
         <button
@@ -84,7 +84,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
               className="w-full h-full object-cover rounded-[7px] transition-all duration-300"
             />
             {material.badge && (
-              <span className="absolute top-4 right-4 text-[10px] px-2.5 py-1 rounded-[7px] bg-accent text-black font-sans font-medium">
+              <span className="absolute top-4 right-4 text-[10px] px-2.5 py-1 rounded-[7px] bg-sky-900/90 dark:bg-sky-400 text-white dark:text-sky-950 font-sans font-bold shadow-md z-10">
                 {material.badge}
               </span>
             )}
@@ -147,7 +147,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
             <span className="text-xs uppercase tracking-widest text-primary font-heading font-medium">
               Ficha Técnica Oficial
             </span>
-            <h1 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)] font-medium">
+            <h1 className="text-canonical-h1">
               {material.name}
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-sans font-normal">
@@ -157,7 +157,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
 
           {/* SPECS GRID */}
           <div className="p-5 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-none space-y-3 text-xs">
-            <h3 className="font-heading text-xs uppercase tracking-wider text-[var(--text-primary)] border-b border-[var(--border-subtle)] pb-2 font-medium">
+            <h3 className="text-canonical-h3">
               Especificaciones de Laboratorio
             </h3>
             <div className="grid grid-cols-2 gap-4">
@@ -218,7 +218,7 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
 
           {/* APPLICATIONS */}
           <div className="space-y-3">
-            <h3 className="font-heading text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+            <h3 className="text-canonical-h3">
               Aplicaciones Frecuentes
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

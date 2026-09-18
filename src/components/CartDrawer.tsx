@@ -34,7 +34,7 @@ import { IconBadge } from "./ui/IconBadge";
 import { PrintReadinessChecklist } from "./ui/PrintReadinessChecklist";
 
 interface CartDrawerProps {
-  onOrderPlaced: (orderId: string) => void;
+  onOrderPlaced: (orderId: string, totalAmountARS?: number, count?: number) => void;
   onNavigate?: (view: string, param?: string) => void;
 }
 
@@ -202,7 +202,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
         if (data.initPoint && !data.initPoint.includes("&demo=true")) {
           window.location.href = data.initPoint;
         } else {
-          onOrderPlaced(data.order.id);
+          onOrderPlaced(data.order.id, data.order.totalAmountARS || grandTotal, items.length);
         }
       } else if (data.error) {
         alert(`Error al generar preferencia: ${data.error}`);
@@ -336,7 +336,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
                   containerStyle="subtle"
                   className="mx-auto"
                 />
-                <h4 className="font-heading text-[var(--text-primary)] text-sm font-medium">
+                <h4 className="text-canonical-h4">
                   {t("cart_empty_title")}
                 </h4>
                 <p className="text-xs text-[var(--text-secondary)] max-w-xs mx-auto">
@@ -357,7 +357,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
                             {item.customLabel}
                           </span>
                         )}
-                        <h4 className="text-xs font-heading font-medium text-[var(--text-primary)]">
+                        <h4 className="text-canonical-h4">
                           {item.materialName}
                         </h4>
                       </div>
@@ -438,7 +438,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
                         />
                         Póster Diseñado con IA
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-[7px] bg-accent text-black font-medium">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-[7px] bg-accent text-[var(--text-primary)] font-medium">
                         {item.posterDesignData.outputFormat}
                       </span>
                     </div>

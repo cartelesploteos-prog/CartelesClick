@@ -1,54 +1,53 @@
 {
-  "short_name": "Carteles.Click",
-  "name": "Carteles.Click - Cartelería e Imprenta Gran Formato",
-  "description": "Cotizador e imprenta digital de carteles, lonas front, vinilos ploteados, portabanners y materiales rígidos con inteligencia artificial.",
-  "icons": [
-    {
-      "src": "/pwa-icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/pwa-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/pwa-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
-  "id": "/",
+  "short_name": "CartelesClick",
+  "name": "CartelesClick 2026 - Producción Gráfica & Cartelería 3D",
+  "description": "Plataforma de cotización instantánea, diseño asistido por IA y producción de cartelería en gran formato.",
   "start_url": "/",
-  "background_color": "#161821",
-  "theme_color": "#161821",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "scope": "/",
-  "lang": "es-AR",
-  "categories": ["shopping", "business", "productivity"],
+  "theme_color": "#2563eb",
+  "background_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
   "shortcuts": [
     {
-      "name": "Cotizador de Carteles",
-      "short_name": "Cotizar",
-      "description": "Calculá el precio m² o por placa de tus lonas y vinilos en tiempo real",
-      "url": "/?view=cotizador"
+      "name": "Cotizador Instantáneo",
+      "short_name": "Cotizador",
+      "description": "Calculá tu cartel o impresión en segundos",
+      "url": "/?view=cotizador",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Crear Cartel con IA",
-      "short_name": "Diseñar IA",
-      "description": "Generador de anuncios y banners con Inteligencia Artificial",
-      "url": "/?view=poster"
-    },
-    {
-      "name": "Seguimiento de Pedidos",
-      "short_name": "Mis Pedidos",
-      "description": "Consultá el estado en taller de tus impresiones",
-      "url": "/?view=pedidos"
+      "name": "Catálogo de Materiales",
+      "short_name": "Materiales",
+      "description": "Explorá lonas, vinilos, rígidos y corpóreos",
+      "url": "/?view=materiales",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

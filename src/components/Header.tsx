@@ -217,7 +217,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
   return (
     <header
       role="banner"
-      className="fixed top-3 sm:top-4 left-0 right-0 z-50 w-full px-3 sm:px-6 pointer-events-none transition-all"
+      className="fixed top-2.5 sm:top-4 left-0 right-0 z-50 w-full px-3 sm:px-6 pointer-events-none transition-all"
     >
       <div ref={headerContainerRef} className="max-w-5xl mx-auto pointer-events-auto rounded-full liquid-glass px-4 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-3 transition-all">
         {/* LOGO */}
@@ -250,7 +250,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
           >
             <Search className="w-4 h-4 text-[var(--brand-brick)]" strokeWidth={2} />
             <span className="hidden sm:inline">Buscar...</span>
-            <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-muted)] border border-black/5 dark:border-white/10">
+            <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/[0.04] dark:bg-[var(--bg-surface)]/[0.08] text-[var(--text-muted)] border border-black/5 dark:border-white/10">
               ⌘K
             </span>
           </button>
@@ -354,7 +354,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                       <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--brand-brick)] font-bold">
                         {t("ai_engine_badge")}
                       </span>
-                      <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                      <h3 className="text-canonical-h3">
                         {t("ai_engine_title")}
                       </h3>
                       <p className="text-xs text-[var(--text-secondary)]">
@@ -391,7 +391,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
                   <div className="space-y-5">
                     {filteredItems.map((group, gIdx) => (
                       <div key={gIdx} className="space-y-2">
-                        <h4 className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold px-1">
+                        <h4 className="text-canonical-h4">
                           {group.group}
                         </h4>
                         <div className="grid grid-cols-1 gap-1.5">

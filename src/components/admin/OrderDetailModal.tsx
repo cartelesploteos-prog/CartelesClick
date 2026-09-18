@@ -58,7 +58,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
             {/* Header */}
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
           <div>
-            <h2 className="text-xl font-heading font-semibold text-[var(--text-primary)]">
+            <h2 className="text-canonical-h2">
               Detalle del Pedido #{order.orderNumber}
             </h2>
             <div className="flex items-center gap-2 mt-2">
@@ -86,7 +86,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
             
             {/* Customer Info */}
             <div className="p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-3">
+              <h3 className="text-canonical-h3">
                 <User className="w-4 h-4 text-[var(--brand-brick)]" />
                 Información del Cliente
               </h3>
@@ -116,7 +116,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
 
             {/* Product Details */}
             <div className="p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-3">
+              <h3 className="text-canonical-h3">
                 <Package className="w-4 h-4 text-[var(--brand-brick)]" />
                 Detalles de Producción
               </h3>
@@ -148,7 +148,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
                 {order.notes && (
                   <div className="col-span-2">
                     <p className="text-[var(--text-secondary)] mb-1">Notas del Pedido</p>
-                    <div className="p-3 bg-white rounded-md text-sm border border-gray-100 whitespace-pre-wrap">
+                    <div className="p-3 bg-[var(--bg-surface)] rounded-md text-sm border border-gray-100 whitespace-pre-wrap">
                       {order.notes}
                     </div>
                   </div>
@@ -158,7 +158,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
 
             {/* Files & Thumbnails */}
             <div className="p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-3">
+              <h3 className="text-canonical-h3">
                 <FileImage className="w-4 h-4 text-[var(--brand-brick)]" />
                 Archivos Adjuntos
               </h3>
@@ -167,15 +167,15 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
                   {order.files.map((file: any, idx: number) => {
                     const isImage = file.type?.startsWith("image/");
                     return (
-                      <div key={idx} className="group relative rounded-md border border-[var(--border-subtle)] bg-white overflow-hidden aspect-square flex flex-col items-center justify-center">
+                      <div key={idx} className="group relative rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden aspect-square flex flex-col items-center justify-center">
                         {isImage && file.url ? (
                           <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
                         ) : (
-                          <FileText className="w-8 h-8 text-gray-400 mb-2" />
+                          <FileText className="w-8 h-8 text-[var(--text-muted)] mb-2" />
                         )}
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center">
                           <p className="text-white text-xs truncate w-full mb-2">{file.name}</p>
-                          <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-white text-black rounded-md hover:bg-gray-100">
+                          <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-[var(--bg-surface)] text-[var(--text-primary)] rounded-md hover:bg-gray-100">
                             <Download className="w-4 h-4" />
                           </a>
                         </div>
@@ -184,7 +184,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
                   })}
                 </div>
               ) : order.designUrl ? (
-                <div className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-md">
+                <div className="flex items-center gap-3 p-3 bg-[var(--bg-surface)] border border-gray-200 rounded-md">
                   <ExternalLink className="w-5 h-5 text-blue-500" />
                   <div className="flex-1 overflow-hidden">
                     <p className="text-sm font-medium truncate">Enlace a Archivo Externo</p>
@@ -201,11 +201,11 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
 
           {/* Right Column: Audit History */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2 mb-1">
+            <h3 className="text-canonical-h3">
               <History className="w-4 h-4 text-[var(--brand-brick)]" />
               Historial de Auditoría
             </h3>
-            <div className="border border-[var(--border-subtle)] rounded-[var(--radius-md)] bg-white overflow-hidden">
+            <div className="border border-[var(--border-subtle)] rounded-[var(--radius-md)] bg-[var(--bg-surface)] overflow-hidden">
               {order.auditHistory && order.auditHistory.length > 0 ? (
                 <ul className="divide-y divide-[var(--border-subtle)] max-h-[500px] overflow-y-auto">
                   {order.auditHistory.map((log: any, idx: number) => (
@@ -214,7 +214,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
                         <span className="text-xs font-semibold text-gray-800">
                           {log.adminName || log.adminUid || "Sistema"}
                         </span>
-                        <span className="text-[10px] text-gray-500 font-mono">
+                        <span className="text-[10px] text-[var(--text-secondary)] font-mono">
                           {formatDate(log.timestamp)}
                         </span>
                       </div>
@@ -228,7 +228,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
                         </span>
                       </div>
                       {log.notes && (
-                        <p className="text-xs text-gray-500 mt-2 italic border-l-2 border-gray-200 pl-2">
+                        <p className="text-xs text-[var(--text-secondary)] mt-2 italic border-l-2 border-gray-200 pl-2">
                           "{log.notes}"
                         </p>
                       )}

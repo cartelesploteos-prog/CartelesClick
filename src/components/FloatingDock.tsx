@@ -68,7 +68,7 @@ const DropdownItem: React.FC<DropdownItemProps> = ({
         className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
           danger
             ? "bg-rose-500/10 text-rose-600"
-            : "bg-black/5 dark:bg-white/10 text-[var(--brand-brick)]"
+            : "bg-black/5 dark:bg-[var(--bg-surface)]/10 text-[var(--brand-brick)]"
         }`}
       >
         <Icon className="w-4 h-4" />
@@ -187,7 +187,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                 {activePopup === "tools" && (
                   <>
                     <Wrench className="w-4 h-4 text-[var(--brand-brick)]" />
-                    <span className="font-heading text-xs font-bold text-[var(--text-primary)]">
+                    <span className="font-heading text-xs font-semibold text-[var(--text-primary)]">
                       Herramientas y Cotizador
                     </span>
                   </>
@@ -195,7 +195,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                 {activePopup === "user" && (
                   <>
                     <User className="w-4 h-4 text-[var(--brand-brick)]" />
-                    <span className="font-heading text-xs font-bold text-[var(--text-primary)]">
+                    <span className="font-heading text-xs font-semibold text-[var(--text-primary)]">
                       {isAuthenticated ? "Mi Cuenta" : "Acceso de Clientes"}
                     </span>
                   </>
@@ -203,7 +203,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                 {activePopup === "modes" && (
                   <>
                     <Settings className="w-4 h-4 text-[var(--brand-brick)]" />
-                    <span className="font-heading text-xs font-bold text-[var(--text-primary)]">
+                    <span className="font-heading text-xs font-semibold text-[var(--text-primary)]">
                       Preferencias y Visualización
                     </span>
                   </>
@@ -211,7 +211,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                 {activePopup === "workshop" && (
                   <>
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="font-heading text-xs font-bold text-[var(--text-primary)]">
+                    <span className="font-heading text-xs font-semibold text-[var(--text-primary)]">
                       Taller Central · Métricas en Vivo
                     </span>
                   </>
@@ -223,7 +223,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                   e.stopPropagation();
                   closeAll();
                 }}
-                className="p-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-[var(--bg-surface)]/10 transition-colors cursor-pointer"
                 title="Cerrar menú"
                 aria-label="Cerrar panel"
               >
@@ -349,7 +349,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                   label="Búsqueda Rápida"
                   sublabel="Materiales, blog o glosario"
                   badge="⌘K"
-                  badgeColor="bg-black/10 dark:bg-white/15 text-[var(--text-primary)]"
+                  badgeColor="bg-black/10 dark:bg-[var(--bg-surface)]/15 text-[var(--text-primary)]"
                   onClick={() => {
                     closeAll();
                     document.dispatchEvent(new CustomEvent("open-mobile-search"));
@@ -362,19 +362,19 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
             {activePopup === "workshop" && (
               <div className="space-y-3 pt-1">
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 space-y-1">
+                  <div className="p-2.5 rounded-2xl bg-black/5 dark:bg-[var(--bg-surface)]/5 space-y-1">
                     <div className="text-[var(--text-secondary)] flex items-center gap-1.5 font-medium text-[11px]">
                       <Activity className="w-3.5 h-3.5 text-[var(--brand-brick)]" />
                       <span>En imprenta</span>
                     </div>
-                    <p className="font-heading text-sm font-bold text-[var(--text-primary)]">14 trabajos</p>
+                    <p className="font-heading text-sm font-semibold text-[var(--text-primary)]">14 trabajos</p>
                   </div>
-                  <div className="p-2.5 rounded-2xl bg-black/5 dark:bg-white/5 space-y-1">
+                  <div className="p-2.5 rounded-2xl bg-black/5 dark:bg-[var(--bg-surface)]/5 space-y-1">
                     <div className="text-[var(--text-secondary)] flex items-center gap-1.5 font-medium text-[11px]">
                       <Clock className="w-3.5 h-3.5 text-[var(--brand-brick)]" />
                       <span>Despacho</span>
                     </div>
-                    <p className="font-heading text-sm font-bold text-[var(--text-primary)]">24 a 48 hs</p>
+                    <p className="font-heading text-sm font-semibold text-[var(--text-primary)]">24 a 48 hs</p>
                   </div>
                 </div>
 
@@ -383,7 +383,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                     <span>Capacidad productiva en taller</span>
                     <span className="font-bold text-[var(--brand-brick)]">82%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-black/10 dark:bg-[var(--bg-surface)]/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[var(--brand-brick)] transition-all duration-500 rounded-full"
                       style={{ width: "82%" }}
@@ -418,12 +418,12 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
           className={`relative p-2.5 sm:p-3 rounded-full transition-all active:scale-95 cursor-pointer ${
             activeTab === "home"
               ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30 ring-1 ring-white/25"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-white/[0.12]"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-[var(--bg-surface)]/[0.12]"
           }`}
         >
           <Home className="w-5 h-5" />
           {activeTab === "home" && (
-            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
+            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--bg-surface)] shadow-sm" />
           )}
         </button>
 
@@ -440,7 +440,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
           className={`relative p-2.5 sm:p-3 rounded-full transition-all active:scale-95 cursor-pointer ${
             activeTab === "tools"
               ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30 ring-1 ring-white/25"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-white/[0.12]"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-[var(--bg-surface)]/[0.12]"
           }`}
         >
           <Calculator className="w-5 h-5" />
@@ -450,7 +450,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
             </span>
           )}
           {activeTab === "tools" && (
-            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
+            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--bg-surface)] shadow-sm" />
           )}
         </button>
 
@@ -467,12 +467,12 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
           className={`relative p-2.5 sm:p-3 rounded-full transition-all active:scale-95 cursor-pointer ${
             activeTab === "user"
               ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30 ring-1 ring-white/25"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-white/[0.12]"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-[var(--bg-surface)]/[0.12]"
           }`}
         >
           <User className="w-5 h-5" />
           {activeTab === "user" && (
-            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
+            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--bg-surface)] shadow-sm" />
           )}
         </button>
 
@@ -489,12 +489,12 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
           className={`relative p-2.5 sm:p-3 rounded-full transition-all active:scale-95 cursor-pointer ${
             activeTab === "modes"
               ? "bg-[var(--brand-brick)] text-white shadow-md shadow-[var(--brand-brick)]/30 ring-1 ring-white/25"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-white/[0.12]"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.05] dark:hover:bg-[var(--bg-surface)]/[0.12]"
           }`}
         >
           <Settings className="w-5 h-5" />
           {activeTab === "modes" && (
-            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
+            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--bg-surface)] shadow-sm" />
           )}
         </button>
       </div>

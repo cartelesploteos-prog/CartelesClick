@@ -46,7 +46,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               className="shrink-0"
             />
             <div>
-              <h4 className="text-[var(--text-primary)] font-semibold text-xs sm:text-sm leading-snug">
+              <h4 className="text-canonical-h4">
                 Cotización Transparente
               </h4>
               <p className="text-[11px] sm:text-xs text-[var(--text-secondary)]">
@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               className="shrink-0"
             />
             <div>
-              <h4 className="text-[var(--text-primary)] font-semibold text-xs sm:text-sm leading-snug">
+              <h4 className="text-canonical-h4">
                 Diseño Asistido por IA
               </h4>
               <p className="text-[11px] sm:text-xs text-[var(--text-secondary)]">
@@ -82,7 +82,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               className="shrink-0"
             />
             <div>
-              <h4 className="text-[var(--text-primary)] font-semibold text-xs sm:text-sm leading-snug">
+              <h4 className="text-canonical-h4">
                 {t("prod_24hs")}
               </h4>
               <p className="text-[11px] sm:text-xs text-[var(--text-secondary)]">
@@ -100,7 +100,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               className="shrink-0"
             />
             <div>
-              <h4 className="text-[var(--text-primary)] font-semibold text-xs sm:text-sm leading-snug">
+              <h4 className="text-canonical-h4">
                 {t("national_shipping")}
               </h4>
               <p className="text-[11px] sm:text-xs text-[var(--text-secondary)]">
@@ -144,7 +144,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           
           {/* MATERIALES DESTACADOS */}
           <div className="flex-auto min-w-[130px] max-w-[180px]">
-            <h4 className="text-[var(--text-primary)] font-semibold text-xs uppercase tracking-wider mb-3.5">
+            <h4 className="text-canonical-h4">
               Materiales
             </h4>
             <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -172,7 +172,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* DICCIONARIO TÉCNICO */}
           <div className="flex-auto min-w-[130px] max-w-[180px]">
-            <h4 className="text-[var(--text-primary)] font-semibold text-xs uppercase tracking-wider mb-3.5">
+            <h4 className="text-canonical-h4">
               Glosario Técnico
             </h4>
             <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -200,7 +200,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* PLATAFORMA Y HERRAMIENTAS */}
           <div className="flex-auto min-w-[130px] max-w-[180px]">
-            <h4 className="text-[var(--text-primary)] font-semibold text-xs uppercase tracking-wider mb-3.5">
+            <h4 className="text-canonical-h4">
               Plataforma
             </h4>
             <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
@@ -249,7 +249,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* CONTACTO Y UBICACIÓN TÉCNICA */}
           <div className="flex-auto min-w-[150px] max-w-[210px] space-y-3">
-            <h4 className="text-[var(--text-primary)] font-semibold text-xs uppercase tracking-wider mb-3.5">
+            <h4 className="text-canonical-h4">
               Taller Central
             </h4>
             <div className="space-y-2.5 text-xs text-[var(--text-secondary)]">

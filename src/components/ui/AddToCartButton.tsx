@@ -125,7 +125,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       disabled={disabled}
       className={`relative overflow-hidden rounded-xl font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer select-none shadow-md ${sizeClasses} ${
         isSuccess
-          ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25 border border-emerald-400/40"
+          ? "bg-emerald-800 hover:bg-emerald-800 text-white shadow-emerald-500/25 border border-emerald-400/40"
           : "bg-primary hover:bg-primary-hover text-white shadow-primary/25 border border-primary/40"
       } ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
     >
@@ -147,7 +147,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
             animate={{ opacity: 1, y: -24, scale: 1 }}
             exit={{ opacity: 0, y: -36 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute -top-1 right-4 font-mono font-bold text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full shadow-lg pointer-events-none z-20 border border-white/40"
+            className="absolute -top-1 right-4 font-mono font-bold text-xs bg-emerald-800 text-white px-2 py-0.5 rounded-full shadow-lg pointer-events-none z-20 border border-white/40"
           >
             +{itemDetails?.quantity || 1}
           </motion.span>

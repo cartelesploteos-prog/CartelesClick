@@ -1,315 +1,299 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
+  Building2,
   CheckCircle2,
-  Send,
-  Building,
+  Percent,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  ShieldCheck,
   Truck,
-  Users,
-  Calculator,
+  MessageCircle,
+  HelpCircle,
 } from "lucide-react";
 import { WHOLESALE_TIERS } from "../../data/materials";
+import { useCartStore } from "../../store/useCartStore";
+import { useCurrencyStore } from "../../store/useCurrencyStore";
+import { BorderBeam } from "../ui/BorderBeam";
+import { CTAButton } from "../ui/CTAButton";
 
 interface WholesaleViewProps {
   onNavigate: (view: string, param?: string) => void;
 }
 
 export const WholesaleView: React.FC<WholesaleViewProps> = ({ onNavigate }) => {
-  const { t } = useTranslation();
-  const [projectedM2, setProjectedM2] = useState<number>(350);
-  const [submitted, setSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
-    companyName: "",
-    cuit: "",
-    city: "",
-    email: "",
-    phone: "",
-    notes: "",
-  });
+  const { wholesaleTierRequested, setWholesaleTier } = useCartStore();
+  const { formatPrice } = useCurrencyStore();
+  const [estimatedMonthlyM2, setEstimatedMonthlyM2] = useState<number>(350);
+  const [applicationSuccess, setApplicationSuccess] = useState<string | null>(null);
 
-  let activeTier = WHOLESALE_TIERS[0];
-  if (projectedM2 >= 1000) {
-    activeTier = WHOLESALE_TIERS[2];
-  } else if (projectedM2 >= 500) {
-    activeTier = WHOLESALE_TIERS[1];
-  }
+  // Average reference price per m2 in ARS for simulation
+  const AVG_M2_PRICE_ARS = 9500;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+  // Determine active tier based on slider volume
+  const getSimulatedTier = (m2: number) => {
+    if (m2 >= 1000) return WHOLESALE_TIERS.find((t) => t.id === "partner");
+    if (m2 >= 500) return WHOLESALE_TIERS.find((t) => t.id === "agencia");
+    if (m2 >= 200) return WHOLESALE_TIERS.find((t) => t.id === "inicio");
+    return null;
+  };
+
+  const activeSimulatedTier = getSimulatedTier(estimatedMonthlyM2);
+  const rawMonthlyTotal = estimatedMonthlyM2 * AVG_M2_PRICE_ARS;
+  const discountPercent = activeSimulatedTier ? activeSimulatedTier.discountPercent : 0;
+  const simulatedSavings = rawMonthlyTotal * (discountPercent / 100);
+
+  const handleSelectTier = (tierId: "inicio" | "agencia" | "partner") => {
+    setWholesaleTier(tierId);
+    setApplicationSuccess(tierId);
+    setTimeout(() => {
+      setApplicationSuccess(null);
+    }, 4000);
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16">
-      {/* HEADER */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="text-xs uppercase tracking-widest text-primary font-medium">
-          Canal Mayorista & Gremio
-        </span>
-        <h1 className="font-heading text-3xl sm:text-4xl text-[var(--text-primary)] tracking-tight">
-          {t("wholesale_title")}
+    <div className="container-safe py-8 sm:py-12 space-y-12">
+      {/* HEADER SECTION */}
+      <div className="text-center max-w-3xl mx-auto space-y-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+          <Building2 className="w-3.5 h-3.5" strokeWidth={2} />
+          <span>Canal Exclusivo para Gremios y Agencias</span>
+        </div>
+        <h1 className="text-canonical-h1">
+          Precios Mayoristas y Producción B2B
         </h1>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-          {t("wholesale_subtitle")}
+        <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+          Optimiza la rentabilidad de tus proyectos de gran formato. Ofrecemos producción express en 24/48h, embalaje neutro listo para despachar y bonificaciones escalonadas por volumen mensual.
         </p>
       </div>
 
-      {/* TIERS CARDS (4-COL BENTO GRID ON XL+) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-        {WHOLESALE_TIERS.map((tier) => (
-          <div
-            key={tier.id}
-            className={`p-6 sm:p-8 rounded-2xl border transition-all flex flex-col justify-between ${
-              tier.highlight
-                ? "border-primary bg-[var(--bg-surface-subtle)] shadow-md"
-                : "border-[var(--border-subtle)] bg-[var(--bg-surface)]"
-            }`}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-heading text-base text-[var(--text-primary)] font-bold">
-                  {tier.name}
-                </h3>
-                {tier.highlight && (
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-accent text-black font-bold">
-                    Más elegido
-                  </span>
-                )}
-              </div>
-              <div>
-                <span className="font-heading text-4xl text-primary font-mono font-extrabold">
-                  {tier.discountPercent}% OFF
-                </span>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  A partir de {tier.minMonthlyM2} m² mensuales
-                </p>
-              </div>
-              <ul className="space-y-2.5 pt-4 border-t border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
-                {tier.benefits.map((b, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ))}
+      {/* TIER CARDS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+        {WHOLESALE_TIERS.map((tier) => {
+          const isSelected = wholesaleTierRequested === tier.id;
+          const isAgencia = tier.id === "agencia";
 
-        {/* 4TH CARD ON XL+: BENEFICIOS EXCLUSIVOS GREMIO */}
-        <div className="p-6 sm:p-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] flex flex-col justify-between">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading text-base text-[var(--text-primary)] font-bold">
-                Beneficios Gremio
-              </h3>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-                Taller B2B
-              </span>
+          return (
+            <div
+              key={tier.id}
+              className={`relative rounded-2xl border p-6 sm:p-7 flex flex-col justify-between transition-all ${
+                isAgencia
+                  ? "border-primary bg-[var(--bg-surface)] shadow-lg"
+                  : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/40 shadow-xs"
+              }`}
+            >
+              {isAgencia && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-white text-[11px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Más Elegido</span>
+                </div>
+              )}
+
+              {isSelected && (
+                <BorderBeam size={48} borderWidth={2} duration={3.5} />
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                    Mínimo {tier.minMonthlyM2} m² / mes
+                  </span>
+                  <h3 className="text-canonical-h3">
+                    {tier.name}
+                  </h3>
+                </div>
+
+                <div className="flex items-baseline gap-1 py-2 border-y border-[var(--border-subtle)]">
+                  <span className="text-3xl sm:text-4xl font-semibold font-heading text-[var(--text-primary)]">
+                    {tier.discountPercent}%
+                  </span>
+                  <span className="text-xs text-[var(--text-secondary)] font-medium">
+                    descuento directo en m²
+                  </span>
+                </div>
+
+                {/* BENEFIT LIST */}
+                <ul className="space-y-2.5 pt-2">
+                  {tier.benefits.map((b, idx) => (
+                    <li
+                      key={idx}
+                      className="text-xs text-[var(--text-secondary)] flex items-start gap-2 leading-snug"
+                    >
+                      <CheckCircle2
+                        className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"
+                        strokeWidth={2}
+                      />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-6 mt-6 border-t border-[var(--border-subtle)]">
+                <button
+                  type="button"
+                  onClick={() => handleSelectTier(tier.id as "inicio" | "agencia" | "partner")}
+                  className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    isSelected
+                      ? "bg-emerald-800 text-white shadow-sm"
+                      : isAgencia
+                      ? "bg-primary hover:bg-primary-hover text-white shadow-sm"
+                      : "bg-[var(--bg-surface-subtle)] hover:bg-primary hover:text-white text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                  }`}
+                >
+                  {isSelected ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Nivel Activo en Carrito</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Activar Nivel {tier.name.split(" ")[1]}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <div>
-              <span className="font-heading text-xl text-[var(--text-primary)] font-bold block">
-                Servicio Integral
-              </span>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">
-                Atención directa para profesionales y agencias
-              </p>
-            </div>
-            <ul className="space-y-2.5 pt-4 border-t border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Despacho express prioritario en 24hs</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Factura A automática y cuenta corriente</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Muestrario físico bonificado con tu 1er pedido</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Embalaje neutro para entrega directa a tu cliente</span>
-              </li>
-            </ul>
+          );
+        })}
+      </div>
+
+      {/* INTERACTIVE VOLUME & SAVINGS SIMULATOR */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-canonical-h2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              <span>Simulador de Ahorro por Volumen</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+              Desliza para calcular tu escala de descuento según la cantidad estimada de m² que imprimes al mes.
+            </p>
+          </div>
+
+          <div className="px-4 py-2 rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-right">
+            <span className="text-[10px] font-semibold text-[var(--text-secondary)] block uppercase tracking-wider">
+              Volumen Estimado
+            </span>
+            <span className="text-xl sm:text-2xl font-semibold font-heading text-primary">
+              {estimatedMonthlyM2} m²
+            </span>
+          </div>
+        </div>
+
+        {/* RANGE SLIDER */}
+        <div className="space-y-2">
+          <input
+            type="range"
+            min="50"
+            max="1500"
+            step="25"
+            value={estimatedMonthlyM2}
+            onChange={(e) => setEstimatedMonthlyM2(Number(e.target.value))}
+            className="w-full h-2 bg-[var(--bg-surface-subtle)] rounded-lg appearance-none cursor-pointer accent-primary"
+            aria-label="Volumen mensual en metros cuadrados"
+          />
+          <div className="flex justify-between text-[11px] font-semibold text-[var(--text-secondary)]">
+            <span>50 m² (Minorista)</span>
+            <span>200 m² (Inicio 5%)</span>
+            <span>500 m² (Agencia 10%)</span>
+            <span>1000+ m² (Partner 15%)</span>
+          </div>
+        </div>
+
+        {/* SIMULATOR METRICS BREAKDOWN */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div className="p-4 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+            <span className="text-[11px] text-[var(--text-secondary)] block">Nivel Asignado:</span>
+            <strong className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 mt-1">
+              <Building2 className="w-4 h-4 text-primary" />
+              {activeSimulatedTier ? activeSimulatedTier.name : "Nivel Base (Minorista)"}
+            </strong>
+          </div>
+
+          <div className="p-4 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+            <span className="text-[11px] text-[var(--text-secondary)] block">Descuento Obtenido:</span>
+            <strong className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-1">
+              <Percent className="w-4 h-4" />
+              {discountPercent}% OFF en tus pedidos
+            </strong>
+          </div>
+
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium block">
+              Ahorro Mensual Proyectado:
+            </span>
+            <strong className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
+              ~ {formatPrice(simulatedSavings)}
+            </strong>
           </div>
         </div>
       </div>
 
-      {/* STRUCTURED LAYOUT ON XL+: SIMULATOR & APPLICATION FORM */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-        {/* INTERACTIVE TIER SIMULATOR (7 cols on xl) */}
-        <div className="xl:col-span-7 p-6 sm:p-8 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-6">
-          <div className="space-y-2">
-            <span className="text-xs uppercase tracking-widest text-primary font-medium">
-              Simulador de Escala Mensual
-            </span>
-            <h2 className="font-heading text-2xl text-[var(--text-primary)] font-bold">
-              Calculá el beneficio según los m² de tu taller
-            </h2>
+      {/* VALUE PILLARS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <Truck className="w-5 h-5" />
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-[var(--text-secondary)]">
-                Metros cuadrados proyectados por mes:
-              </span>
-              <span className="font-mono text-[var(--text-primary)] text-xl font-bold">
-                {projectedM2} m²
-              </span>
-            </div>
-            <input
-              type="range"
-              min="50"
-              max="1500"
-              step="50"
-              value={projectedM2}
-              onChange={(e) => setProjectedM2(parseInt(e.target.value, 10))}
-              className="w-full h-2 rounded-lg accent-primary cursor-pointer"
-            />
-            <div className="flex justify-between text-xs text-[var(--text-secondary)] font-mono">
-              <span>50 m²</span>
-              <span>200 m² (Inicio)</span>
-              <span>500 m² (Agencia)</span>
-              <span>1.000+ m² (Partner)</span>
-            </div>
-          </div>
-          <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
-              <span className="text-xs text-[var(--text-secondary)]">Escala alcanzada:</span>
-              <p className="text-[var(--text-primary)] text-sm font-semibold">
-                {activeTier.name} — Descuento del {activeTier.discountPercent}% directo en servidor
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                const element = document.getElementById("b2b-form");
-                element?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs transition-colors shrink-0 font-bold cursor-pointer"
-            >
-              Solicitar esta escala
-            </button>
-          </div>
+          <h4 className="text-canonical-h4">
+            Despacho Neutro y Blindado
+          </h4>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Embalamos tus lonas y rígidos sin etiquetas ni marcas nuestras. Tu cliente recibe el material como si hubiera salido directo de tu taller.
+          </p>
         </div>
 
-        {/* B2B APPLICATION FORM (5 cols on xl) */}
-        <div
-          id="b2b-form"
-          className="xl:col-span-5 p-6 sm:p-8 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-6 shadow-sm"
-        >
-          <div className="space-y-1 text-center">
-            <h3 className="font-heading text-xl text-[var(--text-primary)] font-bold">
-              Solicitud de Cuenta Gremio
-            </h3>
-            <p className="text-xs text-[var(--text-secondary)]">
-              Completá tus datos comerciales. Un asesor técnico verificará tu CUIT en 24 horas hábiles.
-            </p>
+        <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5" />
           </div>
-          {submitted ? (
-            <div className="p-6 rounded-xl bg-[var(--bg-surface-subtle)] border border-primary/30 text-center space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-primary mx-auto" />
-              <h4 className="font-heading text-sm text-[var(--text-primary)] font-bold">
-                ¡Solicitud enviada con éxito!
-              </h4>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Te contactaremos al correo ingresado para habilitar las listas de precios mayoristas en tu perfil.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[var(--text-secondary)]">Razón Social / Taller</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej: Imprenta San Martín SRL"
-                    value={formData.companyName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, companyName: e.target.value })
-                    }
-                    className="w-full min-h-[2.75rem] px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-primary)] focus:outline-hidden focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[var(--text-secondary)]">CUIT</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="30-XXXXXXXX-X"
-                    value={formData.cuit}
-                    onChange={(e) =>
-                      setFormData({ ...formData, cuit: e.target.value })
-                    }
-                    className="w-full min-h-[2.75rem] px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-primary)] focus:outline-hidden focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[var(--text-secondary)]">Localidad / Provincia</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej: Rosario, Santa Fe"
-                    value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
-                    className="w-full min-h-[2.75rem] px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-primary)] focus:outline-hidden focus:border-primary"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[var(--text-secondary)]">Teléfono / WhatsApp</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="+54 9 11 ..."
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full min-h-[2.75rem] px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-primary)] focus:outline-hidden focus:border-primary"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[var(--text-secondary)]">Email Corporativo</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="compras@taller.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full min-h-[2.75rem] px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-primary)] focus:outline-hidden focus:border-primary"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[var(--text-secondary)]">
-                  Detalle de consumo / Comentarios
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Mencioná tipos de materiales habituales (lonas front, microperforado, placas)..."
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-primary)] focus:outline-hidden focus:border-primary"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full min-h-[2.75rem] py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs transition-colors flex items-center justify-center gap-2 font-bold cursor-pointer shadow-md"
-              >
-                <Send className="w-4 h-4" />
-                <span>Enviar solicitud de cuenta gremio</span>
-              </button>
-            </form>
-          )}
+          <h4 className="text-canonical-h4">
+            Garantía de Reposición Técnica
+          </h4>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Si ocurre cualquier desvío en colorimetría o falla mecánica en el sustrato, reimprimimos sin demoras ni trámites burocráticos.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+          <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <MessageCircle className="w-5 h-5" />
+          </div>
+          <h4 className="text-canonical-h4">
+            Mesa de Ayuda WhatsApp Taller
+          </h4>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Contacto directo con los operarios de máquinas y preprensa para resolver urgencias de archivos, troqueles o perfiles ICC en tiempo real.
+          </p>
+        </div>
+      </div>
+
+      {/* CALL TO ACTION FOOTER */}
+      <div className="p-8 rounded-3xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+        <div className="space-y-1 max-w-xl">
+          <h3 className="text-canonical-h3">
+            ¿Listo para cotizar tus trabajos con tarifa de gremio?
+          </h3>
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+            Accede ahora al cotizador en vivo. Si seleccionaste un nivel mayorista, el descuento se aplicará de forma automática al cerrar tu pedido.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <CTAButton
+            onClick={() => onNavigate("cotizador")}
+            className="text-xs sm:text-sm px-6 py-3"
+            celebrationMessage="¡Tarifa gremio lista para cotizar!"
+          >
+            <span>Ir al Cotizador en Vivo</span>
+            <ArrowRight className="w-4 h-4 ml-1" />
+          </CTAButton>
         </div>
       </div>
     </div>
   );
 };
+
+export default WholesaleView;

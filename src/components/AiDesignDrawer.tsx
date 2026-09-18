@@ -222,7 +222,7 @@ export const AiDesignDrawer: React.FC<AiDesignDrawerProps> = ({
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-heading text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <h3 className="text-canonical-h3">
                   <span>Asistente de Diseño & Mockup IA</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-mono font-semibold">
                     En Vivo
@@ -325,7 +325,7 @@ export const AiDesignDrawer: React.FC<AiDesignDrawerProps> = ({
 
                     {/* Headline */}
                     <h4
-                      className="text-xl sm:text-2xl lg:text-3xl font-extrabold uppercase tracking-tight leading-tight transition-all font-heading"
+                      className="text-xl sm:text-2xl lg:text-3xl font-semibold uppercase tracking-tight leading-tight transition-all font-heading"
                       style={{
                         color: primaryColor,
                         textShadow: `0 0 20px ${primaryColor}60`,

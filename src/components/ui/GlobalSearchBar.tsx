@@ -307,7 +307,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
                   <div className="w-10 h-10 mx-auto rounded-full bg-[var(--bg-surface-subtle)] flex items-center justify-center text-[var(--text-secondary)]">
                     <Search className="w-5 h-5" strokeWidth={1.85} />
                   </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)]">
+                  <h4 className="text-canonical-h4">
                     No encontramos resultados para "{query}"
                   </h4>
                   <p className="text-[11px] text-[var(--text-secondary)] max-w-xs mx-auto">

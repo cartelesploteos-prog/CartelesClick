@@ -87,7 +87,7 @@ const VARIANT_MAP: Record<
   },
   accent: {
     subtle: {
-      container: "bg-[#B45309]/10 dark:bg-[#FFA048]/15 border border-[#B45309]/20 dark:border-[#FFA048]/30",
+      container: "bg-amber-900/10 dark:bg-[#FFA048]/15 border border-[#B45309]/20 dark:border-[#FFA048]/30",
       icon: "text-[#B45309] dark:text-[#FFA048]",
     },
     ghost: {
@@ -95,11 +95,11 @@ const VARIANT_MAP: Record<
       icon: "text-[#B45309] dark:text-[#FFA048]",
     },
     solid: {
-      container: "bg-[#B45309] dark:bg-[#FFA048] text-white dark:text-black shadow-xs",
-      icon: "text-white dark:text-black",
+      container: "bg-amber-900 dark:bg-[#FFA048] text-white dark:text-[var(--text-primary)] shadow-xs",
+      icon: "text-white dark:text-[var(--text-primary)]",
     },
     glass: {
-      container: "bg-[#B45309]/10 dark:bg-[#FFA048]/15 backdrop-blur-md border border-[#B45309]/25 dark:border-[#FFA048]/35",
+      container: "bg-amber-900/10 dark:bg-[#FFA048]/15 backdrop-blur-md border border-[#B45309]/25 dark:border-[#FFA048]/35",
       icon: "text-[#B45309] dark:text-[#FFA048]",
     },
     bordered: {
@@ -113,7 +113,7 @@ const VARIANT_MAP: Record<
   },
   neutral: {
     subtle: {
-      container: "bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.12]",
+      container: "bg-black/[0.04] dark:bg-[var(--bg-surface)]/[0.06] border border-black/[0.08] dark:border-white/[0.12]",
       icon: "text-zinc-800 dark:text-zinc-200",
     },
     ghost: {
@@ -125,7 +125,7 @@ const VARIANT_MAP: Record<
       icon: "text-white dark:text-zinc-900",
     },
     glass: {
-      container: "bg-black/[0.03] dark:bg-white/[0.05] backdrop-blur-md border border-black/[0.08] dark:border-white/[0.12]",
+      container: "bg-black/[0.03] dark:bg-[var(--bg-surface)]/[0.05] backdrop-blur-md border border-black/[0.08] dark:border-white/[0.12]",
       icon: "text-zinc-800 dark:text-zinc-200",
     },
     bordered: {
@@ -147,7 +147,7 @@ const VARIANT_MAP: Record<
       icon: "text-emerald-700 dark:text-emerald-400",
     },
     solid: {
-      container: "bg-emerald-600 dark:bg-emerald-500 text-white shadow-xs",
+      container: "bg-emerald-800 dark:bg-emerald-800 text-white shadow-xs",
       icon: "text-white",
     },
     glass: {
@@ -173,7 +173,7 @@ const VARIANT_MAP: Record<
       icon: "text-amber-700 dark:text-amber-400",
     },
     solid: {
-      container: "bg-amber-600 dark:bg-amber-500 text-white shadow-xs",
+      container: "bg-amber-800 dark:bg-amber-800 text-white shadow-xs",
       icon: "text-white",
     },
     glass: {
@@ -199,7 +199,7 @@ const VARIANT_MAP: Record<
       icon: "text-red-700 dark:text-red-400",
     },
     solid: {
-      container: "bg-red-600 dark:bg-red-500 text-white shadow-xs",
+      container: "bg-red-800 dark:bg-red-800 text-white shadow-xs",
       icon: "text-white",
     },
     glass: {
@@ -225,7 +225,7 @@ const VARIANT_MAP: Record<
       icon: "text-blue-700 dark:text-blue-400",
     },
     solid: {
-      container: "bg-blue-600 dark:bg-blue-500 text-white shadow-xs",
+      container: "bg-blue-600 dark:bg-blue-800 text-white shadow-xs",
       icon: "text-white",
     },
     glass: {
@@ -251,8 +251,8 @@ const VARIANT_MAP: Record<
       icon: "text-white",
     },
     solid: {
-      container: "bg-white text-zinc-900 shadow-xs",
-      icon: "text-zinc-900",
+      container: "bg-white text-slate-900 shadow-xs",
+      icon: "text-slate-900",
     },
     glass: {
       container: "bg-white/20 backdrop-blur-md border border-white/30",

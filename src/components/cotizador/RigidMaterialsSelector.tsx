@@ -138,7 +138,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
                 className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
                   isGroupActive
                     ? "bg-primary/10 border-primary shadow-sm ring-1 ring-primary"
-                    : "bg-white dark:bg-black/40 border-[var(--border-subtle)] hover:border-primary/40 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    : "bg-[var(--bg-surface)]/40 border-[var(--border-subtle)] hover:border-primary/40 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -151,7 +151,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
                     {group.badge}
                   </span>
                 </div>
-                <h4 className="font-heading font-bold text-sm text-[var(--text-primary)] mb-1">
+                <h4 className="text-canonical-h4">
                   {group.title}
                 </h4>
                 <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
@@ -192,7 +192,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
                 className={`p-3 rounded-xl border text-left flex items-center justify-between gap-3 transition-all cursor-pointer ${
                   isSelected
                     ? "bg-primary text-white border-primary shadow-sm"
-                    : "bg-white dark:bg-black/40 border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-primary/40"
+                    : "bg-[var(--bg-surface)]/40 border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-primary/40"
                 }`}
               >
                 <div className="space-y-0.5 min-w-0">
@@ -221,7 +221,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
 
       {/* 3. STANDARD SHEET CUT PRESETS */}
       {onDimensionsChange && (
-        <div className="space-y-2 p-4 rounded-2xl bg-white dark:bg-black/30 border border-[var(--border-subtle)]">
+        <div className="space-y-2 p-4 rounded-2xl bg-[var(--bg-surface)]/30 border border-[var(--border-subtle)]">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
               <Scissors className="w-3.5 h-3.5 text-primary" />
@@ -260,7 +260,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
               <TrendingDown className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-[var(--text-primary)]">
+              <h4 className="text-canonical-h4">
                 Cálculo de Consumo de Placa & Aprovechamiento
               </h4>
               <p className="text-[11px] text-[var(--text-secondary)]">
@@ -283,7 +283,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
 
         {/* METRICS GRID */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 rounded-xl bg-white/60 dark:bg-black/40 border border-[var(--border-subtle)]">
+          <div className="p-3 rounded-xl bg-[var(--bg-surface)]/60 dark:bg-black/40 border border-[var(--border-subtle)]">
             <span className="text-[10px] uppercase font-mono text-[var(--text-muted)] block">
               Superficie Pieza
             </span>
@@ -295,7 +295,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/60 dark:bg-black/40 border border-[var(--border-subtle)]">
+          <div className="p-3 rounded-xl bg-[var(--bg-surface)]/60 dark:bg-black/40 border border-[var(--border-subtle)]">
             <span className="text-[10px] uppercase font-mono text-[var(--text-muted)] block">
               Placas Matriz
             </span>
@@ -307,7 +307,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/60 dark:bg-black/40 border border-[var(--border-subtle)]">
+          <div className="p-3 rounded-xl bg-[var(--bg-surface)]/60 dark:bg-black/40 border border-[var(--border-subtle)]">
             <span className="text-[10px] uppercase font-mono text-[var(--text-muted)] block">
               Área Neta Pedido
             </span>
@@ -319,7 +319,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/60 dark:bg-black/40 border border-[var(--border-subtle)]">
+          <div className="p-3 rounded-xl bg-[var(--bg-surface)]/60 dark:bg-black/40 border border-[var(--border-subtle)]">
             <span className="text-[10px] uppercase font-mono text-[var(--text-muted)] block">
               Sobrante / Recorte
             </span>
@@ -345,7 +345,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
             </span>
           </div>
 
-          <div className="w-full h-3.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden flex p-0.5 border border-[var(--border-subtle)]">
+          <div className="w-full h-3.5 bg-black/10 dark:bg-[var(--bg-surface)]/10 rounded-full overflow-hidden flex p-0.5 border border-[var(--border-subtle)]">
             <div
               className="h-full bg-gradient-to-r from-primary to-[#FF7744] rounded-full transition-all duration-300"
               style={{ width: `${Math.min(100, efficiencyPercentage)}%` }}
@@ -359,7 +359,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
 
         {/* SCRAP PACKED AND SHIPPED OPTION */}
         {onIncludeScrapChange && (
-          <label className="p-3 rounded-xl bg-white dark:bg-black/40 border border-[var(--border-subtle)] hover:border-primary/40 flex items-center justify-between gap-3 cursor-pointer transition-colors">
+          <label className="p-3 rounded-xl bg-[var(--bg-surface)]/40 border border-[var(--border-subtle)] hover:border-primary/40 flex items-center justify-between gap-3 cursor-pointer transition-colors">
             <div className="flex items-center gap-2.5">
               <Package className="w-4 h-4 text-primary shrink-0" />
               <div>

@@ -149,7 +149,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
           <div className="p-3.5 px-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-surface-subtle)]">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-[var(--brand-brick)] dark:text-[var(--brand-brick)]" strokeWidth={2} />
-              <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
+              <h3 className="text-canonical-h3">
                 Notificaciones
               </h3>
               {unreadCount > 0 && (
@@ -163,7 +163,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               {unreadCount > 0 && activeTab !== 'settings' && (
                 <button
                   onClick={markAllAsRead}
-                  className="px-2 py-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-2 py-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-[5px] hover:bg-black/5 dark:hover:bg-[var(--bg-surface)]/5 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Marcar todas como leídas"
                 >
                   <CheckCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
@@ -173,7 +173,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               {notifications.length > 0 && activeTab !== 'settings' && (
                 <button
                   onClick={clearAll}
-                  className="p-1.5 text-[var(--text-secondary)] hover:text-red-500 rounded-[5px] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                  className="p-1.5 text-[var(--text-secondary)] hover:text-red-500 rounded-[5px] hover:bg-black/5 dark:hover:bg-[var(--bg-surface)]/5 transition-colors cursor-pointer"
                   title="Vaciar notificaciones"
                 >
                   <Trash2 className="w-3.5 h-3.5" strokeWidth={1.85} />
@@ -181,7 +181,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-[5px] hover:bg-black/5 dark:hover:bg-[var(--bg-surface)]/5 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" strokeWidth={2} />
               </button>
@@ -228,7 +228,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigate, 
             {activeTab === 'settings' ? (
               <div className="p-4 space-y-4 text-xs">
                 <div>
-                  <h4 className="font-semibold text-[var(--text-primary)] mb-1 flex items-center gap-1.5">
+                  <h4 className="text-canonical-h4">
                     <Mail className="w-3.5 h-3.5 text-[var(--brand-brick)] dark:text-[var(--brand-brick)]" strokeWidth={2} />
                     <span>Canales y Notificaciones</span>
                   </h4>

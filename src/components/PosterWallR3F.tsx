@@ -732,7 +732,7 @@ export const PosterWallR3F: React.FC<PosterWallR3FProps> = ({ design }) => {
             onClick={() => setIsNightMode(!isNightMode)}
             className={`p-2 rounded-[7px] border backdrop-blur transition-colors text-xs flex items-center gap-1 min-h-[2.25rem] ${
               isNightMode
-                ? "bg-accent text-black border-accent font-medium"
+                ? "bg-accent text-[var(--text-primary)] border-accent font-medium"
                 : "bg-[var(--bg-surface)]/90 border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
             title={isNightMode ? "Modo Día" : "Modo Noche con Focos"}

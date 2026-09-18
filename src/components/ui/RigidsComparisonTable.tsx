@@ -86,7 +86,7 @@ export const RigidsComparisonTable: React.FC<RigidsComparisonTableProps> = ({
           <Layers className="w-3.5 h-3.5" />
           <span>GUÍA COMPARATIVA DE SUSTRATOS RÍGIDOS</span>
         </div>
-        <h2 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)] font-bold tracking-tight">
+        <h2 className="text-canonical-h2">
           PVC Espumado vs. Alto Impacto vs. Acrílico
         </h2>
         <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -108,7 +108,7 @@ export const RigidsComparisonTable: React.FC<RigidsComparisonTableProps> = ({
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${mat.colorBadge}`}>
                     {mat.recommendedBadge}
                   </span>
-                  <h3 className="font-heading text-base sm:text-lg font-bold text-[var(--text-primary)] mt-1.5 leading-tight">
+                  <h3 className="text-canonical-h3">
                     {mat.name}
                   </h3>
                   <span className="text-[11px] text-[var(--text-secondary)] font-mono">

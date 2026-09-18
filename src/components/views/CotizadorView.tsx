@@ -75,7 +75,9 @@ import {
   QuotePriceSkeleton,
   BulkCalculationSkeleton,
   QuoteTableSkeleton,
+  CotizadorSkeletonScreen,
 } from "../ui/Skeleton";
+import { useMaterialStore } from "../../store/useMaterialStore";
 import { AiDesignDrawer, GeneratedDesignPayload } from "../AiDesignDrawer";
 import { BorderBeam } from "../ui/BorderBeam";
 import { CTAButton } from "../ui/CTAButton";
@@ -122,19 +124,34 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
   const { t } = useTranslation();
   const { addItem, addItems } = useCartStore();
   const { formatPrice, currency } = useCurrencyStore();
+  const {
+    isLoading: isStoreLoading,
+    categories,
+    materials,
+    getMaterialsByCategory,
+    getSubMaterials,
+  } = useMaterialStore();
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Wizard state: 1 to 7
   const [currentStep, setCurrentStep] = useState<number>(1);
 
-  // Main Family selection (Paso 1: Estampados, Carteles, Corpóreos)
+  // Main Family selection (Paso 1: Gigantografías, Carteles, Corpóreos, Estampados, Impresión 3D)
   const [selectedMainFamily, setSelectedMainFamily] = useState<MainFamilyType>("carteles");
 
-  // Category selection (Subcategoría)
-  const [selectedCategory, setSelectedCategory] = useState<MaterialCategory>("lonas");
+  // Subcategoría selection (Paso 2)
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("all");
 
   // Material selection
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>(
-    initialMaterialId || "lona_front_13oz"
+    initialMaterialId || "giganto_lonas"
   );
 
   // Color selection for vinyls with palettes
@@ -431,7 +448,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
         } else {
           setSelectedMainFamily("carteles");
         }
-        setSelectedCategory(found.category);
+        setSelectedMainFamily(found.category);
         setSelectedMaterialId(found.id);
         if (found.defaultFinishings) {
           setSelectedFinishings(found.defaultFinishings as FinishingType[]);
@@ -445,12 +462,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
 
   // Adjust default ink based on category
   useEffect(() => {
-    if (selectedCategory === "rigidos") {
+    if (false) {
       setInkType("directa_uv");
     } else if (inkType === "directa_uv") {
       setInkType("uv");
     }
-  }, [selectedCategory]);
+  }, [selectedMainFamily]);
 
   // Sync single mode inputs with first bulk item when switching
   const handleSwitchToBulk = () => {
@@ -865,83 +882,55 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
   // Familias principales para el Paso 1 simplificado
   const mainFamilies: { id: MainFamilyType; label: string; icon: any; desc: string; badge?: string }[] = [
     {
-      id: "estampados",
-      label: "Estampados",
-      icon: Shirt,
-      desc: "DTF Textil por metro, Sublimación y Vinilo Termotransferible.",
-      badge: "Textil & Merchandising",
+      id: "gigantografias",
+      label: "Gigantografías",
+      icon: Maximize2,
+      desc: "Lonas, vinilos, papeles.",
+      badge: "Gran Formato",
     },
     {
       id: "carteles",
       label: "Carteles",
       icon: Layers,
-      desc: "Lonas frontlight/blackout, Vinilos adhesivos y Portabanners.",
-      badge: "Gran Formato",
+      desc: "Bastidores, montajes sobre rígidos, fondos de prensa.",
     },
     {
       id: "corporeos",
       label: "Corpóreos",
       icon: Box,
-      desc: "Letras y logos 3D en Polifán 20/30mm, Acrílico láser y Madera MDF.",
+      desc: "Polyfan, acrílico, MDF, chapa.",
       badge: "Relieve 3D & Láser",
     },
+    {
+      id: "estampados",
+      label: "Estampados",
+      icon: Shirt,
+      desc: "DTF Textil, sublimación, vinilo de corte.",
+    },
+    {
+      id: "impresion_3d",
+      label: "Impresión 3D",
+      icon: Box,
+      desc: "Prototipos, piezas a medida y corpóreos.",
+    }
   ];
 
-  // Subcategorías según la familia seleccionada
-  const subcategoriesByFamily: Record<
-    MainFamilyType,
-    { id: MaterialCategory; label: string; icon: any; desc: string }[]
-  > = {
-    estampados: [
-      {
-        id: "estampados",
-        label: "Estampados Textiles",
-        icon: Shirt,
-        desc: "DTF Textil 60cm continuo, Sublimación digital y Vinilo textil de corte.",
-      },
-    ],
-    carteles: [
-      {
-        id: "lonas",
-        label: "Lonas Publicitarias",
-        icon: Layers,
-        desc: "Front 9/13 oz, Blackout bifaz y Mesh microperforada.",
-      },
-      {
-        id: "vinilos",
-        label: "Vinilos Adhesivos",
-        icon: Scissors,
-        desc: "Estándar, Arlon, Avery, Oracal 100/651/751, Mcal y Microperforado.",
-      },
-      {
-        id: "rigidos",
-        label: "Placas Rígidas",
-        icon: Package,
-        desc: "PVC espumado 3/5mm, Alto Impacto PAI 1/2/3mm y Acrílico 3mm.",
-      },
-      {
-        id: "portabanners",
-        label: "Portabanners & Displays",
-        icon: Calculator,
-        desc: "Roll-up 80×200cm, Doble tensor y Araña con lona incluida.",
-      },
-    ],
-    corporeos: [
-      {
-        id: "corporeos",
-        label: "Letras y Logos 3D",
-        icon: Box,
-        desc: "Polifán alta densidad 20/30mm, Acrílico corte láser y Madera MDF CNC.",
-      },
-    ],
-  };
+  // Categoría actual y subcategorías según la jerarquía
+  const currentCategoryHierarchy = useMemo(() => {
+    return categories.find((c) => c.id === selectedMainFamily);
+  }, [categories, selectedMainFamily]);
 
-  const currentSubcategories = subcategoriesByFamily[selectedMainFamily] || subcategoriesByFamily.carteles;
-
-  const availableMaterials = MATERIALS_CATALOG.filter((m) => m.category === selectedCategory);
+  const availableMaterials = useMemo(() => {
+    const list = materials.filter((m) => m.category === selectedMainFamily);
+    const activeList = list.length > 0 ? list : MATERIALS_CATALOG.filter((m) => m.category === selectedMainFamily);
+    if (selectedSubCategory === "all") {
+      return activeList;
+    }
+    return activeList.filter((m) => m.subCategory === selectedSubCategory);
+  }, [materials, selectedMainFamily, selectedSubCategory]);
 
   const applicableFinishings = FINISHING_OPTIONS.filter((f) =>
-    f.applicableCategories.includes(selectedCategory)
+    f.applicableCategories.includes(selectedMainFamily)
   );
 
   const toggleFinishing = (id: FinishingType) => {
@@ -968,7 +957,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
         id: `cart-${Date.now()}`,
         materialId: selectedMaterialId,
         materialName: currentMaterial.name,
-        category: selectedCategory,
+        category: selectedMainFamily,
         mode: currentMaterial.mode,
         widthCm: currentMaterial.mode !== "unidad" ? widthCm : undefined,
         heightCm: currentMaterial.mode !== "unidad" ? heightCm : undefined,
@@ -1059,21 +1048,24 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
     }, 4000);
   };
 
-  const totalSteps = 9;
+  const totalSteps = 8;
   const stepTitles = [
     "Línea de Producto",
-    "Categoría",
     "Material y Sustrato",
     "Medidas y Cantidad",
     "Calidad de Impresión",
-    "Tintas y Tecnología",
-    "Terminaciones y Montaje",
-    "Archivo o Diseño IA",
-    "Resumen Final",
+    "Terminaciones",
+    "Diseño / Originales",
+    "Entrega / Instalación",
+    "Resumen de Orden"
   ];
 
+  if (isInitialLoading || isStoreLoading) {
+    return <CotizadorSkeletonScreen />;
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12">
       {/* WIZARD PROGRESS BAR & STEP INDICATOR - LIQUID GLASS */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between gap-2 text-xs">
@@ -1085,13 +1077,13 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               {stepTitles[currentStep - 1]}
             </span>
           </div>
-          <span className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur-md border border-white/60 dark:border-white/15 shadow-xs">
+          <span className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-[var(--bg-surface)]/70 dark:bg-[var(--bg-surface)]/10 backdrop-blur-md border border-white/60 dark:border-white/15 shadow-xs">
             {Math.round((currentStep / totalSteps) * 100)}%
           </span>
         </div>
 
         {/* Liquid Glass Capsule Track */}
-        <div className="relative w-full h-3 rounded-full bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white/60 dark:border-white/15 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.03)] p-0.5 overflow-hidden">
+        <div className="relative w-full h-3 rounded-full bg-[var(--bg-surface)]/40 dark:bg-[var(--bg-surface)]/5 backdrop-blur-xl border border-white/60 dark:border-white/15 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.03)] p-0.5 overflow-hidden">
           {/* Liquid Gradient Fill */}
           <div
             className="h-full rounded-full bg-gradient-to-r from-blue-600 via-sky-400 to-primary relative shadow-[0_0_14px_rgba(56,189,248,0.55)] transition-all duration-500 ease-out overflow-hidden"
@@ -1100,7 +1092,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
             {/* Liquid Specular Reflection */}
             <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/70 to-transparent rounded-full pointer-events-none" />
             {/* Glow bead */}
-            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/60 rounded-full blur-[0.5px]" />
+            <div className="absolute right-0 top-0 bottom-0 w-2 bg-[var(--bg-surface)]/60 rounded-full blur-[0.5px]" />
           </div>
 
           {/* Interactive Step Click Targets */}
@@ -1126,7 +1118,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <h2 className="font-heading text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="text-canonical-h2">
                   ¿Qué tipo de producto necesitás cotizar?
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -1134,8 +1126,8 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 </p>
               </div>
 
-              {/* 3 TARJETAS DE FAMILIA PRINCIPAL */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* 5 TARJETAS DE FAMILIA PRINCIPAL */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {mainFamilies.map((fam) => {
                   const isFamSelected = selectedMainFamily === fam.id;
                   return (
@@ -1145,24 +1137,13 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       id={`btn-family-${fam.id}`}
                       onClick={() => {
                         setSelectedMainFamily(fam.id);
-                        const availableSubs = subcategoriesByFamily[fam.id];
-                        if (availableSubs && availableSubs.length > 0) {
-                          const firstSub = availableSubs[0];
-                          setSelectedCategory(firstSub.id);
-                          const firstMat = MATERIALS_CATALOG.find((m) => m.category === firstSub.id);
-                          if (firstMat) {
-                            setSelectedMaterialId(firstMat.id);
-                            if (firstMat.defaultFinishings) {
-                              setSelectedFinishings(firstMat.defaultFinishings as FinishingType[]);
-                            }
-                          }
-                        }
+                        setSelectedSubCategory("all");
                         setCurrentStep(2);
                       }}
                       className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 cursor-pointer relative group ${
                         isFamSelected
                           ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm"
-                          : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                          : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -1179,7 +1160,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         )}
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center justify-between">
+                        <h3 className="text-canonical-h3">
                           <span>{fam.label}</span>
                           {isFamSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
                         </h3>
@@ -1199,85 +1180,74 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           {/* ================= STEP 2: CATEGORÍA / SUBCATEGORÍA ================= */}
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="space-y-1">
-                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
-                  Categoría en {mainFamilies.find((f) => f.id === selectedMainFamily)?.label}
-                </h2>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
-                  Elegí el tipo de producto o aplicación que necesitás.
-                </p>
-              </div>
-
-              {/* TARJETAS DE SUBCATEGORÍAS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {currentSubcategories.map((cat) => {
-                  const isSelected = selectedCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      id={`btn-cat-${cat.id}`}
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategory(cat.id as MaterialCategory);
-                        const firstMat = MATERIALS_CATALOG.find((m) => m.category === cat.id);
-                        if (firstMat) {
-                          setSelectedMaterialId(firstMat.id);
-                          if (firstMat.defaultFinishings) {
-                            setSelectedFinishings(firstMat.defaultFinishings as FinishingType[]);
-                          }
-                        }
-                        setCurrentStep(3);
-                      }}
-                      className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm"
-                          : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <IconBadge
-                          icon={cat.icon}
-                          size="md"
-                          variant={isSelected ? "primary" : "neutral"}
-                          containerStyle={isSelected ? "solid" : "subtle"}
-                        />
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-[var(--text-primary)]">{cat.label}</h4>
-                        <p className="text-xs text-[var(--text-secondary)] leading-snug mt-1">
-                          {cat.desc}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* WE REMOVED THE CONTINUAR BUTTON HERE */}
-            </div>
-          )}
-
-          {/* ================= STEP 3: MATERIAL Y SUSTRATO ESPECÍFICO ================= */}
-          {currentStep === 3 && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
-                    Sustrato para {currentSubcategories.find((c) => c.id === selectedCategory)?.label || selectedCategory}
-                  </h2>
-                  <span className="text-xs font-mono text-primary font-bold">
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-canonical-h2">
+                      Sustrato para {mainFamilies.find((f) => f.id === selectedMainFamily)?.label || selectedMainFamily}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans mt-0.5">
+                      {currentCategoryHierarchy?.description || "Seleccioná la variante de material específica para tu trabajo."}
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono text-primary font-bold px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit self-start sm:self-auto">
                     {availableMaterials.length} opciones disponibles
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
-                  Seleccioná la variante de material específica para tu trabajo.
-                </p>
+
+                {/* FILTROS DE SUBCATEGORÍAS */}
+                {currentCategoryHierarchy?.subCategories && currentCategoryHierarchy.subCategories.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border-subtle)]">
+                    <span className="text-xs font-medium text-[var(--text-secondary)] mr-1">Subcategorías:</span>
+                    <button
+                      type="button"
+                      id="subcat-filter-all"
+                      onClick={() => setSelectedSubCategory("all")}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                        selectedSubCategory === "all"
+                          ? "bg-primary text-white shadow-xs font-semibold"
+                          : "bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                      }`}
+                    >
+                      Todos ({materials.filter((m) => m.category === selectedMainFamily).length || availableMaterials.length})
+                    </button>
+                    {currentCategoryHierarchy.subCategories.map((sub) => {
+                      const count = materials.filter(
+                        (m) => m.category === selectedMainFamily && m.subCategory === sub.id
+                      ).length;
+                      const isSubSelected = selectedSubCategory === sub.id;
+                      return (
+                        <button
+                          key={sub.id}
+                          type="button"
+                          id={`subcat-filter-${sub.id}`}
+                          onClick={() => setSelectedSubCategory(sub.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                            isSubSelected
+                              ? "bg-primary text-white shadow-xs font-semibold"
+                              : "bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                          }`}
+                        >
+                          <span>{sub.label || (sub as any).name}</span>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                              isSubSelected
+                                ? "bg-white/25 text-white"
+                                : "bg-black/5 dark:bg-white/10 text-[var(--text-muted)]"
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* LISTADO DE MATERIALES O SELECTOR DE RÍGIDOS */}
               <div className="grid grid-cols-1 gap-3">
-                {selectedCategory === "rigidos" ? (
+                {false ? (
                   <RigidMaterialsSelector
                     selectedMaterialId={selectedMaterialId}
                     onSelectMaterial={(matId) => {
@@ -1288,7 +1258,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       }
                     }}
                     onExplicitMaterialSelect={(matId) => {
-                      setCurrentStep(4);
+                      setCurrentStep(2);
                     }}
                     widthCm={widthCm}
                     heightCm={heightCm}
@@ -1303,7 +1273,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 ) : (
                   <AnimatePresence mode="wait">
                     <motion.div
-                      key={selectedCategory}
+                      key={`${selectedMainFamily}-${selectedSubCategory}`}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
@@ -1312,6 +1282,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                     >
                       {availableMaterials.map((mat) => {
                         const isSelected = selectedMaterialId === mat.id;
+                        const subCatObj = currentCategoryHierarchy?.subCategories.find(
+                          (s) => s.id === mat.subCategory
+                        );
                         return (
                           <motion.button
                             key={mat.id}
@@ -1321,15 +1294,15 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                             transition={{ duration: 0.15 }}
                             onClick={() => {
                               setSelectedMaterialId(mat.id);
-                              if (mat.defaultFinishings) {
-                                setSelectedFinishings(mat.defaultFinishings as FinishingType[]);
+                              if ((mat as any).defaultFinishings) {
+                                setSelectedFinishings((mat as any).defaultFinishings as FinishingType[]);
                               }
-                              setCurrentStep(4);
+                              setCurrentStep(2);
                             }}
                             className={`p-4 rounded-xl border text-left transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
                               isSelected
                                 ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
-                                : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                                : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                             }`}
                           >
                             {isSelected && (
@@ -1340,35 +1313,58 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                               />
                             )}
                             <div className="flex items-start gap-3.5 pl-1">
-                              <img
-                                src={mat.image}
-                                alt={mat.name}
-                                referrerPolicy="no-referrer"
-                                className="w-14 h-14 rounded-lg object-cover shrink-0 border border-[var(--border-subtle)] shadow-xs"
-                              />
+                              {mat.image ? (
+                                <img
+                                  src={mat.image}
+                                  alt={mat.name}
+                                  referrerPolicy="no-referrer"
+                                  className="w-14 h-14 rounded-lg object-cover shrink-0 border border-[var(--border-subtle)] shadow-xs"
+                                />
+                              ) : (
+                                <div className="w-14 h-14 rounded-lg bg-[var(--bg-surface-subtle)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                                  <Layers className="w-6 h-6 text-[var(--text-muted)]" />
+                                </div>
+                              )}
                               <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h4 className="text-canonical-h4">
                                     {mat.name}
                                   </h4>
+                                  {subCatObj && (
+                                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-medium border border-[var(--border-subtle)]">
+                                      {subCatObj.label || (subCatObj as any).name}
+                                    </span>
+                                  )}
                                   {mat.badge && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-black font-semibold">
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-[var(--text-primary)] font-semibold">
                                       {mat.badge}
                                     </span>
                                   )}
                                 </div>
                                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                                  {mat.shortDesc}
+                                  {mat.shortDesc || (mat as any).description}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--text-muted)] pt-0.5">
-                                  <span className="inline-flex items-center gap-1">
-                                    <Clock className="w-3 h-3 text-primary" strokeWidth={1.85} />
-                                    {mat.durability.split(".")[0]}
-                                  </span>
-                                  <span className="inline-flex items-center gap-1">
-                                    <Sun className="w-3 h-3 text-primary" strokeWidth={1.85} />
-                                    {mat.lightingType}
-                                  </span>
+                                  {mat.salePriceARS ? (
+                                    <span className="inline-flex items-center gap-1 font-mono font-bold text-primary">
+                                      {formatPrice(mat.salePriceARS)}
+                                      <span className="text-[10px] text-[var(--text-muted)] font-sans font-normal">
+                                        /{mat.unitLabel || "m²"}
+                                      </span>
+                                    </span>
+                                  ) : null}
+                                  {(mat as any).durability && (
+                                    <span className="inline-flex items-center gap-1">
+                                      <Clock className="w-3 h-3 text-primary" strokeWidth={1.85} />
+                                      {(mat as any).durability.split(".")[0]}
+                                    </span>
+                                  )}
+                                  {(mat as any).lightingType && (
+                                    <span className="inline-flex items-center gap-1">
+                                      <Sun className="w-3 h-3 text-primary" strokeWidth={1.85} />
+                                      {(mat as any).lightingType}
+                                    </span>
+                                  )}
                                   {(mat as any).maxWidthCm && (
                                     <span className="inline-flex items-center gap-1">
                                       <Ruler className="w-3 h-3 text-primary" strokeWidth={1.85} />
@@ -1407,7 +1403,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Palette className="w-5 h-5 text-primary" />
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                      <h4 className="text-canonical-h4">
                         Seleccionar Color de Vinilo ({currentMaterial.name})
                       </h4>
                     </div>
@@ -1459,11 +1455,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* ================= STEP 4: MEDIDAS Y CANTIDAD (CON MODO BULK ORDER) ================= */}
-          {currentStep === 4 && (
+          {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div className="space-y-0.5">
-                  <h2 className="font-heading text-lg sm:text-xl text-[var(--text-primary)] font-medium">
+                  <h2 className="text-canonical-h2">
                     Medidas y Cantidad
                   </h2>
                   <p className="text-xs text-[var(--text-secondary)] font-sans">
@@ -1518,11 +1514,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
 
               {/* INDIVIDUAL ORDER MODE */}
               {orderMode === "individual" ? (
-                <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-3.5">
+                <div className="p-3.5 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3.5">
                   {currentMaterial?.mode !== "unidad" ? (
                     <div className="space-y-3">
                       {/* PRESETS DE MEDIDAS ESTÁNDAR PARA RÍGIDOS / PLACAS */}
-                      {(selectedCategory === "rigidos" || currentMaterial?.mode === "placa") && (
+                      {(false || currentMaterial?.mode === "placa") && (
                         <div className="space-y-1">
                           <span className="font-semibold text-[var(--text-secondary)] text-[11px] uppercase tracking-wider block">
                             Medidas estándar:
@@ -1593,7 +1589,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                 onChange={handleWidthChange}
                                 onBlur={handleWidthBlur}
                                 placeholder="0"
-                                className="w-full pl-13 sm:pl-16 pr-7 sm:pr-8 py-2 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                                className="w-full pl-13 sm:pl-16 pr-7 sm:pr-8 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                               />
                               <span className="absolute right-2 sm:right-2.5 text-xs text-[var(--text-muted)] pointer-events-none font-mono select-none">
                                 cm
@@ -1621,7 +1617,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                 onChange={handleHeightChange}
                                 onBlur={handleHeightBlur}
                                 placeholder="0"
-                                className="w-full pl-11 sm:pl-14 pr-7 sm:pr-8 py-2 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                                className="w-full pl-11 sm:pl-14 pr-7 sm:pr-8 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                               />
                               <span className="absolute right-2 sm:right-2.5 text-xs text-[var(--text-muted)] pointer-events-none font-mono select-none">
                                 cm
@@ -1810,7 +1806,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       type="button"
                       id="btn-confirm-measures"
                       disabled={currentMaterial?.mode !== "unidad" && (widthCm < 5 || heightCm < 5)}
-                      onClick={() => setCurrentStep(5)}
+                      onClick={() => setCurrentStep(2)}
                       className={`w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${
                         currentMaterial?.mode !== "unidad" && (widthCm < 5 || heightCm < 5)
                           ? "bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border-subtle)]"
@@ -1885,7 +1881,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         type="button"
                         onClick={handleClearAll}
                         title="Limpiar medidas y reiniciar lote"
-                        className="px-2.5 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-black text-[var(--text-secondary)] hover:text-red-500 hover:border-red-500/30 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-red-500 hover:border-red-500/30 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>Limpiar</span>
@@ -1915,7 +1911,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       return (
                         <div
                           key={item.id}
-                          className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] hover:border-primary/40 transition-all space-y-3.5 shadow-xs"
+                          className="p-3.5 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-primary/40 transition-all space-y-3.5 shadow-xs"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[var(--border-subtle)] pb-2.5">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -2008,7 +2004,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                       handleUpdateBulkRow(item.id, "widthCm", valid);
                                     }}
                                     placeholder="0"
-                                    className="w-full pl-12 sm:pl-14 pr-7 sm:pr-8 py-1.5 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                                    className="w-full pl-12 sm:pl-14 pr-7 sm:pr-8 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
                                   />
                                   <span className="absolute right-2 sm:right-2.5 text-[10px] text-[var(--text-muted)] pointer-events-none font-mono select-none">
                                     cm
@@ -2051,7 +2047,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                       handleUpdateBulkRow(item.id, "heightCm", valid);
                                     }}
                                     placeholder="0"
-                                    className="w-full pl-10 sm:pl-12 pr-7 sm:pr-8 py-1.5 rounded-lg bg-white dark:bg-black border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                                    className="w-full pl-10 sm:pl-12 pr-7 sm:pr-8 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary"
                                   />
                                   <span className="absolute right-2 sm:right-2.5 text-[10px] text-[var(--text-muted)] pointer-events-none font-mono select-none">
                                     cm
@@ -2225,7 +2221,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                 </div>
                               ) : hasAi ? (
                                 <div className="flex items-center gap-2">
-                                  <div className="px-2.5 py-1 rounded-lg bg-accent text-black text-xs font-bold flex items-center gap-1.5">
+                                  <div className="px-2.5 py-1 rounded-lg bg-accent text-[var(--text-primary)] text-xs font-bold flex items-center gap-1.5">
                                     <Sparkles className="w-3.5 h-3.5" />
                                     <span>Diseñar con IA</span>
                                   </div>
@@ -2240,7 +2236,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                               ) : (
                                 <div className="flex items-center gap-2">
                                   {/* Quick inline upload button */}
-                                  <label className="px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] hover:border-primary bg-white dark:bg-black text-[var(--text-primary)] text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors">
+                                  <label className="px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] hover:border-primary bg-[var(--bg-surface)] text-[var(--text-primary)] text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors">
                                     <Upload className="w-3.5 h-3.5 text-primary" />
                                     <span>Adjuntar Diseño</span>
                                     <input
@@ -2304,7 +2300,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                     <button
                       type="button"
                       id="btn-confirm-bulk-measures"
-                      onClick={() => setCurrentStep(5)}
+                      onClick={() => setCurrentStep(2)}
                       className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer hover:shadow-md active:scale-95"
                     >
                       <span>Confirmar Lote y Continuar</span>
@@ -2317,10 +2313,10 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* ================= STEP 5: CALIDAD DE IMPRESIÓN ================= */}
-          {currentStep === 5 && (
+          {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="text-canonical-h2">
                   Elegir Calidad de Impresión
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2334,12 +2330,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setPrintQuality("estandar");
-                    setCurrentStep(6);
+                    setCurrentStep(2);
                   }}
                   className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
                     printQuality === "estandar"
                       ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
-                      : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                      : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
@@ -2349,7 +2345,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       </span>
                       {printQuality === "estandar" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-base font-bold text-[var(--text-primary)]">Resolución Estándar</h3>
+                    <h3 className="text-canonical-h3">Resolución Estándar</h3>
                     <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       Ideal para vía pública, carteles de fachada, marquesinas y banners visibles a más de 1.5 metros.
                     </p>
@@ -2364,22 +2360,22 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setPrintQuality("alta_resolucion");
-                    setCurrentStep(6);
+                    setCurrentStep(2);
                   }}
                   className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
                     printQuality === "alta_resolucion"
                       ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
-                      : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                      : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-black font-semibold font-mono">
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-[var(--text-primary)] font-semibold font-mono">
                         1440 - 2880 DPI
                       </span>
                       {printQuality === "alta_resolucion" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-base font-bold text-[var(--text-primary)]">Alta Resolución</h3>
+                    <h3 className="text-canonical-h3">Alta Resolución</h3>
                     <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       Detalle fotográfico con pasadas ultra finas. Recomendado para vidrieras, cuadros, stands y visualización cercana.
                     </p>
@@ -2393,10 +2389,10 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* ================= STEP 6: TINTAS ================= */}
-          {currentStep === 6 && (
+          {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="text-canonical-h2">
                   Elegir Tipo de Tintas
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2410,12 +2406,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setInkType("solvente");
-                    setCurrentStep(7);
+                    setCurrentStep(2);
                   }}
                   className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
                     inkType === "solvente"
                       ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
-                      : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                      : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
@@ -2423,7 +2419,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <Printer className="w-5 h-5 text-primary" />
                       {inkType === "solvente" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)]">Solvente / Eco-Solvente</h3>
+                    <h3 className="text-canonical-h3">Solvente / Eco-Solvente</h3>
                     <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       Excelente penetración en PVC y lonas. Alta durabilidad en intemperie y resistencia a lluvias.
                     </p>
@@ -2438,12 +2434,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setInkType("uv");
-                    setCurrentStep(7);
+                    setCurrentStep(2);
                   }}
                   className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
                     inkType === "uv"
                       ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
-                      : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                      : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
@@ -2451,7 +2447,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <Sparkles className="w-5 h-5 text-primary" />
                       {inkType === "uv" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)]">Tintas UV (Curado LED)</h3>
+                    <h3 className="text-canonical-h3">Tintas UV (Curado LED)</h3>
                     <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       Secado instantáneo sin olor. Máxima resistencia a solventes, alcoholes y rayos ultravioletas.
                     </p>
@@ -2466,12 +2462,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setInkType("directa_uv");
-                    setCurrentStep(7);
+                    setCurrentStep(2);
                   }}
                   className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
                     inkType === "directa_uv"
                       ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
-                      : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                      : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
@@ -2479,13 +2475,13 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <Package className="w-5 h-5 text-primary" />
                       {inkType === "directa_uv" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)]">Impresión Directa UV</h3>
+                    <h3 className="text-canonical-h3">Impresión Directa UV</h3>
                     <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                       Cama plana industrial directamente sobre placas rígidas, acrílico, PAI o PVC sin vinilo intermedio.
                     </p>
                   </div>
                   <div className="text-xs font-mono text-primary font-bold">
-                    {selectedCategory === "rigidos" ? "Incluido en placa" : "+ $3.200 ARS / m²"}
+                    {false ? "Incluido en placa" : "+ $3.200 ARS / m²"}
                   </div>
                 </button>
               </div>
@@ -2493,21 +2489,21 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* ================= STEP 7: TERMINACIONES & MONTAJE ================= */}
-          {currentStep === 7 && (
+          {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="text-canonical-h2">
                   Terminaciones y Acabados
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
-                  Opciones de confección específicas para {selectedCategory.toUpperCase()}.
+                  Opciones de confección específicas para {selectedMainFamily.toUpperCase()}.
                   {orderMode === "bulk" && " (Se aplican a todas las piezas del lote)."}
                 </p>
               </div>
 
               {/* CONDITIONAL FINISHING OPTIONS BY CATEGORY */}
               <div className="space-y-4">
-                <h3 className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                <h3 className="text-canonical-h3">
                   Terminaciones de taller:
                 </h3>
                 <div className="grid grid-cols-1 gap-2.5">
@@ -2523,7 +2519,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start justify-between gap-3.5 ${
                           isChecked
                             ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                            : "border-[var(--border-subtle)] bg-white dark:bg-black hover:border-primary/50"
+                            : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                         }`}
                       >
                         <div className="flex items-start gap-3.5">
@@ -2534,7 +2530,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                             className="mt-1 w-4 h-4 rounded accent-primary text-primary"
                           />
                           <div className="space-y-0.5">
-                            <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                            <h4 className="text-canonical-h4">
                               {finish.name}
                             </h4>
                             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
@@ -2560,12 +2556,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 </div>
 
                 {/* VINYL MOUNTING ON RIGID SUBSTRATES (MDF, PVC, PAI, CHAPA) */}
-                {selectedCategory === "vinilos" && (
+                {selectedMainFamily === "gigantografias" && (
                   <div className="pt-4 space-y-4 border-t border-[var(--border-subtle)]">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Package className="w-5 h-5 text-primary" />
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                        <h4 className="text-canonical-h4">
                           Montado sobre Sustrato Rígido (Opcional)
                         </h4>
                       </div>
@@ -2600,13 +2596,13 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                           {Object.entries(MOUNT_OPTIONS).map(([key, opt]) => (
                             <div
                               key={key}
-                              className={`p-3.5 rounded-xl border space-y-2 bg-white dark:bg-black ${
+                              className={`p-3.5 rounded-xl border space-y-2 bg-[var(--bg-surface)] ${
                                 selectedMount?.type === opt.type
                                   ? "border-primary ring-1 ring-primary/40"
                                   : "border-[var(--border-subtle)]"
                               }`}
                             >
-                              <h5 className="text-xs font-bold text-[var(--text-primary)]">{opt.typeName}</h5>
+                              <h5 className="text-xs font-medium text-[var(--text-primary)]">{opt.typeName}</h5>
                               <div className="space-y-1.5">
                                 {opt.thicknesses.map((th) => {
                                   const isSelectedThickness =
@@ -2650,7 +2646,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               <div className="pt-4 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(8)}
+                  onClick={() => setCurrentStep(2)}
                   className="px-6 py-2.5 rounded-[7px] bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
                 >
                   <span>Confirmar Terminaciones y Continuar</span>
@@ -2661,10 +2657,10 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* ================= STEP 8: ARCHIVO O DISEÑO IA ================= */}
-          {currentStep === 8 && (
+          {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="text-canonical-h2">
                   {orderMode === "bulk" ? "Diseños y Archivos del Lote" : "¿Cómo vas a preparar el diseño?"}
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2678,10 +2674,10 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* SUBIR ARCHIVO LOCAL */}
-                    <div className="p-6 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-4 text-center">
+                    <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 text-center">
                       <IconBadge icon={Upload} size="lg" variant="primary" containerStyle="solid" className="mx-auto" />
                       <div>
-                        <h3 className="text-sm font-bold text-[var(--text-primary)]">Subir Archivo Local</h3>
+                        <h3 className="text-canonical-h3">Subir Archivo Local</h3>
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
                           PDF en curvas, TIFF o JPG a 150 DPI en CMYK.
                         </p>
@@ -2696,7 +2692,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         />
                       </label>
                       {uploadedFileName && (
-                        <div className="p-2.5 rounded-lg bg-accent text-black border border-accent text-xs flex items-center justify-center gap-1.5">
+                        <div className="p-2.5 rounded-lg bg-accent text-[var(--text-primary)] border border-accent text-xs flex items-center justify-center gap-1.5">
                           <FileCheck className="w-4 h-4" />
                           <span>{uploadedFileName}</span>
                         </div>
@@ -2708,7 +2704,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <div className="space-y-4">
                         <IconBadge icon={Sparkles} size="lg" variant="accent" containerStyle="solid" className="mx-auto" />
                         <div>
-                          <h3 className="text-sm font-bold text-[var(--text-primary)]">Diseñar Gráfica con IA</h3>
+                          <h3 className="text-canonical-h3">Diseñar Gráfica con IA</h3>
                           <p className="text-xs text-[var(--text-secondary)] mt-1">
                             Generá textos de impacto, colores contrastados y visualizá el mockup 3D en tiempo real sin salir del cotizador.
                           </p>
@@ -2763,9 +2759,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               ) : (
                 /* BULK MODE FILE ATTACHMENTS OVERVIEW */
                 <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-3">
+                  <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                      <h4 className="text-canonical-h4">
                         Estado de Archivos por Corte ({bulkItems.filter((i) => i.fileAttachment || i.isAiDesign).length} de {bulkItems.length} listos)
                       </h4>
                       {uploadedFileName && (
@@ -2807,7 +2803,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                 <span className="truncate max-w-[140px]">{item.fileAttachment.name}</span>
                               </div>
                             ) : item.isAiDesign ? (
-                              <div className="px-2.5 py-1 rounded-lg bg-accent text-black font-bold text-[11px] flex items-center gap-1">
+                              <div className="px-2.5 py-1 rounded-lg bg-accent text-[var(--text-primary)] font-bold text-[11px] flex items-center gap-1">
                                 <Sparkles className="w-3.5 h-3.5" />
                                 <span>Póster IA</span>
                               </div>
@@ -2854,7 +2850,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               <div className="pt-4 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(9)}
+                  onClick={() => setCurrentStep(2)}
                   className="px-6 py-2.5 rounded-[7px] bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
                 >
                   <span>Ver Resumen Final</span>
@@ -2865,10 +2861,10 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           )}
 
           {/* ================= STEP 9: RESUMEN Y AGREGAR AL CARRITO ================= */}
-          {currentStep === 9 && (
+          {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
-                <h2 className="font-heading text-xl sm:text-2xl text-[var(--text-primary)] font-medium">
+                <h2 className="text-canonical-h2">
                   {orderMode === "bulk" ? "Resumen de Pedido por Lotes" : "Resumen de tu Cotización"}
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
@@ -2876,12 +2872,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 </p>
               </div>
 
-              <div className="p-6 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-6">
+              <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-6">
                 {/* PRINT-ONLY OFFICIAL HEADER */}
                 <div className="print-only-header">
                   <div className="flex items-center justify-between pb-3 border-b-2 border-primary">
                     <div>
-                      <h1 className="text-xl font-bold font-heading text-black tracking-tight">
+                      <h1 className="text-canonical-h1">
                         CARTELES.CLICK · TALLER DE MANUFACTURA GRÁFICA
                       </h1>
                       <p className="text-xs text-gray-600">
@@ -2890,7 +2886,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                     </div>
                     <div className="text-right text-xs">
                       <span className="font-bold block text-primary">PRESUPUESTO ESTIMADO</span>
-                      <span className="text-gray-500 font-mono">
+                      <span className="text-[var(--text-secondary)] font-mono">
                         {new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
@@ -2901,7 +2897,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 {orderMode === "bulk" ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                      <h4 className="text-canonical-h4">
                         Detalle de Ítems en el Lote ({bulkItems.length} cortes):
                       </h4>
                       <span className="text-xs font-mono font-bold text-primary">
@@ -3056,7 +3052,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 </div>
 
                 {addedSuccess ? (
-                  <div className="p-4 rounded-xl bg-emerald-500 text-white text-center font-bold text-sm flex items-center justify-center gap-2 animate-in zoom-in-95">
+                  <div className="p-4 rounded-xl bg-emerald-800 text-white text-center font-bold text-sm flex items-center justify-center gap-2 animate-in zoom-in-95">
                     <CheckCircle2 className="w-5 h-5" />
                     <span>
                       {orderMode === "bulk"
@@ -3137,7 +3133,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               <button
                 type="button"
                 onClick={() => setCurrentStep(currentStep - 1)}
-                className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm text-xs font-medium text-[var(--text-primary)] hover:border-primary flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-95"
+                className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]/80 dark:bg-neutral-900/80 backdrop-blur-sm text-xs font-medium text-[var(--text-primary)] hover:border-primary flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-95"
               >
                 <ArrowLeft className="w-4 h-4" strokeWidth={1.85} />
                 <span>Ir atrás</span>
@@ -3258,12 +3254,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
             <div className="p-4 rounded-[7px] bg-primary text-white space-y-1">
               <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-white/90">
                 <span>Total Final Cotizado:</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded-[5px] bg-white/20 font-medium">
+                <span className="text-[9px] px-1.5 py-0.5 rounded-[5px] bg-white/20 text-white font-medium">
                   {currency}
                 </span>
               </div>
               <div className="flex items-baseline justify-between pt-1">
-                <span className="font-heading text-2xl sm:text-3xl text-white font-mono-num font-bold">
+                <span className="font-heading text-2xl sm:text-3xl text-white font-mono-num font-semibold">
                   {isLoadingQuote ? (
                     <QuotePriceSkeleton />
                   ) : orderMode === "bulk" ? (
@@ -3315,7 +3311,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
           <div className="w-full max-w-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl p-6 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
               <div>
-                <h3 className="text-base font-bold text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Adjuntar Diseño a "{activeAttachItem.label}"
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)]">
@@ -3362,7 +3358,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 onClick={() => setAttachTab("ai")}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                   attachTab === "ai"
-                    ? "bg-accent text-black shadow-sm font-bold"
+                    ? "bg-accent text-[var(--text-primary)] shadow-sm font-bold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
@@ -3459,7 +3455,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
               <div className="space-y-4 text-center">
                 <div className="p-6 rounded-2xl bg-[var(--bg-surface-subtle)] border border-primary/20 space-y-3">
                   <Sparkles className="w-8 h-8 text-primary mx-auto" />
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                  <h4 className="text-canonical-h4">
                     Marcar para Diseñar con IA
                   </h4>
                   <p className="text-xs text-[var(--text-secondary)]">
@@ -3479,7 +3475,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         handleSaveAttachment(undefined, true);
                         setIsAiDesignDrawerOpen(true);
                       }}
-                      className="flex-1 py-2.5 rounded-xl bg-accent text-black text-xs font-bold hover:bg-[var(--color-accent-hover)] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="flex-1 py-2.5 rounded-xl bg-accent text-[var(--text-primary)] text-xs font-bold hover:bg-[var(--color-accent-hover)] transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Abrir Asistente IA</span>

@@ -86,13 +86,13 @@ export const GoogleDriveAttachment: React.FC<GoogleDriveAttachmentProps> = ({
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-black border border-[var(--border-subtle)] space-y-4 text-left shadow-sm">
+    <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 text-left shadow-sm">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
           <HardDrive className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <h3 className="text-canonical-h3">
             <span>Google Drive (Carpeta u Originales)</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-bold">
               Google Workspace

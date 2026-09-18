@@ -166,7 +166,7 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
                           ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                           : option.badgeType === "highlight"
                           ? "bg-primary/15 text-primary border border-primary/30"
-                          : "bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] border border-[var(--border-subtle)]"
+                          : "bg-black/5 dark:bg-[var(--bg-surface)]/5 text-[var(--text-secondary)] border border-[var(--border-subtle)]"
                       }`}
                     >
                       {option.badge}

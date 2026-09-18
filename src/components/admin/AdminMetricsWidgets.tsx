@@ -211,7 +211,7 @@ export const AdminMetricsWidgets: React.FC<AdminMetricsWidgetsProps> = ({ orders
         <div className="lg:col-span-2 p-4 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+              <h3 className="text-canonical-h3">
                 Volumen Mensual de Pedidos & Tendencia
               </h3>
               <p className="text-[11px] text-[var(--text-secondary)]">
@@ -266,7 +266,7 @@ export const AdminMetricsWidgets: React.FC<AdminMetricsWidgetsProps> = ({ orders
         {/* CHART 2: CONVERSION PIPELINE DISTRIBUTION (SPAN 1 COL) */}
         <div className="p-4 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-1">
+            <h3 className="text-canonical-h3">
               Embudo y Tasa de Conversión
             </h3>
             <p className="text-[11px] text-[var(--text-secondary)] mb-3">

@@ -1,312 +1,51 @@
-// 🔒 SERVER-ONLY GUARD
-// Garantiza que este módulo NUNCA sea empaquetado o ejecutado en el cliente (navegador).
-if (typeof window !== 'undefined') {
-  throw new Error('FATAL SECURITY VIOLATION: src/server/ai/geminiActions.ts is server-only and cannot be executed in the browser.');
-}
-
-import { GoogleGenAI, Type } from '@google/genai';
-
-/**
- * Helper lazy para inicializar el cliente oficial de Gemini en el servidor.
- * La API key solo vive en process.env.GEMINI_API_KEY y jamás viaja al frontend.
- */
-function getGeminiClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey.trim() === '' || apiKey === 'MY_GEMINI_API_KEY') {
-    return null;
-  }
-
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'carteles-click-server',
-      },
-    },
-  });
-}
-
-export interface PosterAssistantInput {
-  promptTopic?: string;
-  purpose?: string;
-  targetAudience?: string;
-  currentHeadline?: string;
-}
-
-export interface PosterAssistantOutput {
-  headline: string;
-  subheadline: string;
-  bodyText: string;
-  recommendedPalette: string;
-  primaryColorHex?: string;
-  accentColorHex?: string;
-  fontHeadingRecommendation?: string;
-  taglines: string[];
-  compositionAdvice: string;
-}
-
-/**
- * Server Action: Generador Creativo para Carteles y Lonas Gran Formato
- */
-export async function generatePosterDesignAction(input: PosterAssistantInput): Promise<PosterAssistantOutput> {
-  const ai = getGeminiClient();
-
-  // Fallback estructurado si no hay API key configurada en el servidor
-  if (!ai) {
-    return {
-      headline: 'GRAN LIQUIDACIÓN DE TEMPORADA',
-      subheadline: 'Hasta 50% OFF en todos los productos seleccionados',
-      bodyText: 'Aprovechá ofertas imperdibles por tiempo limitado. Calidad garantizada y cuotas sin interés.',
-      recommendedPalette: 'Vibrante Moderno (Azul Marino + Amarillo Alerta)',
-      primaryColorHex: '#1E3A8A',
-      accentColorHex: '#FBBF24',
-      taglines: ['¡No te lo pierdas!', 'Stock limitado', 'Envíos a todo el país'],
-      compositionAdvice: 'Ubicá el titular en el tercio superior con tipografía bold contrastada. Los datos de contacto al pie.',
-      fontHeadingRecommendation: 'display',
-    };
-  }
-
-  const systemInstruction = `Sos un Director Creativo experto en diseño gráfico y cartelería de vía pública en gran formato para Carteles.Click. 
+var __defProp=Object.defineProperty;var __name=(target,value)=>__defProp(target,"name",{value,configurable:true});if(typeof window!=="undefined"){throw new Error("FATAL SECURITY VIOLATION: src/server/ai/geminiActions.ts is server-only and cannot be executed in the browser.")}import{GoogleGenAI,Type}from"@google/genai";function getGeminiClient(){const apiKey=process.env.GEMINI_API_KEY;if(!apiKey||apiKey.trim()===""||apiKey==="MY_GEMINI_API_KEY"){return null}return new GoogleGenAI({apiKey,httpOptions:{headers:{"User-Agent":"carteles-click-server"}}})}__name(getGeminiClient,"getGeminiClient");async function generatePosterDesignAction(input){const ai=getGeminiClient();if(!ai){return{headline:"GRAN LIQUIDACI\xD3N DE TEMPORADA",subheadline:"Hasta 50% OFF en todos los productos seleccionados",bodyText:"Aprovech\xE1 ofertas imperdibles por tiempo limitado. Calidad garantizada y cuotas sin inter\xE9s.",recommendedPalette:"Vibrante Moderno (Azul Marino + Amarillo Alerta)",primaryColorHex:"#1E3A8A",accentColorHex:"#FBBF24",taglines:["\xA1No te lo pierdas!","Stock limitado","Env\xEDos a todo el pa\xEDs"],compositionAdvice:"Ubic\xE1 el titular en el tercio superior con tipograf\xEDa bold contrastada. Los datos de contacto al pie.",fontHeadingRecommendation:"display"}}const systemInstruction=`Sos un Director Creativo experto en dise\xF1o gr\xE1fico y carteler\xEDa de v\xEDa p\xFAblica en gran formato para Carteles.Click. 
 Tu objetivo es generar copys de alto impacto, legibles a la distancia, concisos y estructurados, optimizados para carteles, lonas frontales o portabanners.
-Respondé siempre en JSON estructurado.`;
-
-  const promptText = `Generá una propuesta creativa de póster para:
-- Rubro/Tema: ${input.promptTopic || 'Comercial / Promocional'}
-- Propósito: ${input.purpose || 'Venta y atracción peatonal'}
-- Público: ${input.targetAudience || 'Transeúntes y clientes locales'}
-- Idea base del cliente: ${input.currentHeadline || 'Oferta especial'}
-`;
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-3.7-flash',
-    contents: promptText,
-    config: {
-      systemInstruction,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          headline: { type: Type.STRING, description: 'Titular principal corto e impactante (máx 6 palabras).' },
-          subheadline: { type: Type.STRING, description: 'Bajada complementaria de beneficio (máx 12 palabras).' },
-          bodyText: { type: Type.STRING, description: 'Cuerpo breve de 1 o 2 oraciones con llamada a la acción.' },
-          recommendedPalette: { type: Type.STRING, description: 'Combinación cromática recomendada.' },
-          primaryColorHex: { type: Type.STRING, description: 'Color primario de fondo o contraste en formato HEX.' },
-          accentColorHex: { type: Type.STRING, description: 'Color secundario de acento en formato HEX.' },
-          fontHeadingRecommendation: { type: Type.STRING, description: 'Recomendación: sans, serif, display, o mono.' },
-          taglines: { 
-            type: Type.ARRAY, 
-            items: { type: Type.STRING },
-            description: '3 frases cortas de gancho para el póster.' 
-          },
-          compositionAdvice: { type: Type.STRING, description: 'Consejo técnico de legibilidad en gran formato.' }
-        },
-        required: ['headline', 'subheadline', 'bodyText', 'recommendedPalette', 'taglines', 'compositionAdvice']
-      }
-    }
-  });
-
-  const jsonStr = response.text?.trim() || '{}';
-  return JSON.parse(jsonStr);
-}
-
-export interface LiveChatSupportInput {
-  message: string;
-  history?: Array<{ role: 'user' | 'assistant'; text: string }>;
-  currentView?: string;
-  catalogSummary?: string;
-}
-
-export interface LiveChatSupportOutput {
-  reply: string;
-  agentName: string;
-  suggestedAction?: {
-    type: 'navigate';
-    label: string;
-    view: string;
-    param?: string;
-  } | null;
-  detectedQuote?: {
-    materialName: string;
-    widthCm: number;
-    heightCm: number;
-    quantity: number;
-    estimatedTotalARS: number;
-  };
-  timestamp: string;
-}
-
-/**
- * Server Action: Chatbot Sofi Asistente de Taller en Vivo con Gemini
- */
-export async function liveChatSupportAction(input: LiveChatSupportInput): Promise<LiveChatSupportOutput> {
-  const { message, history = [], currentView = 'home', catalogSummary = '' } = input;
-  const ai = getGeminiClient();
-
-  if (!ai) {
-    const lowerMsg = message.toLowerCase();
-    let replyText = '¡Hola! Soy Sofi, asesora de taller en **Carteles.Click**. ';
-    let suggestedAction: any = null;
-
-    if (lowerMsg.includes('lona') || lowerMsg.includes('front') || lowerMsg.includes('backlight')) {
-      replyText += `Para lonas tenemos opciones desde **$15.000/m²** en Lona Front Standard 13oz hasta Lona Backlight con doble pasada a **$19.400/m²**. Todas con doblado y refuerzo opcional. ¿Qué medida necesitás cotizar?`;
-      suggestedAction = { type: 'navigate', label: 'Ver Cotizador de Lonas', view: 'cotizador', param: 'lona_front' };
-    } else if (lowerMsg.includes('vinilo') || lowerMsg.includes('ploteo') || lowerMsg.includes('microperforado')) {
-      replyText += `Nuestros vinilos más pedidos son el **Vinilo Brillante/Mate a $15.000/m²** y el **Microperforado para vidrieras/autos a $16.600/m²**. También hacemos laminado protector UV para intemperie extrema.`;
-      suggestedAction = { type: 'navigate', label: 'Cotizar Vinilos', view: 'cotizador', param: 'vinilo_comun' };
-    } else if (lowerMsg.includes('dpi') || lowerMsg.includes('resolucion') || lowerMsg.includes('archivo') || lowerMsg.includes('pdf')) {
-      replyText += `Para cartelería exterior en gran formato recomendemos trabajar a **150 DPI a tamaño real (escala 1:1)** o a **300 DPI a escala 1:2**. Espacio de color CMYK y textos convertidos a curvas/vector.`;
-      suggestedAction = { type: 'navigate', label: 'Leer Guía de Pre-Prensa', view: 'diccionario' };
-    } else if (lowerMsg.includes('envio') || lowerMsg.includes('despacho') || lowerMsg.includes('tiempo') || lowerMsg.includes('demora')) {
-      replyText += `Los trabajos ingresados antes de las 13hs entran a cola de impresión el mismo día. La producción estándar demora **24/48hs hábiles**. Hacemos envíos a todo el país o retiro sin cargo por nuestro taller.`;
-      suggestedAction = { type: 'navigate', label: 'Ver Mis Pedidos', view: 'pedidos' };
-    } else {
-      replyText += `Puedo ayudarte con **cotizaciones en vivo**, recomendación de materiales (lonas, vinilos, rígidos), tiempos de entrega o asistencia en diseño con IA. ¿En qué proyecto estás trabajando?`;
-      suggestedAction = { type: 'navigate', label: 'Ir al Cotizador Vivo', view: 'cotizador' };
-    }
-
-    return {
-      reply: replyText,
-      agentName: 'Sofi (Asesora Taller)',
-      suggestedAction,
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  const systemInstruction = `Sos Sofi, la asesora técnica en vivo del taller de imprenta digital de gran formato Carteles.Click (Argentina).
-Tu función es brindar atención al cliente rápida, cálida, experta y transparente a transeúntes, diseñadores, empresas y revendedores.
+Respond\xE9 siempre en JSON estructurado.`;const promptText=`Gener\xE1 una propuesta creativa de p\xF3ster para:
+- Rubro/Tema: ${input.promptTopic||"Comercial / Promocional"}
+- Prop\xF3sito: ${input.purpose||"Venta y atracci\xF3n peatonal"}
+- P\xFAblico: ${input.targetAudience||"Transe\xFAntes y clientes locales"}
+- Idea base del cliente: ${input.currentHeadline||"Oferta especial"}
+`;const response=await ai.models.generateContent({model:"gemini-3.7-flash",contents:promptText,config:{systemInstruction,responseMimeType:"application/json",responseSchema:{type:Type.OBJECT,properties:{headline:{type:Type.STRING,description:"Titular principal corto e impactante (m\xE1x 6 palabras)."},subheadline:{type:Type.STRING,description:"Bajada complementaria de beneficio (m\xE1x 12 palabras)."},bodyText:{type:Type.STRING,description:"Cuerpo breve de 1 o 2 oraciones con llamada a la acci\xF3n."},recommendedPalette:{type:Type.STRING,description:"Combinaci\xF3n crom\xE1tica recomendada."},primaryColorHex:{type:Type.STRING,description:"Color primario de fondo o contraste en formato HEX."},accentColorHex:{type:Type.STRING,description:"Color secundario de acento en formato HEX."},fontHeadingRecommendation:{type:Type.STRING,description:"Recomendaci\xF3n: sans, serif, display, o mono."},taglines:{type:Type.ARRAY,items:{type:Type.STRING},description:"3 frases cortas de gancho para el p\xF3ster."},compositionAdvice:{type:Type.STRING,description:"Consejo t\xE9cnico de legibilidad en gran formato."}},required:["headline","subheadline","bodyText","recommendedPalette","taglines","compositionAdvice"]}}});const jsonStr=response.text?.trim()||"{}";return JSON.parse(jsonStr)}__name(generatePosterDesignAction,"generatePosterDesignAction");async function liveChatSupportAction(input){const{message,history=[],currentView="home",catalogSummary=""}=input;const ai=getGeminiClient();if(!ai){const lowerMsg=message.toLowerCase();let replyText="\xA1Hola! Soy Sofi, asesora de taller en **Carteles.Click**. ";let suggestedAction=null;if(lowerMsg.includes("lona")||lowerMsg.includes("front")||lowerMsg.includes("backlight")){replyText+=`Para lonas tenemos opciones desde **$15.000/m\xB2** en Lona Front Standard 13oz hasta Lona Backlight con doble pasada a **$19.400/m\xB2**. Todas con doblado y refuerzo opcional. \xBFQu\xE9 medida necesit\xE1s cotizar?`;suggestedAction={type:"navigate",label:"Ver Cotizador de Lonas",view:"cotizador",param:"lona_front"}}else if(lowerMsg.includes("vinilo")||lowerMsg.includes("ploteo")||lowerMsg.includes("microperforado")){replyText+=`Nuestros vinilos m\xE1s pedidos son el **Vinilo Brillante/Mate a $15.000/m\xB2** y el **Microperforado para vidrieras/autos a $16.600/m\xB2**. Tambi\xE9n hacemos laminado protector UV para intemperie extrema.`;suggestedAction={type:"navigate",label:"Cotizar Vinilos",view:"cotizador",param:"vinilo_comun"}}else if(lowerMsg.includes("dpi")||lowerMsg.includes("resolucion")||lowerMsg.includes("archivo")||lowerMsg.includes("pdf")){replyText+=`Para carteler\xEDa exterior en gran formato recomendemos trabajar a **150 DPI a tama\xF1o real (escala 1:1)** o a **300 DPI a escala 1:2**. Espacio de color CMYK y textos convertidos a curvas/vector.`;suggestedAction={type:"navigate",label:"Leer Gu\xEDa de Pre-Prensa",view:"diccionario"}}else if(lowerMsg.includes("envio")||lowerMsg.includes("despacho")||lowerMsg.includes("tiempo")||lowerMsg.includes("demora")){replyText+=`Los trabajos ingresados antes de las 13hs entran a cola de impresi\xF3n el mismo d\xEDa. La producci\xF3n est\xE1ndar demora **24/48hs h\xE1biles**. Hacemos env\xEDos a todo el pa\xEDs o retiro sin cargo por nuestro taller.`;suggestedAction={type:"navigate",label:"Ver Mis Pedidos",view:"pedidos"}}else{replyText+=`Puedo ayudarte con **cotizaciones en vivo**, recomendaci\xF3n de materiales (lonas, vinilos, r\xEDgidos), tiempos de entrega o asistencia en dise\xF1o con IA. \xBFEn qu\xE9 proyecto est\xE1s trabajando?`;suggestedAction={type:"navigate",label:"Ir al Cotizador Vivo",view:"cotizador"}}return{reply:replyText,agentName:"Sofi (Asesora Taller)",suggestedAction,timestamp:new Date().toISOString()}}const systemInstruction=`Sos Sofi, la asesora t\xE9cnica en vivo del taller de imprenta digital de gran formato Carteles.Click (Argentina).
+Tu funci\xF3n es brindar atenci\xF3n al cliente r\xE1pida, c\xE1lida, experta y transparente a transe\xFAntes, dise\xF1adores, empresas y revendedores.
 
 DIRECTRICES DE RESPUESTA:
-1. Idioma: Español rioplatense (es-AR, voseo cordial y profesional).
-2. Tono: Cercano, de taller experto pero moderno y directo. Sin rodeos innecesarios. Usá negritas para destacar precios, medidas y materiales.
-3. Catálogo de productos actual de taller:
+1. Idioma: Espa\xF1ol rioplatense (es-AR, voseo cordial y profesional).
+2. Tono: Cercano, de taller experto pero moderno y directo. Sin rodeos innecesarios. Us\xE1 negritas para destacar precios, medidas y materiales.
+3. Cat\xE1logo de productos actual de taller:
 ${catalogSummary}
 
 4. Reglas de Negocio Clave:
-- Lonas y Vinilos: Se cotizan por m² (superficie).
-- Rígidos (PVC, Corrugado, PAI): Se comercializan por placa entera (122x244 cm o 100x200 cm).
-- Tiempos de fabricación: 24/48 hs hábiles desde la aprobación del archivo en CMYK a 150 DPI.
-- Envíos: Despacho exprés a todo el país o retiro por taller.
+- Lonas y Vinilos: Se cotizan por m\xB2 (superficie).
+- R\xEDgidos (PVC, Corrugado, PAI): Se comercializan por placa entera (122x244 cm o 100x200 cm).
+- Tiempos de fabricaci\xF3n: 24/48 hs h\xE1biles desde la aprobaci\xF3n del archivo en CMYK a 150 DPI.
+- Env\xEDos: Despacho expr\xE9s a todo el pa\xEDs o retiro por taller.
 
-5. Formato de salida: Devolvé SIEMPRE un objeto JSON estructurado con:
-- "reply": Tu respuesta completa formateada con markdown (listas, negrita, saltos de línea prolijos).
-- "suggestedAction": Opcional { "type": "navigate", "label": "Texto Botón CTA", "view": "cotizador" | "poster" | "materiales" | "pedidos" | "diccionario" } si corresponde dirigir al usuario a una sección.
+5. Formato de salida: Devolv\xE9 SIEMPRE un objeto JSON estructurado con:
+- "reply": Tu respuesta completa formateada con markdown (listas, negrita, saltos de l\xEDnea prolijos).
+- "suggestedAction": Opcional { "type": "navigate", "label": "Texto Bot\xF3n CTA", "view": "cotizador" | "poster" | "materiales" | "pedidos" | "diccionario" } si corresponde dirigir al usuario a una secci\xF3n.
 - "detectedQuote": Opcional objeto si el usuario pide cotizar un material concreto con medidas: { "materialName": string, "widthCm": number, "heightCm": number, "quantity": number, "estimatedTotalARS": number }.
-`;
-
-  const formattedHistory = Array.isArray(history) 
-    ? history.slice(-6).map(h => `${h.role === 'user' ? 'Cliente' : 'Sofi'}: ${h.text}`).join('\n') 
-    : '';
-
-  const promptText = `
-Historial reciente de la conversación:
+`;const formattedHistory=Array.isArray(history)?history.slice(-6).map(h=>`${h.role==="user"?"Cliente":"Sofi"}: ${h.text}`).join("\n"):"";const promptText=`
+Historial reciente de la conversaci\xF3n:
 ${formattedHistory}
 
-Vista actual del sitio donde está el cliente: ${currentView}
+Vista actual del sitio donde est\xE1 el cliente: ${currentView}
 Mensaje actual del Cliente: "${message}"
 
-Respondé según las directrices en formato JSON estricto.
-`;
+Respond\xE9 seg\xFAn las directrices en formato JSON estricto.
+`;const response=await ai.models.generateContent({model:"gemini-3.7-flash",contents:promptText,config:{systemInstruction,responseMimeType:"application/json",responseSchema:{type:Type.OBJECT,properties:{reply:{type:Type.STRING},suggestedAction:{type:Type.OBJECT,properties:{type:{type:Type.STRING},label:{type:Type.STRING},view:{type:Type.STRING},param:{type:Type.STRING}}},detectedQuote:{type:Type.OBJECT,properties:{materialName:{type:Type.STRING},widthCm:{type:Type.NUMBER},heightCm:{type:Type.NUMBER},quantity:{type:Type.NUMBER},estimatedTotalARS:{type:Type.NUMBER}}}},required:["reply"]}}});const parsed=JSON.parse(response.text?.trim()||"{}");return{reply:parsed.reply||"Recib\xED tu consulta, \xBFen qu\xE9 m\xE1s te puedo asesorar?",agentName:"Sofi (Asesora Taller)",suggestedAction:parsed.suggestedAction||null,detectedQuote:parsed.detectedQuote,timestamp:new Date().toISOString()}}__name(liveChatSupportAction,"liveChatSupportAction");async function generateBlogArticleAction(input){const ai=getGeminiClient();const{topic,targetAudience,tone}=input;if(!ai){return{title:`Gu\xEDa Maestra: ${topic||"Tendencias en Carteler\xEDa y Gran Formato 2026"}`,excerpt:"C\xF3mo optimizar la durabilidad, impacto visual y costo por metro cuadrado en aplicaciones comerciales.",tag:"Producci\xF3n Gr\xE1fica",readTime:"5 min de lectura",content:`## Claves T\xE9cnicas de ${topic||"Impresi\xF3n en Gran Formato"}
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3.7-flash',
-    contents: promptText,
-    config: {
-      systemInstruction,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          reply: { type: Type.STRING },
-          suggestedAction: {
-            type: Type.OBJECT,
-            properties: {
-              type: { type: Type.STRING },
-              label: { type: Type.STRING },
-              view: { type: Type.STRING },
-              param: { type: Type.STRING }
-            }
-          },
-          detectedQuote: {
-            type: Type.OBJECT,
-            properties: {
-              materialName: { type: Type.STRING },
-              widthCm: { type: Type.NUMBER },
-              heightCm: { type: Type.NUMBER },
-              quantity: { type: Type.NUMBER },
-              estimatedTotalARS: { type: Type.NUMBER }
-            }
-          }
-        },
-        required: ['reply']
-      }
-    }
-  });
+En este art\xEDculo repasamos las mejores pr\xE1cticas para confecci\xF3n, tensado de lonas y laminados protectores UV para maximizar la vida \xFAtil en v\xEDa p\xFAblica.
 
-  const parsed = JSON.parse(response.text?.trim() || '{}');
-  return {
-    reply: parsed.reply || 'Recibí tu consulta, ¿en qué más te puedo asesorar?',
-    agentName: 'Sofi (Asesora Taller)',
-    suggestedAction: parsed.suggestedAction || null,
-    detectedQuote: parsed.detectedQuote,
-    timestamp: new Date().toISOString()
-  };
-}
+### 1. Preparaci\xF3n de Archivos
+- Escala 1:1 a 150 DPI o 1:10 a 300 DPI.
+- Perfil de color FOGRA39 (CMYK).
 
-export interface BlogGeneratorInput {
-  topic?: string;
-  targetAudience?: string;
-  tone?: string;
-}
+### 2. Elecci\xF3n de Sustrato
+- Seleccionar el material acorde al tiempo de exposici\xF3n.
+- En zonas de alto viento, priorizar Lona Mesh o refuerzo perimetral con vaina termosellada.`}}const promptText=`Gener\xE1 un art\xEDculo t\xE9cnico profesional para el blog de Carteles.Click (imprenta gran formato).
+Tema: ${topic||"Consejos para carteler\xEDa exterior duradera"}
+Audiencia: ${targetAudience||"Dise\xF1adores, agencias de publicidad y carteleros"}
+Tono: ${tone||"T\xE9cnico, pr\xE1ctico y claro"}
+Respond\xE9 en formato JSON con title, excerpt, tag, readTime, y content en Markdown.`;const response=await ai.models.generateContent({model:"gemini-3.7-flash",contents:promptText,config:{responseMimeType:"application/json",responseSchema:{type:Type.OBJECT,properties:{title:{type:Type.STRING},excerpt:{type:Type.STRING},tag:{type:Type.STRING},readTime:{type:Type.STRING},content:{type:Type.STRING}},required:["title","excerpt","tag","readTime","content"]}}});return JSON.parse(response.text?.trim()||"{}")}__name(generateBlogArticleAction,"generateBlogArticleAction");export{generateBlogArticleAction,generatePosterDesignAction,liveChatSupportAction};
 
-export interface BlogGeneratorOutput {
-  title: string;
-  excerpt: string;
-  tag: string;
-  readTime: string;
-  content: string;
-}
-
-/**
- * Server Action: Generador de Artículos Técnicos para Blog
- */
-export async function generateBlogArticleAction(input: BlogGeneratorInput): Promise<BlogGeneratorOutput> {
-  const ai = getGeminiClient();
-  const { topic, targetAudience, tone } = input;
-
-  if (!ai) {
-    return {
-      title: `Guía Maestra: ${topic || 'Tendencias en Cartelería y Gran Formato 2026'}`,
-      excerpt: 'Cómo optimizar la durabilidad, impacto visual y costo por metro cuadrado en aplicaciones comerciales.',
-      tag: 'Producción Gráfica',
-      readTime: '5 min de lectura',
-      content: `## Claves Técnicas de ${topic || 'Impresión en Gran Formato'}\n\nEn este artículo repasamos las mejores prácticas para confección, tensado de lonas y laminados protectores UV para maximizar la vida útil en vía pública.\n\n### 1. Preparación de Archivos\n- Escala 1:1 a 150 DPI o 1:10 a 300 DPI.\n- Perfil de color FOGRA39 (CMYK).\n\n### 2. Elección de Sustrato\n- Seleccionar el material acorde al tiempo de exposición.\n- En zonas de alto viento, priorizar Lona Mesh o refuerzo perimetral con vaina termosellada.`
-    };
-  }
-
-  const promptText = `Generá un artículo técnico profesional para el blog de Carteles.Click (imprenta gran formato).
-Tema: ${topic || 'Consejos para cartelería exterior duradera'}
-Audiencia: ${targetAudience || 'Diseñadores, agencias de publicidad y carteleros'}
-Tono: ${tone || 'Técnico, práctico y claro'}
-Respondé en formato JSON con title, excerpt, tag, readTime, y content en Markdown.`;
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-3.7-flash',
-    contents: promptText,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING },
-          excerpt: { type: Type.STRING },
-          tag: { type: Type.STRING },
-          readTime: { type: Type.STRING },
-          content: { type: Type.STRING }
-        },
-        required: ['title', 'excerpt', 'tag', 'readTime', 'content']
-      }
-    }
-  });
-
-  return JSON.parse(response.text?.trim() || '{}');
-}
+//# sourceMappingURL=data:application/json;base64,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QUMvRSxRQUFTLDJHQUNULElBQUssMkJBQ0wsU0FBVSxtQkFDVixRQUFTLDRCQUF5QixPQUFTLDhCQUEyQjtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLDZGQUN4RSxDQUNGLENBRUEsTUFBTSxXQUFhO0FBQUEsUUFDYixPQUFTLCtDQUE0QztBQUFBLGFBQ2hELGdCQUFrQixxREFBa0Q7QUFBQSxRQUN6RSxNQUFRLGlDQUEyQjtBQUFBLHVGQUd6QyxNQUFNLFNBQVcsTUFBTSxHQUFHLE9BQU8sZ0JBQWdCLENBQy9DLE1BQU8sbUJBQ1AsU0FBVSxXQUNWLE9BQVEsQ0FDTixpQkFBa0IsbUJBQ2xCLGVBQWdCLENBQ2QsS0FBTSxLQUFLLE9BQ1gsV0FBWSxDQUNWLE1BQU8sQ0FBRSxLQUFNLEtBQUssTUFBTyxFQUMzQixRQUFTLENBQUUsS0FBTSxLQUFLLE1BQU8sRUFDN0IsSUFBSyxDQUFFLEtBQU0sS0FBSyxNQUFPLEVBQ3pCLFNBQVUsQ0FBRSxLQUFNLEtBQUssTUFBTyxFQUM5QixRQUFTLENBQUUsS0FBTSxLQUFLLE1BQU8sQ0FDL0IsRUFDQSxTQUFVLENBQUMsUUFBUyxVQUFXLE1BQU8sV0FBWSxTQUFTLENBQzdELENBQ0YsQ0FDRixDQUFDLEVBRUQsT0FBTyxLQUFLLE1BQU0sU0FBUyxNQUFNLEtBQUssR0FBSyxJQUFJLENBQ2pELENBeENzQiIsIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiL2FwcC9hcHBsZXQvc3JjL3NlcnZlci9haS9nZW1pbmlBY3Rpb25zLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF19

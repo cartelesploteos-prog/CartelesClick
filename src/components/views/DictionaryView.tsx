@@ -41,13 +41,13 @@ export const DictionaryView: React.FC<DictionaryViewProps> = ({
     DICTIONARY_TERMS[0];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
       {/* HEADER */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <span className="text-xs uppercase tracking-widest text-primary font-heading font-medium">
           Glosario Técnico de Imprenta & Pre-Prensa
         </span>
-        <h1 className="font-heading text-3xl sm:text-4xl text-[var(--text-primary)] tracking-tight font-medium">
+        <h1 className="text-canonical-h1">
           {t("dictionary_title")}
         </h1>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-sans font-normal">
@@ -83,7 +83,7 @@ export const DictionaryView: React.FC<DictionaryViewProps> = ({
                 }`}
               >
                 <div>
-                  <h4 className="font-heading text-xs sm:text-sm text-[var(--text-primary)] font-medium">
+                  <h4 className="text-canonical-h4">
                     {t.term}
                   </h4>
                   <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1 mt-0.5 font-sans font-normal">
@@ -107,7 +107,7 @@ export const DictionaryView: React.FC<DictionaryViewProps> = ({
               <span className="font-mono-num text-xs uppercase text-primary font-sans font-medium">
                 Término #{activeTerm.slug}
               </span>
-              <h2 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)] font-medium">
+              <h2 className="text-canonical-h2">
                 {activeTerm.term}
               </h2>
             </div>
@@ -120,7 +120,7 @@ export const DictionaryView: React.FC<DictionaryViewProps> = ({
 
               {activeTerm.goodPractice && (
                 <div className="p-4 rounded-[7px] bg-accent/20 border border-accent/40 text-xs space-y-1 text-[var(--text-primary)]">
-                  <div className="flex items-center gap-1.5 font-sans font-medium text-black dark:text-accent">
+                  <div className="flex items-center gap-1.5 font-sans font-medium text-[var(--text-primary)] dark:text-accent">
                     <Sparkles className="w-4 h-4 text-primary" />
                     <span>Consejo de Taller para Diseñadores:</span>
                   </div>

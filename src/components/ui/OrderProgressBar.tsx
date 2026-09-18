@@ -18,7 +18,7 @@ export const OrderProgressBar: React.FC<OrderProgressBarProps> = ({ status }) =>
 
   return (
     <div className="w-full space-y-2">
-      <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest">
+      <div className="flex justify-between text-[10px] text-[var(--text-secondary)] uppercase tracking-widest">
         {steps.map((s, i) => (
           <span key={s} className={i <= stepIndex ? "text-primary font-bold" : ""}>{s}</span>
         ))}

@@ -34,13 +34,18 @@ import {
   Eye,
   Filter,
   Printer,
+  Calculator,
+  Ruler,
 } from "lucide-react";
 import { collection, onSnapshot, query, orderBy, doc, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { Order } from "../../types";
 import { OrderProgressBar } from "../ui/OrderProgressBar";
 import { OrdersListSkeleton } from "../ui/Skeleton";
-import { generateOrderSheetPdf } from "../../utils/generateQuotePdf";
+import { generateOrderSheetPdf, generateSavedQuotePdf } from "../../utils/generateQuotePdf";
+import { useAuthStore } from "../../store/useAuthStore";
+import { SavedQuote, getUserSavedQuotes } from "../../lib/firestore";
+import { AiUsageChargesTable } from "../ui/AiUsageChargesTable";
 
 interface OrdersViewProps {
   onNavigate: (view: string, param?: string) => void;
@@ -86,8 +91,12 @@ function playStatusChime() {
 
 export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const [viewMode, setViewMode] = useState<"orders" | "quotes" | "ai_charges">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [trackedOrder, setTrackedOrder] = useState<Order | null>(null);
   const [isTracking, setIsTracking] = useState(false);
@@ -195,6 +204,25 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
       setIsLoading(false);
     }
   };
+
+  const loadSavedQuotes = async () => {
+    if (!user) return;
+    setIsLoadingQuotes(true);
+    try {
+      const quotes = await getUserSavedQuotes(user.uid);
+      setSavedQuotes(quotes);
+    } catch (e) {
+      console.error("Error loading saved quotes", e);
+    } finally {
+      setIsLoadingQuotes(false);
+    }
+  };
+
+  useEffect(() => {
+    if (viewMode === "quotes") {
+      loadSavedQuotes();
+    }
+  }, [viewMode, user]);
 
   // Real-time Firestore Listener with state change detection & notification trigger
   useEffect(() => {
@@ -458,7 +486,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
         );
       case "despachado":
         return (
-          <span className="px-2.5 py-1 rounded-[7px] text-xs font-sans font-semibold bg-accent text-black flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-[7px] text-xs font-sans font-semibold bg-accent text-[var(--text-primary)] flex items-center gap-1.5">
             <Truck className="w-3.5 h-3.5" strokeWidth={1.85} />
             Despachado / En Viaje
           </span>
@@ -480,7 +508,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-14 font-sans">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-14 font-sans">
       {/* LIVE EVENT TOAST NOTIFICATION */}
       {activeToast && (
         <div className="fixed bottom-24 right-4 sm:right-8 z-50 max-w-sm p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-primary shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-300">
@@ -568,8 +596,8 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)] font-medium">
-              {t("orders_title")}
+            <h1 className="text-canonical-h1">
+              Panel de Usuario
             </h1>
             {/* Real-time sync badge */}
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -581,27 +609,155 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 font-sans font-normal">
-            Monitoreo en tiempo real de cola de impresión, confección y despacho en taller.
+            Monitoreo en tiempo real de cola de impresión, historial de pedidos y cotizaciones.
           </p>
         </div>
-        <button
-          onClick={fetchOrdersRest}
-          className="px-4 py-2 rounded-[7px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-xs text-[var(--text-primary)] flex items-center gap-1.5 transition-colors font-sans font-medium"
-        >
-          <RefreshCw
-            className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`}
-          />
-          <span>Actualizar</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center p-1 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+            <button
+              onClick={() => setViewMode("orders")}
+              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                viewMode === "orders" 
+                  ? "bg-[var(--brand-brick)] text-white shadow-sm" 
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              Mis Pedidos
+            </button>
+            <button
+              onClick={() => setViewMode("quotes")}
+              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                viewMode === "quotes" 
+                  ? "bg-[var(--brand-brick)] text-white shadow-sm" 
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              Mis Cotizaciones
+            </button>
+            <button
+              onClick={() => setViewMode("ai_charges")}
+              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                viewMode === "ai_charges" 
+                  ? "bg-[var(--brand-brick)] text-white shadow-sm" 
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Cargos Diseños IA</span>
+            </button>
+          </div>
+          {viewMode === "orders" && (
+            <button
+              onClick={fetchOrdersRest}
+              className="px-4 py-2.5 rounded-[7px] border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-xs text-[var(--text-primary)] flex items-center gap-1.5 transition-colors font-sans font-medium"
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`}
+              />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* LIVE WORKSHOP RADAR FEED (IF EVENTS OCCURRED) */}
-      {liveEvents.length > 0 && (
-        <div className="p-5 rounded-xl bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-primary/30 space-y-3 animate-in fade-in duration-300">
+      {viewMode === "quotes" ? (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-[var(--brand-brick)]" />
+            <h2 className="text-canonical-h2">
+              Cotizaciones Guardadas
+            </h2>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-mono font-medium">
+              {savedQuotes.length} {savedQuotes.length === 1 ? "cotización" : "cotizaciones"}
+            </span>
+          </div>
+          
+          {isLoadingQuotes ? (
+            <OrdersListSkeleton count={2} />
+          ) : savedQuotes.length === 0 ? (
+            <div className="text-center py-16 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-none p-8 space-y-4 font-sans">
+              <div className="w-16 h-16 rounded-[7px] bg-[var(--bg-surface-subtle)] mx-auto flex items-center justify-center text-[var(--text-secondary)]">
+                <Calculator className="w-8 h-8" />
+              </div>
+              <h3 className="text-canonical-h3">
+                No tenés cotizaciones guardadas
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto font-normal">
+                Podés guardar cualquier presupuesto generado en el cotizador para consultarlo o descargarlo en PDF más tarde.
+              </p>
+              <button
+                onClick={() => onNavigate("cotizador")}
+                className="px-6 py-3 rounded-[7px] bg-[var(--brand-brick)] text-white text-xs font-bold transition-all hover:brightness-110"
+              >
+                Ir al Cotizador
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {savedQuotes.map((quote) => (
+                <div 
+                  key={quote.id}
+                  className="p-5 rounded-[7px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] transition-colors flex flex-col justify-between gap-4"
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] font-bold">
+                          {quote.materialId}
+                        </span>
+                        <h4 className="text-canonical-h4">
+                          {quote.materialName}
+                        </h4>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="block text-[10px] text-[var(--text-secondary)]">Total</span>
+                        <span className="font-mono text-base font-bold text-[var(--text-primary)]">
+                          ${(quote.totalPriceARS || 0).toLocaleString("es-AR")}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 flex-wrap">
+                      <Ruler className="w-3.5 h-3.5" />
+                      {quote.widthCm}x{quote.heightCm} cm 
+                      <span className="mx-1 opacity-40">|</span> 
+                      {quote.quantity} unid.
+                    </p>
+                    {(quote.notes || quote.customNotes) && (
+                      <p className="text-[11px] text-[var(--text-secondary)] p-2 rounded bg-[var(--bg-page)] border border-[var(--border-subtle)] line-clamp-2">
+                        <FileText className="w-3 h-3 inline-block mr-1 opacity-70" />
+                        {quote.notes || quote.customNotes}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-subtle)] mt-auto">
+                    <span className="text-[10px] text-[var(--text-secondary)] flex-1">
+                      Guardada el {new Date(quote.createdAt).toLocaleDateString("es-AR")}
+                    </span>
+                    <button
+                      onClick={() => generateSavedQuotePdf(quote)}
+                      className="px-3 py-1.5 rounded-[5px] bg-[var(--bg-page)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] flex items-center gap-1.5 transition-colors"
+                      title="Descargar Presupuesto PDF"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      PDF
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : viewMode === "ai_charges" ? (
+        <AiUsageChargesTable onNavigate={onNavigate} />
+      ) : (
+        <>
+          {/* LIVE WORKSHOP RADAR FEED (IF EVENTS OCCURRED) */}
+          {liveEvents.length > 0 && (
+            <div className="p-5 rounded-xl bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-subtle)] border border-primary/30 space-y-3 animate-in fade-in duration-300">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
+              <h3 className="text-canonical-h3">
                 <Activity className="w-4 h-4 text-primary" />
                 Historial de Cambios en Vivo del Taller ({liveEvents.length})
               </h3>
@@ -683,7 +839,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
           <div className="print-only-header">
             <div className="flex items-center justify-between pb-3 border-b-2 border-primary">
               <div>
-                <h1 className="text-xl font-bold font-heading text-black tracking-tight">
+                <h1 className="text-canonical-h1">
                   CARTELES.CLICK · FICHA TÉCNICA Y REMITO DE TALLER
                 </h1>
                 <p className="text-xs text-gray-600">
@@ -694,7 +850,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                 <span className="font-bold block text-primary font-mono">
                   ORDEN #{trackedOrder.orderNumber || trackedOrder.id}
                 </span>
-                <span className="text-gray-500 font-mono">
+                <span className="text-[var(--text-secondary)] font-mono">
                   {new Date(trackedOrder.createdAt).toLocaleDateString("es-AR")}
                 </span>
               </div>
@@ -711,7 +867,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                   LIVE FIRESTORE
                 </span>
               </div>
-              <h3 className="font-heading text-lg text-[var(--text-primary)] font-bold mt-0.5">
+              <h3 className="text-canonical-h3">
                 Orden #{trackedOrder.orderNumber || trackedOrder.id}
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">
@@ -763,7 +919,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
             <div
               className={`p-3 rounded-[7px] border flex flex-col gap-1 ${
                 trackedOrder.paymentStatus === "acreditado"
-                  ? "bg-accent/15 border-accent text-black dark:text-accent font-medium"
+                  ? "bg-accent/15 border-accent text-[var(--text-primary)] dark:text-accent font-medium"
                   : "bg-amber-500/10 dark:bg-amber-950/30 border-amber-500/30 text-amber-800 dark:text-amber-300"
               }`}
             >
@@ -837,7 +993,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <History className="w-5 h-5 text-primary" />
-            <h2 className="font-heading text-lg sm:text-xl font-medium text-[var(--text-primary)]">
+            <h2 className="text-canonical-h2">
               Historial de Pedidos & Archivos de Trabajos
             </h2>
             <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-mono font-medium">
@@ -905,7 +1061,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
           <div className="w-16 h-16 rounded-[7px] bg-[var(--bg-surface-subtle)] mx-auto flex items-center justify-center text-[var(--text-secondary)]">
             <Package className="w-8 h-8" />
           </div>
-          <h3 className="font-heading text-base text-[var(--text-primary)] font-medium">
+          <h3 className="text-canonical-h3">
             {orders.length === 0
               ? "No tenés pedidos registrados aún"
               : "No se encontraron trabajos con el filtro seleccionado"}
@@ -1000,7 +1156,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                   <div
                     className={`p-2.5 rounded-[7px] flex items-center gap-2 font-medium ${
                       order.paymentStatus === "acreditado"
-                        ? "bg-accent text-black"
+                        ? "bg-accent text-[var(--text-primary)]"
                         : "bg-amber-950/30 text-amber-300 border border-amber-800/40"
                     }`}
                   >
@@ -1039,7 +1195,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                   <div
                     className={`p-2.5 rounded-[7px] flex items-center gap-2 ${
                       order.status === "despachado" || order.status === "entregado"
-                        ? "bg-accent text-black font-medium"
+                        ? "bg-accent text-[var(--text-primary)] font-medium"
                         : "bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
                     }`}
                   >
@@ -1073,7 +1229,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                     <button
                       onClick={() => handleSimulateWebhook(order.id)}
                       disabled={simulatingWebhookFor === order.id}
-                      className="px-3.5 py-2 rounded-[7px] bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50"
+                      className="px-3.5 py-2 rounded-[7px] bg-emerald-800 hover:bg-emerald-800 text-white text-xs font-medium flex items-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>
@@ -1116,7 +1272,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
                               {item.materialName}
                             </span>
                             {isAiPoster && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-black font-semibold">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-[var(--text-primary)] font-semibold">
                                 ✨ Diseño IA
                               </span>
                             )}
@@ -1318,6 +1474,8 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ onNavigate }) => {
             </div>
           ))}
         </div>
+      )}
+      </>
       )}
     </div>
   );

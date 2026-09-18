@@ -7,6 +7,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { QuoteResponsePayload, Order, CartItem } from "../types";
+import { SavedQuote } from "../lib/firestore";
 
 export interface GenerateQuotePdfOptions {
   quote: QuoteResponsePayload;
@@ -309,6 +310,49 @@ export function generateQuotePdf(options: GenerateQuotePdfOptions) {
   // Save / Download
   const filename = `Presupuesto_CartelesClick_${quote.materialId}_${quoteId}.pdf`;
   doc.save(filename);
+}
+
+/**
+ * Genera y descarga un presupuesto PDF a partir de una cotización guardada en el historial del cliente.
+ */
+export function generateSavedQuotePdf(savedQuote: SavedQuote) {
+  const quotePayload: QuoteResponsePayload = {
+    materialId: savedQuote.materialId,
+    materialName: savedQuote.materialName,
+    mode: "m2",
+    unitPriceARS: savedQuote.unitPriceARS,
+    totalPriceARS: savedQuote.totalPriceARS,
+    subtotalARS: savedQuote.totalPriceARS,
+    quantity: savedQuote.quantity || 1,
+    widthCm: savedQuote.widthCm,
+    heightCm: savedQuote.heightCm,
+    calculatedAreaM2: savedQuote.totalAreaM2,
+    discountPercentage: 0,
+    discountAmountARS: 0,
+    finishingsSummary: savedQuote.finishingsSummary || [],
+    finishingsBreakdown: (savedQuote.finishingsSummary || []).map((f) => ({
+      id: f,
+      name: f,
+      unitCostARS: 0,
+      totalCostARS: 0,
+    })),
+    timestamp: new Date().toISOString(),
+    transparencyNotes: [
+      `Sustrato: ${savedQuote.materialName}`,
+      savedQuote.printQuality ? `Calidad de impresión: ${savedQuote.printQuality}` : "Impresión de alta resolución para gran formato",
+      savedQuote.inkType ? `Tipo de tinta: ${savedQuote.inkType}` : "Tintas curables UV intemperie",
+      `Medidas: ${savedQuote.widthCm || 0} cm x ${savedQuote.heightCm || 0} cm (${savedQuote.totalAreaM2 ? savedQuote.totalAreaM2.toFixed(2) : 0} m²)`,
+      `Cantidad: ${savedQuote.quantity || 1} unidad(es)`
+    ],
+  };
+
+  generateQuotePdf({
+    quote: quotePayload,
+    clientName: savedQuote.customerName || "Cliente",
+    clientEmail: savedQuote.userEmail,
+    clientCompany: savedQuote.customerCompany,
+    customNotes: savedQuote.notes || savedQuote.customNotes,
+  });
 }
 
 /**

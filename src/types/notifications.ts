@@ -1,4 +1,6 @@
-export type NotificationType = 'order_status' | 'promotion' | 'blog' | 'system' | 'admin_alert';
+export type NotificationType = 'order_status' | 'promotion' | 'blog' | 'system' | 'quote' | 'admin_alert';
+
+export type NotificationPriority = 'low' | 'normal' | 'high';
 
 export interface AppNotification {
   id: string;
@@ -10,13 +12,15 @@ export interface AppNotification {
   orderId?: string;
   link?: string;
   emailSent?: boolean;
-  priority?: 'low' | 'normal' | 'high';
+  priority?: NotificationPriority;
 }
 
 export interface NotificationPreference {
   orderUpdates: boolean;
   promotions: boolean;
-  blogUpdates: boolean;
+  technicalGuides?: boolean;
   emailNotifications: boolean;
-  userEmail: string;
+  soundEnabled?: boolean;
+  blogUpdates?: boolean;
+  userEmail?: string;
 }

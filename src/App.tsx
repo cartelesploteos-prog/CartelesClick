@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -21,20 +21,33 @@ import { useThemeStore } from "./store/useThemeStore";
 import { useMaterialStore } from "./store/useMaterialStore";
 import { useI18nStore } from "./store/useI18nStore";
 import { getLocalBusinessSchema } from "./utils/schema";
+import {
+  initGA4,
+  trackCotizacionIniciada,
+  trackMaterialSeleccionado,
+  trackPedidoExitoso,
+} from "./utils/analytics";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<string>("home");
   const [viewParam, setViewParam] = useState<string | undefined>(undefined);
-  const { initTheme } = useThemeStore();
-  const { fetchMaterials } = useMaterialStore();
-  const { initI18n } = useI18nStore();
 
-  // Initialize theme and i18n language persistence on mount
+  // Initialize theme, i18n, materials and GA4 on mount
   useEffect(() => {
-    initTheme();
-    fetchMaterials();
-    initI18n();
-  }, [initTheme, initI18n, fetchMaterials]);
+    useThemeStore.getState().initTheme();
+    useMaterialStore.getState().fetchMaterials();
+    useI18nStore.getState().initI18n();
+    initGA4();
+  }, []);
+
+  // Track navigation & key events in GA4
+  useEffect(() => {
+    if (currentView === "cotizador") {
+      trackCotizacionIniciada({ materialId: viewParam });
+    } else if (currentView === "material-detail" && viewParam) {
+      trackMaterialSeleccionado(viewParam);
+    }
+  }, [currentView, viewParam]);
 
   // Inject JSON-LD Schema for Local SEO
   useEffect(() => {
@@ -48,13 +61,14 @@ export default function App() {
   }, []);
 
   // Memoize handleNavigate callback to prevent unnecessary re-renders of React.memo components
-  const handleNavigate = React.useCallback((view: string, param?: string) => {
+  const handleNavigate = useCallback((view: string, param?: string) => {
     setCurrentView(view);
     setViewParam(param);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const handleOrderPlaced = React.useCallback((orderId: string) => {
+  const handleOrderPlaced = useCallback((orderId: string, totalAmountARS: number = 0, count: number = 1) => {
+    trackPedidoExitoso(orderId, totalAmountARS, count);
     handleNavigate("pedidos", orderId);
   }, [handleNavigate]);
 

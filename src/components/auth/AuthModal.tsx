@@ -265,7 +265,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               )}
             </div>
             <div>
-              <h2 className="font-heading text-xl font-medium tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-canonical-h2">
                 {title || (mode === "forgot"
                   ? "Recuperar Contraseña"
                   : mode === "register"

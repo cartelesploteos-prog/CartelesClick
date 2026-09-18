@@ -1,19 +1,161 @@
-export type MainFamilyType = "carteles" | "estampados" | "corporeos";
-export type MaterialCategory = "lonas" | "vinilos" | "rigidos" | "portabanners" | "insumos" | "estructuras" | "estampados" | "corporeos" | "carteles";
-export type CalculationMode = "m2" | "unidad" | "placa" | "metro_lineal";
+// Core Type Definitions for Carteles Click 3D
 
-export type CustomerType = "agencia" | "imprenta" | "cartelero" | "comun";
-export type OrderPriority = "urgente" | "alta" | "normal" | "baja";
+export type MaterialCategory =
+  | "gigantografias"
+  | "carteles"
+  | "corporeos"
+  | "estampados"
+  | "impresion_3d"
+  | "todos";
 
-export type PrintQualityType = "estandar" | "alta_resolucion";
-export type InkType = "solvente" | "uv" | "directa_uv";
+export type CalculationMode = "m2" | "metro_lineal" | "placa" | "unidad";
+
+export type MainFamilyType = MaterialCategory;
+
+export type FinishingType = string;
+
+export type CustomerType =
+  | "consumidor_final"
+  | "gremio"
+  | "agencia"
+  | "corporativo"
+  | "imprenta"
+  | "cartelero";
+
+export type OrderPriority = "baja" | "normal" | "alta" | "urgente" | "express";
+
+export type OrderStatus =
+  | "recibido"
+  | "diseno"
+  | "preprensa"
+  | "impresion"
+  | "terminacion"
+  | "control_calidad"
+  | "empaquetado"
+  | "listo_entrega"
+  | "en_viaje"
+  | "entregado"
+  | "cancelado"
+  | "despachado"
+  | "en_produccion"
+  | "terminaciones"
+  | "pendiente";
+
+export type ShippingMethod =
+  | "retiro_taller"
+  | "envio_caba"
+  | "envio_gba"
+  | "expreso_interior"
+  | "a_despacho"
+  | "instantaneo"
+  | "ronda_semanal";
+
+export type PrintQualityType = "estandar" | "alta_resolucion" | "fotografica";
+
+export type InkType = "solvente" | "uv" | "directa_uv" | "latex";
+
+export interface MaterialOption {
+  id: string;
+  name: string;
+  category: MaterialCategory;
+  subCategory?: string;
+  mode: CalculationMode;
+  shortDesc: string;
+  description?: string;
+  costARS?: number;
+  salePriceARS?: number;
+  marginPercent?: number;
+  recommendedUses: string[];
+  durability?: string;
+  resistance?: string;
+  printTechnology?: string;
+  lightingType?: string;
+  image?: string;
+  badge?: string;
+  defaultFinishings?: string[];
+  unitLabel?: string;
+  minAreaM2?: number;
+  plateWidthCm?: number;
+  plateHeightCm?: number;
+  plateAreaM2?: number;
+  plateDimensions?: { widthCm: number; heightCm: number; areaM2: number };
+  linearWidthCm?: number;
+  linearDimensions?: { widthCm?: number; rollWidthCm?: number; maxRollLengthM?: number };
+  hasDoubleSidedOption?: boolean;
+  sampleImages?: string[];
+  hasColorPalette?: boolean;
+  stockStatus?: "disponible" | "a_pedido" | "agotado" | "stock_bajo";
+  isActive?: boolean;
+}
+
+export interface ProductCategorySubCategory {
+  id: string;
+  name?: string;
+  label: string;
+  description: string;
+  materialIds: string[];
+}
+
+export interface ProductCategoryHierarchy {
+  id: MaterialCategory;
+  name: string;
+  slug: string;
+  description: string;
+  badge?: string;
+  iconName: string;
+  subCategories: ProductCategorySubCategory[];
+}
+
+export interface FinishingOption {
+  id: string;
+  name: string;
+  category?: MaterialCategory | "todos";
+  applicableCategories?: (MaterialCategory | "todos")[];
+  calculationType: "fijo" | "metro_lineal_ancho" | "metro_perimetral" | "m2";
+  unitCostARS?: number;
+  description: string;
+  priceDescription?: string;
+  basePriceARS?: number;
+}
+
+export interface DictionaryTerm {
+  slug: string;
+  title?: string;
+  term?: string;
+  category?: string;
+  shortDef?: string;
+  shortDefinition?: string;
+  fullDef?: string;
+  fullExplanation?: string;
+  technicalImpact?: string;
+  goodPractice?: string;
+  tips?: string[];
+  relatedMaterials?: string[];
+}
+
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+}
+
+export interface WholesaleTier {
+  id: string;
+  name: string;
+  minMonthlyM2: number;
+  discountPercent: number;
+  benefits: string[];
+  badge?: string;
+  highlight?: boolean;
+}
 
 export interface VinylColorOption {
   id: string;
   name: string;
   hex: string;
-  textColor?: string;
-  family: "blanco_negro" | "rojos" | "azules" | "amarillos_naranjas" | "verdes" | "metalizados_especiales";
+  textColor: string;
+  family: string;
 }
 
 export interface MountOption {
@@ -21,109 +163,96 @@ export interface MountOption {
   typeName: string;
   thickness: string;
   pricePerM2ARS: number;
+  thicknesses?: { label: string; thickness: string; pricePerM2ARS: number }[];
 }
 
-export interface MaterialOption {
+export interface CartItem {
   id: string;
-  name: string;
-  category: MaterialCategory;
-  mode: CalculationMode;
-  description: string;
-  shortDesc: string;
-  recommendedUses: string[];
-  minAreaM2?: number;
-  hasColorPalette?: boolean;
-  plateDimensions?: { widthCm: number; heightCm: number; areaM2: number };
-  linearDimensions?: { rollWidthCm: number; maxRollLengthM: number };
-  hasDoubleSidedOption?: boolean;
-  defaultFinishings?: string[];
-  badge?: string;
-  image: string;
-  durability: string;
-  resistance: string;
-  printTechnology: string;
-  lightingType: string;
-  sampleImages?: string[];
-}
-export type FinishingType =
-  | "rollo"
-  | "refilado"
-  | "bolsillos_portabanner"
-  | "refuerzo_perimetral"
-  | "ojales_50cm"
-  | "ojales_vertices"
-  | "panos"
-  | "montado_mdf"
-  | "montado_pvc"
-  | "montado_pai"
-  | "montado_chapa"
-  | "refilado_escuadra"
-  | "troquelado_cnc"
-  | "agujereado_fijaciones"
-  | "despuntado_redondeado"
-  | "corte_a_medida"
-  | "soldado_termico"
-  | "laminado_protector"
-  | string;
-
-export type FinishingCalculationType =
-  | "fijo"
-  | "metro_perimetral"
-  | "metro_lineal_ancho"
-  | "m2"
-  | "por_unidad";
-
-export interface FinishingOption {
-  id: FinishingType;
-  name: string;
-  description: string;
-  applicableCategories: MaterialCategory[];
-  basePriceARS?: number;
-  calculationType?: FinishingCalculationType;
-  priceDescription?: string;
-}
-
-export interface FinishingBreakdownItem {
-  id: string;
-  name: string;
-  priceARS?: number;
-  unitCostARS?: number;
-  totalCostARS?: number;
-  details: string;
-  // Aliases for compatibility
-  finishingId?: string;
-  subtotalARS?: number;
-  description?: string;
-}
-
-export interface PricingSettingsConfig {
-  aiDesignFeeARS: number;
-  finishings: Record<
-    string,
-    {
-      id: string;
-      name: string;
-      category: string;
-      calculationType: FinishingCalculationType;
-      unitCostARS: number;
-      description: string;
-    }
-  >;
-}
-
-export interface QuoteRequestPayload {
   materialId: string;
+  materialName: string;
+  mode?: CalculationMode;
   widthCm?: number;
   heightCm?: number;
   quantity: number;
   printQuality?: PrintQualityType;
+  printQualityLabel?: string;
   inkType?: InkType;
+  inkTypeLabel?: string;
   selectedColor?: string;
   mountOption?: MountOption;
-  finishings?: FinishingType[];
-  isAiDesign?: boolean;
-  wholesaleTierRequested?: "inicio" | "agencia" | "partner";
-  customNotes?: string;
+  finishings?: string[];
+  finishingsSummary?: string[];
+  finishingsBreakdown?: any[];
+  baseMaterialSubtotalARS?: number;
+  unitPriceARS: number;
+  totalPriceARS: number;
+  hasAiDesign?: boolean;
+  aiDesignFeeARS?: number;
+  fileAttachment?: {
+    name?: string;
+    size?: number;
+    sizeBytes?: number;
+    previewUrl?: string;
+    driveUrl?: string;
+    isDriveFolder?: boolean;
+    type?: string;
+  };
+  posterDesignData?: {
+    headline?: string;
+    subheadline?: string;
+    bodyText?: string;
+    ctaText?: string;
+    templateId?: string;
+    heroImageUrl?: string;
+    backgroundColor?: string;
+    accentColor?: string;
+    foregroundElements?: any[];
+    customWidthCm?: number;
+    customHeightCm?: number;
+    [key: string]: any;
+  };
+  transparencyNotes?: string[];
+  [key: string]: any;
+}
+
+export interface OrderItem extends CartItem {}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  userId?: string;
+  userEmail?: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  customerCompany?: string;
+  customerType?: CustomerType;
+  items: CartItem[];
+  subtotalARS: number;
+  totalM2?: number;
+  shippingMethod: ShippingMethod;
+  shippingFeeARS: number;
+  discountARS?: number;
+  totalPriceARS: number;
+  totalAmountARS?: number;
+  status: OrderStatus;
+  priority: OrderPriority;
+  promisedDate?: string;
+  createdAt: string;
+  updatedAt?: string;
+  paymentMethod?: "mercadopago" | "transferencia" | "efectivo";
+  paymentStatus?: "pendiente" | "aprobado" | "rechazado" | "acreditado";
+  trackingCode?: string;
+  notes?: string;
+  internalNotes?: string;
+  files?: string[];
+  driveFolderUrl?: string;
+  auditLog?: {
+    date: string;
+    action: string;
+    user: string;
+    details?: string;
+  }[];
 }
 
 export interface QuoteResponsePayload {
@@ -150,84 +279,84 @@ export interface QuoteResponsePayload {
   minAreaAppliedWarning?: boolean;
   baseMaterialSubtotalARS?: number;
   finishingsSubtotalARS?: number;
-  finishingsBreakdown?: FinishingBreakdownItem[];
+  finishingsBreakdown?: {
+    id: string;
+    name: string;
+    unitCostARS?: number;
+    totalCostARS?: number;
+    subtotalARS?: number;
+    finishingId?: string;
+    details?: string;
+    [key: string]: any;
+  }[];
   aiDesignFeeARS?: number;
   hasAiDesign?: boolean;
   unitPriceARS: number;
   subtotalARS: number;
-  discountPercentage: number;
-  discountAmountARS: number;
+  discountPercentage?: number;
+  discountAmountARS?: number;
   totalPriceARS: number;
   finishingsSummary: string[];
   transparencyNotes: string[];
   timestamp: string;
 }
 
-export type OrderStatus =
-  "pendiente" | "en_produccion" | "terminaciones" | "despachado" | "entregado";
-
-export interface CartItem {
+export type PosterPatternType = string;
+export type PosterBackgroundMode = string;
+export interface PosterForegroundElement {
   id: string;
-  materialId: string;
-  materialName: string;
-  category: MaterialCategory;
-  mode: CalculationMode;
-  widthCm?: number;
-  heightCm?: number;
-  quantity: number;
-  unitPriceARS: number;
-  totalPriceARS: number;
-  baseMaterialSubtotalARS?: number;
-  finishingsSubtotalARS?: number;
-  finishingsBreakdown?: FinishingBreakdownItem[];
-  aiDesignFeeARS?: number;
-  hasAiDesign?: boolean;
-  printQuality?: PrintQualityType;
-  printQualityLabel?: string;
-  inkType?: InkType;
-  inkTypeLabel?: string;
-  selectedColor?: string;
-  mountOption?: MountOption;
-  finishings: FinishingType[];
-  customLabel?: string;
-  batchGroupId?: string;
-  fileAttachment?: {
-    name: string;
-    sizeBytes?: number;
-    type?: string;
-    previewUrl?: string;
-    driveUrl?: string;
-    isDriveFolder?: boolean;
-  };
-  posterDesignData?: PosterDesignState;
-  transparencyNotes?: string[];
-  createdAt: string;
+  type?: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  content?: string;
+  [key: string]: any;
 }
 
-export type ShippingMethod =
-  "retiro_taller" | "instantaneo" | "ronda_semanal" | "a_despacho";
-export interface Order {
-  id: string;
-  orderNumber: string;
-  createdAt: string;
-  status: OrderStatus;
-  priority?: OrderPriority;
-  customerType?: CustomerType;
-  customerName: string;
-  customerCompany?: string;
-  customerEmail: string;
-  customerPhone: string;
-  items: CartItem[];
-  shippingMethod: ShippingMethod;
-  shippingFeeARS: number;
-  totalAmountARS: number;
-  paymentMethod: "mercadopago" | "transferencia";
-  paymentStatus: "acreditado" | "pendiente";
-  trackingUrl?: string;
-  estimatedDelivery?: string;
-  internalNotes?: string;
-  promisedDate?: string;
+export interface PosterDesignState {
+  headline: string;
+  subheadline: string;
+  bodyText: string;
+  ctaText?: string;
+  themeStyle?: string;
+  aspectRatio?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  accentColor?: string;
+  heroImageUrl?: string;
+  themePalette?: string;
+  texture?: string;
+  backgroundImageUrl?: string;
+  backgroundImageOpacity?: number;
+  backgroundImageFilter?: string;
+  alignment?: any;
+  outputFormat?: string;
+  backgroundMode?: string;
+  gradientConfig?: any;
+  foregroundElements?: any[];
+  [key: string]: any;
+}
+
+export interface AdminProduct extends MaterialOption {
+  marginPercent: number;
+  costARS: number;
+  salePriceARS: number;
+}
+
+export interface AdminPeriodMetrics {
+  totalOrders: number;
+  totalRevenueARS: number;
+  averageTicketARS: number;
+  topMaterials: { name: string; count: number; revenueARS: number; mode?: any; quantityOrM2?: any; [key: string]: any }[];
+  statusBreakdown: Record<string, number>;
   totalM2?: number;
+  totalPlates?: number;
+  totalUnits?: number;
+  urgentOrders?: number;
+  revenueByCustomerType?: Record<string, number>;
+  timeline?: any[];
+  [key: string]: any;
 }
 
 export interface BlogPost {
@@ -244,209 +373,4 @@ export interface BlogPost {
   published: boolean;
   featured?: boolean;
   viewsCount?: number;
-}
-
-export interface AdminProduct {
-  id: string;
-  name: string;
-  category: MaterialCategory;
-  mode: CalculationMode;
-  costARS: number;
-  salePriceARS: number;
-  marginPercent: number; // e.g. 100%
-  unitLabel: string; // "m²", "metro lineal", "unidad", "placa"
-  minAreaM2?: number;
-  plateWidthCm?: number;
-  plateHeightCm?: number;
-  linearWidthCm?: number;
-  stockStatus: "disponible" | "stock_bajo" | "sin_stock" | "a_pedido";
-  shortDesc: string;
-  badge?: string;
-  isActive: boolean;
-  updatedAt?: string;
-}
-
-export interface AdminPeriodMetrics {
-  period: "semanal" | "mensual" | "anual" | "historico";
-  totalRevenueARS: number;
-  totalOrders: number;
-  totalM2: number;
-  totalLinearM: number;
-  totalUnits: number;
-  totalPlates: number;
-  averageTicketARS: number;
-  completedOrders: number;
-  pendingOrders: number;
-  urgentOrders: number;
-  revenueByCustomerType: {
-    agencia: number;
-    imprenta: number;
-    cartelero: number;
-    comun: number;
-  };
-  ordersByCustomerType: {
-    agencia: number;
-    imprenta: number;
-    cartelero: number;
-    comun: number;
-  };
-  revenueByCategory: {
-    lonas: number;
-    vinilos: number;
-    rigidos: number;
-    portabanners: number;
-    insumos?: number;
-    estructuras?: number;
-  };
-  topMaterials: { name: string; mode: string; quantityOrM2: number; revenueARS: number }[];
-  timeline: { label: string; revenueARS: number; ordersCount: number; m2: number }[];
-}
-export type PosterBackgroundMode = "solid" | "gradient" | "image";
-export type PosterPatternType =
-  | "none"
-  | "dots"
-  | "grid"
-  | "diagonal"
-  | "crosshatch"
-  | "halftone"
-  | "blueprint"
-  | "stripes"
-  | "canvas";
-
-export interface PosterGradientConfig {
-  type: "linear" | "radial";
-  color1: string;
-  color2: string;
-  angle: number; // 0, 45, 90, 135, 180, 270
-  presetId?: string;
-}
-
-export interface PosterForegroundElement {
-  id: string;
-  type: "image" | "badge" | "sticker" | "text";
-  url?: string;
-  title?: string;
-  text?: string;
-  x: number; // percentage 0 to 100
-  y: number; // percentage 0 to 100
-  scale: number; // 0.3 to 3.0
-  rotation: number; // -180 to 180
-  badgeStyle?: "brick" | "graphite" | "concrete" | "craft" | "dark" | "light";
-  shape?: "pill" | "circle" | "badge" | "ribbon";
-  // Custom text attributes when type === "text"
-  fontSize?: number; // base font size in px/rem
-  color?: string;
-  fontFamily?: "sans" | "serif" | "display" | "mono";
-  fontWeight?: "normal" | "medium" | "bold" | "black";
-  align?: "left" | "center" | "right";
-  textRole?: "headline" | "subheadline" | "body" | "contact" | "custom";
-}
-
-export interface PosterDesignState {
-  headline: string;
-  subheadline: string;
-  bodyText: string;
-  contactAddress: string;
-  contactPhone: string;
-  contactWhatsapp: string;
-  contactInstagram: string;
-  fontHeading: "sans" | "serif" | "display" | "mono";
-  alignment: "left" | "center" | "right";
-  themePalette: string;
-  primaryColor: string;
-  accentColor: string;
-  backgroundColor: string;
-  textColor: string;
-  outputFormat: string;
-  // Medidas especiales y espesores
-  customWidthCm?: number;
-  customHeightCm?: number;
-  selectedThickness?: string; // "3 mm" | "5 mm" | "1 mm" | "2 mm"
-  // Fondos avanzados, degradé y patrones
-  backgroundMode?: PosterBackgroundMode;
-  gradientConfig?: PosterGradientConfig;
-  texture: PosterPatternType;
-  textureOpacity?: number;
-  // Imágenes de fondo
-  backgroundImageUrl?: string;
-  backgroundImageOpacity?: number;
-  backgroundImageBlur?: number;
-  backgroundImageFilter?: "none" | "darken" | "grayscale" | "warm" | "cool";
-  // Imágenes y objetos en el frente (arrastrables)
-  foregroundElements?: PosterForegroundElement[];
-  logoUrl?: string;
-  heroImageUrl?: string;
-  aiGeneratedPrompt?: string;
-}
-export interface DictionaryTerm {
-  slug: string;
-  term: string;
-  shortDefinition: string;
-  fullExplanation: string;
-  technicalImpact: string;
-  goodPractice: string;
-  relatedMaterials: string[];
-}
-export interface FAQItem {
-  id: string;
-  question: string;
-  answer: string;
-  category: "cotizacion" | "archivos" | "produccion" | "envios" | "garantia";
-}
-export interface WholesaleTier {
-  id: string;
-  name: string;
-  minMonthlyM2: number;
-  discountPercent: number;
-  benefits: string[];
-  highlight?: boolean;
-}
-export interface GeoCoordinatesConfig {
-  latitude: number | null;
-  longitude: number | null;
-}
-export interface PostalAddressConfig {
-  streetAddress: string;
-  addressLocality: string;
-  addressRegion: string;
-  postalCode: string;
-  addressCountry: string;
-}
-export interface OpeningHoursConfig {
-  dayOfWeek: (
-    | "Monday"
-    | "Tuesday"
-    | "Wednesday"
-    | "Thursday"
-    | "Friday"
-    | "Saturday"
-    | "Sunday"
-  )[];
-  opens: string;
-  closes: string;
-}
-export interface LocalBusinessConfig {
-  businessName: string;
-  legalName?: string;
-  telephone: string | null;
-  email: string;
-  url: string;
-  logo: string;
-  image: string[];
-  priceRange: string;
-  currenciesAccepted: string;
-  paymentAccepted: string[];
-  address: PostalAddressConfig;
-  geo: GeoCoordinatesConfig;
-  openingHours: OpeningHoursConfig[];
-  areaServed: {
-    geoMidpoint?: GeoCoordinatesConfig;
-    geoRadiusKm?: number;
-    citiesOrNeighborhoods: string[];
-    country: string;
-  };
-  hasOfferCatalog?: {
-    name: string;
-    itemListElement: { name: string; description: string }[];
-  };
 }

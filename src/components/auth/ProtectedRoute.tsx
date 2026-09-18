@@ -73,7 +73,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <div className="w-12 h-12 rounded-[7px] bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
               <ShieldAlert className="w-6 h-6" />
             </div>
-            <h2 className="font-heading text-xl font-medium text-[var(--text-primary)]">
+            <h2 className="text-canonical-h2">
               Acceso Restringido
             </h2>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
@@ -103,7 +103,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <div className="w-14 h-14 rounded-[7px] bg-red-950/40 border border-red-800 text-red-400 flex items-center justify-center mx-auto">
               <ShieldAlert className="w-7 h-7" />
             </div>
-            <h2 className="font-heading text-xl font-medium text-[var(--text-primary)]">
+            <h2 className="text-canonical-h2">
               Permiso de Administrador Requerido
             </h2>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">

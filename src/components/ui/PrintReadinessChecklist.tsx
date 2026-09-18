@@ -188,7 +188,7 @@ export const PrintReadinessChecklist: React.FC<PrintReadinessChecklistProps> = (
         <div className="space-y-1 flex-1 min-w-[200px]">
           <div className="flex items-center gap-2">
             <IconBadge icon={FileCheck} size="sm" variant="primary" containerStyle="subtle" />
-            <h3 className="font-heading text-sm sm:text-base font-bold text-[var(--text-primary)]">
+            <h3 className="text-canonical-h3">
               {title}
             </h3>
           </div>

@@ -167,7 +167,7 @@ export const OrderAuditLogModal: React.FC<OrderAuditLogModalProps> = ({
                 <History className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-heading text-base font-semibold text-[var(--text-primary)]">
+                <h3 className="text-canonical-h3">
                   Historial de Auditoría (Audit Log)
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)]">

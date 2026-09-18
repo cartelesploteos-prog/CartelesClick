@@ -7,14 +7,26 @@ import {
   User,
   GoogleAuthProvider,
   signInWithPopup,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  setPersistence,
+  browserLocalPersistence
 } from "firebase/auth";
 import { auth } from "../lib/firebase";
+import { syncUserDocument, Usuario } from "../lib/firestore";
 import { getFirebaseAuthErrorMessage } from "../utils/authErrors";
 import { useNotificationStore } from "./useNotificationStore";
 
 export const ADMIN_EMAIL = "carteles.ploteos@gmail.com";
 export const ADMIN_PASS = "cartelesclick2026";
+
+// Configurar persistencia segura local en el navegador para sesiones
+try {
+  setPersistence(auth, browserLocalPersistence).catch((err) => {
+    console.warn("[Auth] Persistencia de sesión:", err);
+  });
+} catch (e) {
+  // Ignore in SSR/test environment
+}
 
 const createAdminUser = (): User => ({
   uid: "admin_carteles_ploteos",
@@ -41,19 +53,31 @@ const createAdminUser = (): User => ({
   toJSON: () => ({})
 } as unknown as User);
 
-const getInitialAdminSession = (): { user: User | null; isAdmin: boolean; isAuthenticated: boolean } => {
+const createAdminProfile = (): Usuario => ({
+  uid: "admin_carteles_ploteos",
+  email: ADMIN_EMAIL,
+  displayName: "Administrador Taller Carteles.Click",
+  role: "admin",
+  customerType: "corporativo",
+  isActive: true,
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: new Date().toISOString(),
+});
+
+const getInitialAdminSession = (): { user: User | null; profile: Usuario | null; isAdmin: boolean; isAuthenticated: boolean } => {
   try {
     if (typeof window !== "undefined" && localStorage.getItem("cc_admin_session") === "active") {
-      return { user: createAdminUser(), isAdmin: true, isAuthenticated: true };
+      return { user: createAdminUser(), profile: createAdminProfile(), isAdmin: true, isAuthenticated: true };
     }
   } catch (e) {
     // Ignore storage restrictions
   }
-  return { user: null, isAdmin: false, isAuthenticated: false };
+  return { user: null, profile: null, isAdmin: false, isAuthenticated: false };
 };
 
 interface AuthStore {
   user: User | null;
+  profile: Usuario | null;
   loading: boolean;
   isAdmin: boolean;
   isAuthenticated: boolean;
@@ -63,6 +87,7 @@ interface AuthStore {
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  syncProfile: (data?: Partial<Usuario>) => Promise<Usuario | null>;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => {
@@ -79,22 +104,40 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         } catch (e) {
           isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL;
         }
-        set({ user, loading: false, isAdmin, isAuthenticated: true });
+
+        // Sincronizar y persistir automáticamente el perfil en Firestore /users
+        let profile: Usuario | null = null;
+        try {
+          profile = await syncUserDocument(user);
+          if (profile.role === "admin") {
+            isAdmin = true;
+          }
+        } catch (err) {
+          console.warn("[Auth] Error en syncUserDocument durante onAuthStateChanged:", err);
+        }
+
+        set({ user, profile, loading: false, isAdmin, isAuthenticated: true });
       } else {
         // If Firebase user is null, check if persistent local admin session is active
         const currentSession = get();
         if (currentSession.user?.email?.toLowerCase() === ADMIN_EMAIL && currentSession.isAdmin) {
           set({ loading: false });
         } else if (typeof window !== "undefined" && localStorage.getItem("cc_admin_session") === "active") {
-          set({ user: createAdminUser(), loading: false, isAdmin: true, isAuthenticated: true });
+          set({ user: createAdminUser(), profile: createAdminProfile(), loading: false, isAdmin: true, isAuthenticated: true });
         } else {
-          set({ user: null, loading: false, isAdmin: false, isAuthenticated: false });
+          set({ user: null, profile: null, loading: false, isAdmin: false, isAuthenticated: false });
         }
       }
     });
   } catch (err) {
     console.warn("Auth initialization warning:", err);
-    set({ user: initialSession.user, loading: false, isAdmin: initialSession.isAdmin, isAuthenticated: initialSession.isAuthenticated });
+    set({ 
+      user: initialSession.user, 
+      profile: initialSession.profile,
+      loading: false, 
+      isAdmin: initialSession.isAdmin, 
+      isAuthenticated: initialSession.isAuthenticated 
+    });
   }
 
   const notifyAuthError = (err: any) => {
@@ -114,6 +157,7 @@ export const useAuthStore = create<AuthStore>((set, get) => {
 
   return {
     user: initialSession.user,
+    profile: initialSession.profile,
     loading: initialSession.isAuthenticated ? false : true,
     isAdmin: initialSession.isAdmin,
     isAuthenticated: initialSession.isAuthenticated,
@@ -131,20 +175,29 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         try {
           localStorage.setItem("cc_admin_session", "active");
         } catch (e) {}
-        set({ user: createAdminUser(), loading: false, isAdmin: true, isAuthenticated: true });
+        set({ user: createAdminUser(), profile: createAdminProfile(), loading: false, isAdmin: true, isAuthenticated: true });
         return;
       }
 
       // 2. Acceso estándar vía Firebase Auth
       try {
-        await signInWithEmailAndPassword(auth, cleanEmail, pass);
+        const userCred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
+        if (userCred.user) {
+          const profile = await syncUserDocument(userCred.user);
+          const isAdmin = profile.role === "admin" || userCred.user.email?.toLowerCase() === ADMIN_EMAIL;
+          set({ user: userCred.user, profile, loading: false, isAdmin, isAuthenticated: true });
+        }
       } catch (err: any) {
         throw notifyAuthError(err);
       }
     },
     loginAsClient: async (email = "cliente@carteles.click", pass = "123456") => {
       try {
-        await signInWithEmailAndPassword(auth, email.trim(), pass);
+        const userCred = await signInWithEmailAndPassword(auth, email.trim(), pass);
+        if (userCred.user) {
+          const profile = await syncUserDocument(userCred.user);
+          set({ user: userCred.user, profile, loading: false, isAdmin: false, isAuthenticated: true });
+        }
       } catch (err: any) {
         throw notifyAuthError(err);
       }
@@ -152,7 +205,12 @@ export const useAuthStore = create<AuthStore>((set, get) => {
     register: async (email, pass) => {
       const cleanEmail = email.trim().toLowerCase();
       try {
-        await createUserWithEmailAndPassword(auth, cleanEmail, pass);
+        const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
+        if (userCred.user) {
+          const profile = await syncUserDocument(userCred.user);
+          const isAdmin = profile.role === "admin" || userCred.user.email?.toLowerCase() === ADMIN_EMAIL;
+          set({ user: userCred.user, profile, loading: false, isAdmin, isAuthenticated: true });
+        }
       } catch (err: any) {
         throw notifyAuthError(err);
       }
@@ -166,13 +224,19 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       } catch (err: any) {
         // Continue clearing local state
       }
-      set({ user: null, loading: false, isAdmin: false, isAuthenticated: false });
+      set({ user: null, profile: null, loading: false, isAdmin: false, isAuthenticated: false });
     },
     signInWithGoogle: async () => {
       try {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
-        await signInWithPopup(auth, provider);
+        const userCred = await signInWithPopup(auth, provider);
+        if (userCred.user) {
+          // Crear o actualizar inmediatamente el usuario en Firestore
+          const profile = await syncUserDocument(userCred.user);
+          const isAdmin = profile.role === "admin" || userCred.user.email?.toLowerCase() === ADMIN_EMAIL;
+          set({ user: userCred.user, profile, loading: false, isAdmin, isAuthenticated: true });
+        }
       } catch (err: any) {
         throw notifyAuthError(err);
       }
@@ -184,7 +248,20 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         throw notifyAuthError(err);
       }
     },
+    syncProfile: async (data?: Partial<Usuario>) => {
+      const currentUser = get().user;
+      if (!currentUser) return null;
+      try {
+        const updated = await syncUserDocument(currentUser, data);
+        set({ profile: updated });
+        return updated;
+      } catch (err) {
+        console.warn("Error en syncProfile:", err);
+        return null;
+      }
+    },
   };
 });
+
 
 

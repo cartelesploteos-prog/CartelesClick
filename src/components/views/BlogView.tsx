@@ -45,7 +45,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onNavigate }) => {
   }, []);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
+    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-12 sm:space-y-16 font-sans">
       
       {/* ARTICLE READER MODAL */}
       {activeArticle && (
@@ -89,7 +89,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onNavigate }) => {
                 )}
               </div>
 
-              <h1 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)] font-bold leading-tight">
+              <h1 className="text-canonical-h1">
                 {activeArticle.title}
               </h1>
 
@@ -125,7 +125,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onNavigate }) => {
           <span className="text-xs uppercase tracking-widest text-primary font-heading font-medium">
             Publicaciones Técnicas & Guías de Taller
           </span>
-          <h1 className="font-heading text-3xl sm:text-4xl text-[var(--text-primary)] tracking-tight font-normal">
+          <h1 className="text-canonical-h1">
             {t("blog_title")}
           </h1>
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-sans font-normal">
