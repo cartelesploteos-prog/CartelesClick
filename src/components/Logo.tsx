@@ -17,7 +17,7 @@ export const Logo: React.FC<LogoProps> = ({
   };
 
   return (
-    <span className={`inline-flex items-baseline tracking-tight select-none font-heading ${sizeClasses[size]} ${className}`}>
+    <span className={`inline-flex items-baseline tracking-tight select-none font-logo ${sizeClasses[size]} ${className}`}>
       <span className="font-bold text-[var(--text-primary)] transition-colors">
         Carteles.
       </span>

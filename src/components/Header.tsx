@@ -232,7 +232,7 @@ export const Header: React.FC<HeaderProps> = React.memo(({ currentView, onNaviga
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[var(--brand-brick)] hover:bg-[var(--brand-brick-hover)] flex items-center justify-center text-white shrink-0 shadow-md shadow-[var(--brand-brick)]/25 transition-all">
             <Zap className="w-5 h-5 fill-current text-white" aria-hidden="true" />
           </div>
-          <div className="font-heading">
+          <div className="font-logo">
             <Logo size="md" />
           </div>
         </motion.button>

@@ -18,20 +18,28 @@ import {
   QrCode,
   Building2,
   Share2,
+  FileText,
+  Paperclip,
+  Upload,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
 import { useCartStore } from "../store/useCartStore";
+import { ItemFileAttachmentController } from "./ui/ItemFileAttachmentController";
 import { sendHighValueOrderNotification } from "../utils/notifications";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import { useNotificationStore } from "../store/useNotificationStore";
-import { triggerOrderCelebration } from "./ui/ToastCelebration";
+import { triggerOrderCelebration, triggerBrindisCelebration } from "./ui/ToastCelebration";
 import { ShippingSelector } from "./ui/ShippingSelector";
 import { BorderBeam } from "./ui/BorderBeam";
 import { OrderQRCodeModal } from "./ui/OrderQRCodeModal";
 import { IconBadge } from "./ui/IconBadge";
 import { PrintReadinessChecklist } from "./ui/PrintReadinessChecklist";
+import { MATERIALS_CATALOG, FINISHING_OPTIONS } from "../data/materials";
+import { ResumenOrdenCompra } from "./ResumenOrdenCompra";
+import { AuthModal } from "./auth/AuthModal";
+import { InkType, CartItem } from "../types";
 
 interface CartDrawerProps {
   onOrderPlaced: (orderId: string, totalAmountARS?: number, count?: number) => void;
@@ -46,12 +54,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
     setIsOpen,
     removeItem,
     updateQuantity,
+    addItems,
+    updateItemSpecs,
     shippingMethod,
     setShippingMethod,
     getItemsTotal,
     getShippingFee,
     getGrandTotal,
     clearCart,
+    isCartValid: storeIsCartValid,
   } = useCartStore();
   const { user } = useAuthStore();
   const { formatPrice } = useCurrencyStore();
@@ -67,6 +78,184 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
   const [customerPhone, setCustomerPhone] = useState(
     (user as any)?.phone || user?.phoneNumber || "+54 11 4892-1100"
   );
+
+  // Modal, bulk import & validation state
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [bulkImportText, setBulkImportText] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const validateItem = (item: CartItem) => {
+    const isMeasureValid = item.mode === "unidad" || (Number(item.widthCm) > 0 && Number(item.heightCm) > 0);
+    const isInkValid = !!item.inkType;
+    const isFinishingsValid = Array.isArray(item.finishings);
+    return {
+      isValid: isMeasureValid && isInkValid && isFinishingsValid,
+      isMeasureValid,
+      isInkValid,
+      isFinishingsValid,
+    };
+  };
+
+  const invalidItemsCount = items.filter(it => !validateItem(it).isValid).length;
+  const isCartValid = invalidItemsCount === 0 && storeIsCartValid();
+
+  const handleRecalculateItem = async (itemId: string, updatedSpecs: Partial<CartItem>) => {
+    const item = items.find(it => it.id === itemId);
+    if (!item) return;
+
+    const nextSpecs = { ...item, ...updatedSpecs };
+    updateItemSpecs(itemId, updatedSpecs);
+
+    try {
+      const response = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          materialId: nextSpecs.materialId,
+          widthCm: nextSpecs.mode !== "unidad" ? nextSpecs.widthCm : undefined,
+          heightCm: nextSpecs.mode !== "unidad" ? nextSpecs.heightCm : undefined,
+          quantity: nextSpecs.quantity,
+          printQuality: nextSpecs.printQuality || "estandar",
+          inkType: nextSpecs.inkType || "solvente",
+          selectedColor: nextSpecs.selectedColor,
+          mountOption: nextSpecs.mountOption,
+          finishings: nextSpecs.finishings || [],
+        }),
+      });
+
+      if (response.ok) {
+        const quoteData = await response.json();
+        updateItemSpecs(itemId, {
+          unitPriceARS: quoteData.unitPriceARS,
+          totalPriceARS: quoteData.totalPriceARS,
+          baseMaterialSubtotalARS: quoteData.baseMaterialSubtotalARS,
+          finishingsSubtotalARS: quoteData.finishingsSubtotalARS,
+          finishingsBreakdown: quoteData.finishingsBreakdown,
+          printQualityLabel: quoteData.printQualityLabel,
+          inkTypeLabel: quoteData.inkTypeLabel,
+          transparencyNotes: quoteData.transparencyNotes || [],
+        });
+      }
+    } catch (err) {
+      console.error("Error recalculating cart item price:", err);
+    }
+  };
+
+  const handleImportBulkText = async (text: string) => {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length === 0) return;
+
+    const newItems: CartItem[] = [];
+    const errors: string[] = [];
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const line = lines[idx];
+      if (idx === 0 && (line.toLowerCase().includes("sustrato") || line.toLowerCase().includes("ancho"))) {
+        continue;
+      }
+
+      const parts = line.split(/[|;,]/).map(p => p.trim());
+      if (parts.length < 4) {
+        errors.push(`Línea ${idx + 1}: Faltan campos básicos (Sustrato, Ancho, Alto, Cantidad).`);
+        continue;
+      }
+
+      const sustratoQuery = parts[0];
+      const width = Number(parts[1]);
+      const height = Number(parts[2]);
+      const qty = Number(parts[3]) || 1;
+      const ink = (parts[4] ? parts[4].toLowerCase() : "solvente") as InkType;
+      const finishingsStr = parts[5] || "";
+      const finishings = finishingsStr ? finishingsStr.split(/[+&/-]/).map(f => f.trim().toLowerCase()) : [];
+
+      const matchedMaterial = MATERIALS_CATALOG.find(m =>
+        m.name.toLowerCase().includes(sustratoQuery.toLowerCase()) ||
+        sustratoQuery.toLowerCase().includes(m.name.toLowerCase())
+      ) || MATERIALS_CATALOG[0];
+
+      try {
+        const response = await fetch("/api/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            materialId: matchedMaterial.id,
+            widthCm: matchedMaterial.mode !== "unidad" ? width : undefined,
+            heightCm: matchedMaterial.mode !== "unidad" ? height : undefined,
+            quantity: qty,
+            printQuality: "estandar",
+            inkType: ink,
+            finishings: finishings,
+          }),
+        });
+
+        if (response.ok) {
+          const quoteData = await response.json();
+          newItems.push({
+            id: `cart-bulk-import-${Date.now()}-${idx}-${Math.random().toString(36).substring(2,5)}`,
+            materialId: matchedMaterial.id,
+            materialName: matchedMaterial.name,
+            category: matchedMaterial.category,
+            mode: matchedMaterial.mode,
+            widthCm: matchedMaterial.mode !== "unidad" ? width : undefined,
+            heightCm: matchedMaterial.mode !== "unidad" ? height : undefined,
+            quantity: qty,
+            unitPriceARS: quoteData.unitPriceARS,
+            totalPriceARS: quoteData.totalPriceARS,
+            baseMaterialSubtotalARS: quoteData.baseMaterialSubtotalARS,
+            finishingsSubtotalARS: quoteData.finishingsSubtotalARS,
+            finishingsBreakdown: quoteData.finishingsBreakdown,
+            printQuality: "estandar",
+            printQualityLabel: quoteData.printQualityLabel,
+            inkType: ink,
+            inkTypeLabel: quoteData.inkTypeLabel,
+            finishings: finishings,
+            transparencyNotes: quoteData.transparencyNotes || [],
+            createdAt: new Date().toISOString(),
+          });
+        } else {
+          newItems.push({
+            id: `cart-bulk-import-${Date.now()}-${idx}-${Math.random().toString(36).substring(2,5)}`,
+            materialId: matchedMaterial.id,
+            materialName: matchedMaterial.name,
+            category: matchedMaterial.category,
+            mode: matchedMaterial.mode,
+            widthCm: matchedMaterial.mode !== "unidad" ? width : undefined,
+            heightCm: matchedMaterial.mode !== "unidad" ? height : undefined,
+            quantity: qty,
+            unitPriceARS: matchedMaterial.salePriceARS || 5000,
+            totalPriceARS: (matchedMaterial.salePriceARS || 5000) * qty,
+            printQuality: "estandar",
+            inkType: ink,
+            finishings: finishings,
+            createdAt: new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        console.error("Error quoting bulk line:", err);
+      }
+    }
+
+    if (newItems.length > 0) {
+      addItems(newItems);
+      triggerBrindisCelebration({
+        title: "¡Carga Masiva Exitosa!",
+        message: `Se importaron ${newItems.length} ítems correctamente mapeados al carrito.`,
+      });
+    }
+
+    if (errors.length > 0) {
+      alert(`Algunas líneas tuvieron errores de formato:\n${errors.join("\n")}`);
+    }
+  };
+
+  const getApplicableFinishings = (category?: string) => {
+    if (!category) return [];
+    return FINISHING_OPTIONS.filter((f) =>
+      f.applicableCategories?.includes(category as any) || f.category === "todos" || f.applicableCategories?.includes("todos")
+    );
+  };
 
   // Volume metrics
   const totalUnits = items.reduce((acc, it) => acc + (it.quantity || 1), 0);
@@ -175,6 +364,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
+    if (!storeIsCartValid()) {
+      alert("Por favor, completa las especificaciones (medida, tinta y terminación) de todos los productos antes de continuar al pago.");
+      return;
+    }
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     setIsProcessing(true);
     try {
       const response = await fetch("/api/checkout/preference", {
@@ -327,6 +524,57 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
 
           {/* ITEM LIST */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 overscroll-contain">
+            {/* Bulk Import Section */}
+            <div className="p-3.5 rounded-[7px] border border-dashed border-primary/40 bg-primary/5 space-y-2.5">
+              <button
+                type="button"
+                onClick={() => setIsBulkImportOpen(!isBulkImportOpen)}
+                className="w-full flex items-center justify-between text-xs font-bold text-primary hover:underline cursor-pointer"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Plus className="w-4 h-4" />
+                  <span>⚡ Carga Masiva (Importar Lote desde Excel / CSV)</span>
+                </div>
+                <span className="text-[9px] uppercase font-mono tracking-wider">{isBulkImportOpen ? "Contraer" : "Expandir"}</span>
+              </button>
+
+              {isBulkImportOpen && (
+                <div className="space-y-3 pt-1 animate-in fade-in duration-200">
+                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                    Copiá y pegá filas de tu planilla o escribilas abajo. Cada línea representa un producto.
+                  </p>
+                  <div className="text-[10px] font-mono bg-[var(--bg-page)] p-2.5 rounded border border-[var(--border-subtle)] text-slate-500 space-y-1">
+                    <p className="font-bold text-slate-700 dark:text-slate-300">Campos esperados por fila:</p>
+                    <p className="text-slate-600 dark:text-slate-400 font-semibold">Sustrato, Ancho, Alto, Cantidad, Tinta, Terminaciones</p>
+                    <p className="text-primary font-bold mt-1">Ejemplos para copiar:</p>
+                    <p>Lona Frontlight, 200, 100, 3, uv, doble_vaina;ojales</p>
+                    <p>Vinilo Calandrado, 120, 80, 2, solvente, corte_escuadrado</p>
+                  </div>
+                  <textarea
+                    value={bulkImportText}
+                    onChange={(e) => setBulkImportText(e.target.value)}
+                    placeholder="Lona Frontlight, 200, 100, 3, uv, doble_vaina&#10;Vinilo Calandrado, 120, 80, 2, solvente, corte_escuadrado"
+                    rows={4}
+                    className="w-full p-2 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-page)] text-xs font-mono text-[var(--text-primary)] focus:ring-1 focus:ring-primary focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={isImporting || !bulkImportText.trim()}
+                    onClick={async () => {
+                      setIsImporting(true);
+                      await handleImportBulkText(bulkImportText);
+                      setBulkImportText("");
+                      setIsBulkImportOpen(false);
+                      setIsImporting(false);
+                    }}
+                    className="w-full py-2 bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold rounded-[7px] transition-colors disabled:opacity-40 cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    {isImporting ? "Procesando lote..." : "Confirmar e Importar al Carrito"}
+                  </button>
+                </div>
+              )}
+            </div>
+
             {items.length === 0 ? (
               <div className="text-center py-16 space-y-3">
                 <IconBadge
@@ -378,6 +626,122 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
                     </button>
                   </div>
 
+                  {/* EDITABLE TECHNICAL SPECIFICATIONS */}
+                  <div className="p-3 bg-[var(--bg-page)] rounded-[7px] border border-[var(--border-subtle)] space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-secondary)] font-bold">
+                        ⚙️ Especificaciones Técnicas
+                      </span>
+                      {validateItem(item).isValid ? (
+                        <span className="text-[10px] text-green-600 font-bold bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                          ✓ Válido
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-red-600 font-bold bg-red-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                          ⚠️ Incompleto
+                        </span>
+                      )}
+                    </div>
+
+                    {/* MEDIDAS (Only if mode !== "unidad") */}
+                    {item.mode !== "unidad" && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className={`text-[10px] font-medium block mb-1 ${!validateItem(item).isMeasureValid ? "text-red-500 font-bold" : "text-[var(--text-secondary)]"}`}>
+                            Ancho (cm) {!validateItem(item).isMeasureValid && "*"}
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.widthCm || ""}
+                            onChange={(e) => handleRecalculateItem(item.id, { widthCm: Number(e.target.value) })}
+                            className={`w-full px-2 py-1 rounded bg-[var(--bg-surface)] border text-xs font-mono focus:ring-1 focus:ring-primary focus:outline-none ${
+                              !validateItem(item).isMeasureValid
+                                ? "border-red-400 dark:border-red-500/40 focus:ring-red-500"
+                                : "border-[var(--border-subtle)]"
+                            }`}
+                          />
+                        </div>
+                        <div>
+                          <label className={`text-[10px] font-medium block mb-1 ${!validateItem(item).isMeasureValid ? "text-red-500 font-bold" : "text-[var(--text-secondary)]"}`}>
+                            Alto (cm) {!validateItem(item).isMeasureValid && "*"}
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.heightCm || ""}
+                            onChange={(e) => handleRecalculateItem(item.id, { heightCm: Number(e.target.value) })}
+                            className={`w-full px-2 py-1 rounded bg-[var(--bg-surface)] border text-xs font-mono focus:ring-1 focus:ring-primary focus:outline-none ${
+                              !validateItem(item).isMeasureValid
+                                ? "border-red-400 dark:border-red-500/40 focus:ring-red-500"
+                                : "border-[var(--border-subtle)]"
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TIPO DE TINTA */}
+                    <div>
+                      <label className={`text-[10px] font-medium block mb-1 ${!validateItem(item).isInkValid ? "text-red-500 font-bold" : "text-[var(--text-secondary)]"}`}>
+                        Tipo de Tinta {!validateItem(item).isInkValid && "*"}
+                      </label>
+                      <select
+                        value={item.inkType || ""}
+                        onChange={(e) => handleRecalculateItem(item.id, { inkType: e.target.value as any })}
+                        className={`w-full px-2 py-1.5 rounded bg-[var(--bg-surface)] border text-xs focus:ring-1 focus:ring-primary focus:outline-none ${
+                          !validateItem(item).isInkValid
+                            ? "border-red-400 dark:border-red-500/40 focus:ring-red-500 text-red-500"
+                            : "border-[var(--border-subtle)] text-[var(--text-primary)]"
+                        }`}
+                      >
+                        <option value="" disabled>Seleccione una tecnología de tinta...</option>
+                        <option value="solvente">Solvente Industrial (Vía Pública)</option>
+                        <option value="uv">UV LED Curable (Interiores & Alergenos-Free)</option>
+                        <option value="directa_uv">Directa UV Cama Plana (Rígidos)</option>
+                        <option value="latex">Látex Ecológica (Salud/Hogar)</option>
+                      </select>
+                    </div>
+
+                    {/* TERMINACIONES MULTI-TOGGLE CHIPS */}
+                    <div>
+                      <label className="text-[10px] text-[var(--text-secondary)] font-medium block mb-1.5">
+                        Terminaciones de Taller
+                      </label>
+                      {getApplicableFinishings(item.category).length === 0 ? (
+                        <span className="text-[10px] text-[var(--text-muted)] italic">
+                          No requiere o no tiene terminaciones disponibles.
+                        </span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {getApplicableFinishings(item.category).map((fin) => {
+                            const isSelected = (item.finishings || []).includes(fin.id);
+                            return (
+                              <button
+                                key={fin.id}
+                                type="button"
+                                onClick={() => {
+                                  const currentFin = item.finishings || [];
+                                  const nextFin = isSelected
+                                    ? currentFin.filter((id) => id !== fin.id)
+                                    : [...currentFin, fin.id];
+                                  handleRecalculateItem(item.id, { finishings: nextFin });
+                                }}
+                                className={`px-2 py-1 rounded-[4px] text-[10px] font-semibold border transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? "bg-primary/15 border-primary text-primary"
+                                    : "bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-primary/50"
+                                }`}
+                              >
+                                {fin.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* TRANSPARENCY NOTICES */}
                   {item.transparencyNotes && item.transparencyNotes.length > 0 && (
                     <div className="p-2.5 rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] text-[11px] space-y-1">
@@ -396,35 +760,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
                     </div>
                   )}
 
-                  {/* GOOGLE DRIVE O ATTACHMENT BADGE IF PRESENT */}
-                  {item.fileAttachment && (
-                    <div className="p-2 rounded-[7px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 flex items-center justify-between text-[11px] gap-2">
-                      <span className="flex items-center gap-1.5 text-[var(--text-primary)] font-medium truncate">
-                        <IconBadge
-                          icon={HardDrive}
-                          size="compact"
-                          variant="info"
-                          containerStyle="subtle"
-                        />
-                        <span className="truncate">{item.fileAttachment.name}</span>
-                      </span>
-                      {item.fileAttachment.driveUrl ? (
-                        <a
-                          href={item.fileAttachment.driveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-0.5 shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded"
-                        >
-                          <span>Ver</span>
-                          <ExternalLink className="w-3 h-3" strokeWidth={1.85} />
-                        </a>
-                      ) : (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-mono shrink-0">
-                          Adjunto
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  {/* DESIGN FILE ATTACHMENT CONTROLLER */}
+                  <ItemFileAttachmentController
+                    item={item}
+                    updateItemSpecs={updateItemSpecs}
+                  />
 
                   {/* AI POSTER BADGE IF ATTACHED */}
                   {item.posterDesignData && (
@@ -677,10 +1017,33 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
                   </AnimatePresence>
                 </div>
               </div>
+              {/* VALIDATION WARNING BANNER */}
+              {!isCartValid && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-[7px] text-xs text-red-600 dark:text-red-400 flex items-start gap-2 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4.5 h-4.5 shrink-0 text-red-500 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Especificaciones técnicas pendientes:</span>
+                    <p className="mt-0.5 text-[11px] leading-normal opacity-90">
+                      Hay {invalidItemsCount} producto(s) con medidas, tintas o terminaciones incompletas. Completá las especificaciones marcadas con (*) para poder continuar.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* TECHNICAL INVOICE / OC RESUMEN BUTTON */}
+              <button
+                type="button"
+                onClick={() => setIsInvoiceOpen(true)}
+                className="w-full min-h-[2.5rem] py-2 px-4 rounded-[7px] border border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary text-xs flex items-center justify-center gap-2 transition-all font-bold cursor-pointer"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Ver Resumen de Orden / Factura Técnica</span>
+              </button>
+
               <button
                 id="btn-checkout-mercadopago"
                 onClick={handleCheckout}
-                disabled={isProcessing}
+                disabled={isProcessing || !isCartValid}
                 className="relative overflow-hidden w-full min-h-[2.75rem] py-3 px-4 rounded-[7px] bg-primary text-white text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary font-medium shadow-md"
               >
                 {isProcessing ? (
@@ -731,17 +1094,44 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOrderPlaced, onNavigat
         </motion.div>
       </div>
     </div>
-  )}
-</AnimatePresence>
+    )}
+  </AnimatePresence>
 
-{/* ORDER QR CODE MODAL FOR MOBILE SCAN & TRACKING */}
-<OrderQRCodeModal
-  isOpen={isQrModalOpen}
-  onClose={() => setIsQrModalOpen(false)}
-  items={items}
-  customerName={customerName}
-  totalAmountARS={grandTotal ?? 0}
-/>
+  {/* ORDER QR CODE MODAL FOR MOBILE SCAN & TRACKING */}
+  <OrderQRCodeModal
+    isOpen={isQrModalOpen}
+    onClose={() => setIsQrModalOpen(false)}
+    items={items}
+    customerName={customerName}
+    totalAmountARS={grandTotal ?? 0}
+  />
+
+  {/* TECHNICAL INVOICE PREVIEW MODAL */}
+  <ResumenOrdenCompra
+    isOpen={isInvoiceOpen}
+    onClose={() => setIsInvoiceOpen(false)}
+    items={items}
+    customerName={customerName}
+    customerEmail={customerEmail}
+    customerPhone={customerPhone}
+    shippingMethod={shippingMethod}
+    shippingFee={getShippingFee()}
+    itemsTotal={getItemsTotal()}
+    grandTotal={getGrandTotal()}
+  />
+
+  {/* AUTHENTICATION MODAL FOR CHECKOUT */}
+  <AuthModal
+    isOpen={showAuthModal}
+    onClose={() => setShowAuthModal(false)}
+    onSuccess={() => {
+      setShowAuthModal(false);
+      setTimeout(() => {
+        handleCheckout();
+      }, 300);
+    }}
+    defaultMode="login"
+  />
 </>
 );
 };

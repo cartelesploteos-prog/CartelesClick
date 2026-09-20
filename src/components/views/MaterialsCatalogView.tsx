@@ -314,7 +314,7 @@ export const MaterialsCatalogView: React.FC<MaterialsCatalogViewProps> = ({
                   <ZoomIn className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 id="macro-modal-title" className="font-heading text-sm sm:text-base font-semibold text-[var(--text-primary)]">
+                  <h3 id="macro-modal-title" className="font-heading text-sm sm:text-base text-[var(--text-primary)]">
                     Inspección Macro de Textura: {inspectingMaterial.name}
                   </h3>
                   <p className="text-xs text-[var(--text-secondary)]">

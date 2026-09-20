@@ -17,10 +17,10 @@ import { OrdersView } from "./components/views/OrdersView";
 import { AdminPanelView } from "./components/views/AdminPanelView";
 import { NotificationToast } from "./components/ui/NotificationToast";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { SEOProvider } from "./components/seo/SEOProvider";
 import { useThemeStore } from "./store/useThemeStore";
 import { useMaterialStore } from "./store/useMaterialStore";
 import { useI18nStore } from "./store/useI18nStore";
-import { getLocalBusinessSchema } from "./utils/schema";
 import {
   initGA4,
   trackCotizacionIniciada,
@@ -49,17 +49,6 @@ export default function App() {
     }
   }, [currentView, viewParam]);
 
-  // Inject JSON-LD Schema for Local SEO
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify(getLocalBusinessSchema());
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
   // Memoize handleNavigate callback to prevent unnecessary re-renders of React.memo components
   const handleNavigate = useCallback((view: string, param?: string) => {
     setCurrentView(view);
@@ -73,16 +62,17 @@ export default function App() {
   }, [handleNavigate]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors selection:bg-primary selection:text-white antialiased w-full max-w-full overflow-x-hidden">
-      {/* ACCESSIBILITY: SKIP LINK */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 px-4 py-2 bg-primary text-white text-xs rounded-lg focus:outline-none focus:ring-2"
-      >
-        Saltar al contenido principal
-      </a>
+    <SEOProvider currentView={currentView} viewParam={viewParam}>
+      <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors selection:bg-primary selection:text-white antialiased w-full max-w-full overflow-x-hidden">
+        {/* ACCESSIBILITY: SKIP LINK */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 px-4 py-2 bg-primary text-white text-xs rounded-lg focus:outline-none focus:ring-2"
+        >
+          Saltar al contenido principal
+        </a>
 
-      {/* GLOBAL HEADER */}
+        {/* GLOBAL HEADER */}
       <Header currentView={currentView} onNavigate={handleNavigate} />
 
       {/* MAIN VIEW AREA WITH FRAMER MOTION TRANSITIONS */}
@@ -170,5 +160,6 @@ export default function App() {
       {/* GLOBAL FOOTER */}
       <Footer onNavigate={handleNavigate} />
     </div>
+  </SEOProvider>
   );
 }

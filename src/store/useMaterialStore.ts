@@ -962,7 +962,7 @@ export const useMaterialStore = create<MaterialState>()(
       }
     }),
     {
-      name: 'carteles-material-cache-v2',
+      name: 'carteles-material-cache-v3',
     }
   )
 );

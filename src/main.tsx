@@ -14,19 +14,20 @@ if (import.meta.env.DEV) {
   setTimeout(() => runAuditDiagnostic(), 2500);
 }
 
-// Force cleanup of any stale Service Worker or cache from previous sessions
+// Service Worker Registration for PWA
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const reg of registrations) {
-      reg.unregister().then(() => {
-        console.log("[PWA] Service Worker unregistered:", reg.scope);
-      });
-    }
-  });
-  if ("caches" in window) {
-    caches.keys().then((names) => {
-      for (const name of names) {
-        caches.delete(name);
+  if (import.meta.env.PROD) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => console.log("[PWA] Service Worker registrado con éxito:", reg.scope))
+        .catch((err) => console.warn("[PWA] Error registrando Service Worker:", err));
+    });
+  } else {
+    // In dev mode, ensure old workers don't intercept Vite development modules
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        reg.unregister();
       }
     });
   }

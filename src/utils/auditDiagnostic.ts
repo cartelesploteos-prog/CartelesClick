@@ -4,16 +4,16 @@ export function runAuditDiagnostic() {
   console.group('🔍 Running UI Diagnostic Audit...');
   let hasErrors = false;
 
-  // 1. Audit H1-H6 for 'Space Grotesk' and inline styles
+  // 1. Audit H1-H6 for 'Sansation' and inline styles
   const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .text-canonical-h1, .text-canonical-h2, .text-canonical-h3, .text-canonical-h4');
   headings.forEach(heading => {
     const el = heading as HTMLElement;
     const computedStyle = window.getComputedStyle(el);
     const fontFamily = computedStyle.fontFamily;
-    const isGrotesk = fontFamily.toLowerCase().includes('space grotesk');
+    const isSansation = fontFamily.toLowerCase().includes('sansation');
     const inlineStyle = el.getAttribute('style');
 
-    if (!isGrotesk) {
+    if (!isSansation) {
       console.warn('❌ Heading font-family violation:', el.tagName, el.className, 'Computed Font:', fontFamily);
       hasErrors = true;
     }

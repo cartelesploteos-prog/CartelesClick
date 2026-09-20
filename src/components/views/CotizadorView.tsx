@@ -339,14 +339,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
 
   // Quality & Inks
   const [printQuality, setPrintQuality] = useState<PrintQualityType>("estandar");
-  const [inkType, setInkType] = useState<InkType>("solvente");
+  const [inkType, setInkType] = useState<InkType>("uv");
   const [includeScrapPacked, setIncludeScrapPacked] = useState<boolean>(false);
 
   // Finishings & Mounting
-  const [selectedFinishings, setSelectedFinishings] = useState<FinishingType[]>([
-    "rollo",
-    "refilado",
-  ]);
+  const [selectedFinishings, setSelectedFinishings] = useState<FinishingType[]>(["rollo"]);
   const [selectedMount, setSelectedMount] = useState<MountOption | undefined>(undefined);
   const [enableMounting, setEnableMounting] = useState<boolean>(false);
 
@@ -1054,10 +1051,10 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
     "Material y Sustrato",
     "Medidas y Cantidad",
     "Calidad de Impresión",
+    "Tipo de Tintas",
     "Terminaciones",
     "Diseño / Originales",
-    "Entrega / Instalación",
-    "Resumen de Orden"
+    "Resumen de tu Cotización"
   ];
 
   if (isInitialLoading || isStoreLoading) {
@@ -1065,35 +1062,47 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
   }
 
   return (
-    <div className="container-safe pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12">
-      {/* WIZARD PROGRESS BAR & STEP INDICATOR - LIQUID GLASS */}
+    <div className="w-full max-w-[96rem] mx-auto px-[4%] pt-28 sm:pt-32 lg:pt-36 pb-36 sm:pb-44 space-y-10 sm:space-y-12">
+      {/* WIZARD PROGRESS BAR & PERCENTAGE GUIDE (NO BREADCRUMBS) */}
       <div className="space-y-2.5">
-        <div className="flex items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono text-[11px] font-bold border border-primary/20 backdrop-blur-sm">
-              Paso {currentStep} de {totalSteps}
-            </span>
-            <span className="font-heading text-xs sm:text-sm font-semibold text-[var(--text-primary)]">
-              {stepTitles[currentStep - 1]}
-            </span>
-          </div>
-          <span className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-[var(--bg-surface)]/70 dark:bg-[var(--bg-surface)]/10 backdrop-blur-md border border-white/60 dark:border-white/15 shadow-xs">
-            {Math.round((currentStep / totalSteps) * 100)}%
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-heading font-medium text-xs sm:text-sm text-[var(--text-secondary)]">
+            {stepTitles[currentStep - 1]}
           </span>
+          <motion.span
+            key={currentStep}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-[var(--bg-surface)]/70 dark:bg-[var(--bg-surface)]/10 backdrop-blur-md border border-white/60 dark:border-white/15 shadow-xs"
+          >
+            {Math.round((currentStep / totalSteps) * 100)}%
+          </motion.span>
         </div>
 
-        {/* Liquid Glass Capsule Track */}
-        <div className="relative w-full h-3 rounded-full bg-[var(--bg-surface)]/40 dark:bg-[var(--bg-surface)]/5 backdrop-blur-xl border border-white/60 dark:border-white/15 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.03)] p-0.5 overflow-hidden">
-          {/* Liquid Gradient Fill */}
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-blue-600 via-sky-400 to-primary relative shadow-[0_0_14px_rgba(56,189,248,0.55)] transition-all duration-500 ease-out overflow-hidden"
-            style={{ width: `${Math.max(6, Math.round((currentStep / totalSteps) * 100))}%` }}
+        {/* Liquid Glass Capsule Track with Alive Animated Glow */}
+        <div className="relative w-full h-2.5 sm:h-3 rounded-full bg-[var(--bg-surface)]/40 dark:bg-[var(--bg-surface)]/5 backdrop-blur-xl border border-white/60 dark:border-white/15 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.03)] p-0.5 overflow-hidden">
+          {/* Liquid Gradient Fill with Live Spring Motion */}
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-blue-600 via-sky-400 to-primary relative shadow-[0_0_16px_rgba(56,189,248,0.7)] overflow-hidden"
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.max(6, Math.round((currentStep / totalSteps) * 100))}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 18 }}
           >
+            {/* Shimmer Effect */}
+            <motion.div
+              className="absolute inset-0 bg-white/35 skew-x-[-20deg]"
+              animate={{ x: ["-100%", "220%"] }}
+              transition={{ repeat: Infinity, duration: 2.2, ease: "linear" }}
+            />
             {/* Liquid Specular Reflection */}
             <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/70 to-transparent rounded-full pointer-events-none" />
-            {/* Glow bead */}
-            <div className="absolute right-0 top-0 bottom-0 w-2 bg-[var(--bg-surface)]/60 rounded-full blur-[0.5px]" />
-          </div>
+            {/* Alive Pulsing Head Bead */}
+            <motion.div
+              className="absolute right-0 top-0 bottom-0 w-3 bg-white rounded-full blur-[1px]"
+              animate={{ opacity: [0.6, 1, 0.6], scale: [0.9, 1.1, 0.9] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            />
+          </motion.div>
 
           {/* Interactive Step Click Targets */}
           <div className="absolute inset-0 flex">
@@ -1122,12 +1131,12 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   ¿Qué tipo de producto necesitás cotizar?
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
-                  Seleccioná la línea principal de producción. En cada paso configurarás detalles específicos de forma intuitiva.
+                  Seleccioná la línea principal de producción. Al marcar la opción avanzarás automáticamente.
                 </p>
               </div>
 
-              {/* 5 TARJETAS DE FAMILIA PRINCIPAL */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {/* 5 TARJETAS DE FAMILIA PRINCIPAL - 2 COLUMNAS EN MOBILE */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
                 {mainFamilies.map((fam) => {
                   const isFamSelected = selectedMainFamily === fam.id;
                   return (
@@ -1140,7 +1149,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                         setSelectedSubCategory("all");
                         setCurrentStep(2);
                       }}
-                      className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 cursor-pointer relative group ${
+                      className={`p-3 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-2.5 sm:space-y-4 cursor-pointer relative group ${
                         isFamSelected
                           ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm"
                           : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
@@ -1154,17 +1163,17 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                           containerStyle={isFamSelected ? "solid" : "subtle"}
                         />
                         {fam.badge && (
-                          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-mono font-medium">
+                          <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-mono font-medium truncate max-w-[70px] sm:max-w-none">
                             {fam.badge}
                           </span>
                         )}
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-canonical-h3">
-                          <span>{fam.label}</span>
-                          {isFamSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                        <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] flex items-center justify-between gap-1 leading-snug">
+                          <span className="truncate">{fam.label}</span>
+                          {isFamSelected && <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />}
                         </h3>
-                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                        <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] leading-relaxed font-sans line-clamp-2 sm:line-clamp-none mt-0.5">
                           {fam.desc}
                         </p>
                       </div>
@@ -1172,8 +1181,6 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   );
                 })}
               </div>
-
-              {/* WE REMOVED THE CONTINUAR BUTTON HERE */}
             </div>
           )}
 
@@ -1258,7 +1265,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       }
                     }}
                     onExplicitMaterialSelect={(matId) => {
-                      setCurrentStep(2);
+                      setCurrentStep(3);
                     }}
                     widthCm={widthCm}
                     heightCm={heightCm}
@@ -1278,7 +1285,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.2 }}
-                      className="grid grid-cols-1 gap-3"
+                      className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"
                     >
                       {availableMaterials.map((mat) => {
                         const isSelected = selectedMaterialId === mat.id;
@@ -1289,7 +1296,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                           <motion.button
                             key={mat.id}
                             id={`mat-option-${mat.id}`}
-                            whileHover={{ scale: 1.005, y: -1 }}
+                            whileHover={{ scale: 1.01, y: -1 }}
                             whileTap={{ scale: 0.99 }}
                             transition={{ duration: 0.15 }}
                             onClick={() => {
@@ -1297,9 +1304,9 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                               if ((mat as any).defaultFinishings) {
                                 setSelectedFinishings((mat as any).defaultFinishings as FinishingType[]);
                               }
-                              setCurrentStep(2);
+                              setCurrentStep(3);
                             }}
-                            className={`p-4 rounded-xl border text-left transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
+                            className={`p-3 sm:p-4 rounded-xl border text-left transition-all flex flex-col justify-between gap-2.5 sm:gap-3 cursor-pointer relative overflow-hidden ${
                               isSelected
                                 ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
                                 : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
@@ -1312,80 +1319,62 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                                 transition={{ type: "spring", stiffness: 350, damping: 30 }}
                               />
                             )}
-                            <div className="flex items-start gap-3.5 pl-1">
-                              {mat.image ? (
-                                <img
-                                  src={mat.image}
-                                  alt={mat.name}
-                                  referrerPolicy="no-referrer"
-                                  className="w-14 h-14 rounded-lg object-cover shrink-0 border border-[var(--border-subtle)] shadow-xs"
-                                />
-                              ) : (
-                                <div className="w-14 h-14 rounded-lg bg-[var(--bg-surface-subtle)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
-                                  <Layers className="w-6 h-6 text-[var(--text-muted)]" />
-                                </div>
-                              )}
+                            <div className="space-y-2.5">
+                              <div className="flex items-start justify-between gap-2">
+                                {mat.image ? (
+                                  <img
+                                    src={mat.image}
+                                    alt={mat.name}
+                                    referrerPolicy="no-referrer"
+                                    className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg object-cover shrink-0 border border-[var(--border-subtle)] shadow-xs"
+                                  />
+                                ) : (
+                                  <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-[var(--bg-surface-subtle)] flex items-center justify-center shrink-0 border border-[var(--border-subtle)]">
+                                    <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-muted)]" />
+                                  </div>
+                                )}
+                                {isSelected ? (
+                                  <span className="p-1 rounded-full bg-primary text-white shadow-xs">
+                                    <Check className="w-3.5 h-3.5" />
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                                    Elegir
+                                  </span>
+                                )}
+                              </div>
+
                               <div className="space-y-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <h4 className="text-canonical-h4">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <h4 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
                                     {mat.name}
                                   </h4>
                                   {subCatObj && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-medium border border-[var(--border-subtle)]">
+                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-medium border border-[var(--border-subtle)]">
                                       {subCatObj.label || (subCatObj as any).name}
                                     </span>
                                   )}
-                                  {mat.badge && (
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-[var(--text-primary)] font-semibold">
-                                      {mat.badge}
-                                    </span>
-                                  )}
                                 </div>
-                                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                                <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans line-clamp-2 leading-relaxed mt-0.5">
                                   {mat.shortDesc || (mat as any).description}
                                 </p>
-                                <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--text-muted)] pt-0.5">
-                                  {mat.salePriceARS ? (
-                                    <span className="inline-flex items-center gap-1 font-mono font-bold text-primary">
-                                      {formatPrice(mat.salePriceARS)}
-                                      <span className="text-[10px] text-[var(--text-muted)] font-sans font-normal">
-                                        /{mat.unitLabel || "m²"}
-                                      </span>
-                                    </span>
-                                  ) : null}
-                                  {(mat as any).durability && (
-                                    <span className="inline-flex items-center gap-1">
-                                      <Clock className="w-3 h-3 text-primary" strokeWidth={1.85} />
-                                      {(mat as any).durability.split(".")[0]}
-                                    </span>
-                                  )}
-                                  {(mat as any).lightingType && (
-                                    <span className="inline-flex items-center gap-1">
-                                      <Sun className="w-3 h-3 text-primary" strokeWidth={1.85} />
-                                      {(mat as any).lightingType}
-                                    </span>
-                                  )}
-                                  {(mat as any).maxWidthCm && (
-                                    <span className="inline-flex items-center gap-1">
-                                      <Ruler className="w-3 h-3 text-primary" strokeWidth={1.85} />
-                                      Ancho máx: {(mat as any).maxWidthCm} cm
-                                    </span>
-                                  )}
-                                </div>
                               </div>
                             </div>
-                            <div className="shrink-0 flex items-center gap-2 self-end sm:self-center pr-1">
-                              {isSelected ? (
-                                <motion.div
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                                >
-                                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                                </motion.div>
+
+                            <div className="pt-2 border-t border-[var(--border-subtle)]/70 flex items-center justify-between">
+                              {mat.salePriceARS ? (
+                                <span className="inline-flex items-center gap-1 font-mono text-xs font-bold text-primary">
+                                  {formatPrice(mat.salePriceARS)}
+                                  <span className="text-[10px] text-[var(--text-muted)] font-sans font-normal">
+                                    /{mat.unitLabel || "m²"}
+                                  </span>
+                                </span>
                               ) : (
-                                <span className="text-[11px] font-mono text-[var(--text-muted)] group-hover:text-primary">
-                                  Seleccionar
+                                <span className="text-[10px] text-[var(--text-muted)]">A cotizar</span>
+                              )}
+                              {(mat as any).maxWidthCm && (
+                                <span className="hidden sm:inline-flex text-[10px] font-mono text-[var(--text-muted)]">
+                                  {(mat as any).maxWidthCm}cm
                                 </span>
                               )}
                             </div>
@@ -1449,13 +1438,23 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* WE REMOVED THE CONTINUAR BUTTON HERE */}
+              
+              {/* NAVEGACIÓN PASO 2 */}
+              <div className="flex justify-between items-center pt-4 border-t border-[var(--border-subtle)]">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Volver a Líneas</span>
+                </button>
+              </div>
             </div>
           )}
 
-          {/* ================= STEP 4: MEDIDAS Y CANTIDAD (CON MODO BULK ORDER) ================= */}
-          {currentStep === 2 && (
+          {/* ================= STEP 3: MEDIDAS Y CANTIDAD (CON MODO BULK ORDER) ================= */}
+          {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div className="space-y-0.5">
@@ -1800,13 +1799,21 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                     </div>
                   )}
 
-                  {/* ACTION BUTTON (CONFIRMAR Y CONTINUAR) */}
-                  <div className="pt-3 flex justify-end border-t border-[var(--border-subtle)]">
+                  {/* ACTION BUTTONS (CONFIRMAR Y CONTINUAR / VOLVER) */}
+                  <div className="pt-4 flex items-center justify-between border-t border-[var(--border-subtle)]">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(2)}
+                      className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Volver a Sustratos</span>
+                    </button>
                     <button
                       type="button"
                       id="btn-confirm-measures"
                       disabled={currentMaterial?.mode !== "unidad" && (widthCm < 5 || heightCm < 5)}
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => setCurrentStep(4)}
                       className={`w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${
                         currentMaterial?.mode !== "unidad" && (widthCm < 5 || heightCm < 5)
                           ? "bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border-subtle)]"
@@ -2296,11 +2303,19 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   </div>
 
                   {/* BULK MODE CONFIRM BUTTON */}
-                  <div className="pt-3 flex justify-end">
+                  <div className="pt-4 flex items-center justify-between border-t border-[var(--border-subtle)]">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(2)}
+                      className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Volver a Sustratos</span>
+                    </button>
                     <button
                       type="button"
                       id="btn-confirm-bulk-measures"
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => setCurrentStep(4)}
                       className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer hover:shadow-md active:scale-95"
                     >
                       <span>Confirmar Lote y Continuar</span>
@@ -2312,46 +2327,50 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
             </div>
           )}
 
-          {/* ================= STEP 5: CALIDAD DE IMPRESIÓN ================= */}
-          {currentStep === 2 && (
+          {/* ================= STEP 4: CALIDAD DE IMPRESIÓN ================= */}
+          {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
                 <h2 className="text-canonical-h2">
                   Elegir Calidad de Impresión
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
-                  Seleccioná la resolución adecuada según la distancia de visualización.
+                  Seleccioná la resolución adecuada. Al marcar la opción avanzarás automáticamente.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {/* RESOLUCIÓN ESTÁNDAR */}
                 <button
                   type="button"
                   onClick={() => {
                     setPrintQuality("estandar");
-                    setCurrentStep(2);
+                    setCurrentStep(5);
                   }}
-                  className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
+                  className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
                     printQuality === "estandar"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
                       : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-mono">
+                      <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] font-mono">
                         720 - 1080 DPI
                       </span>
-                      {printQuality === "estandar" && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                      {printQuality === "estandar" && <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
                     </div>
-                    <h3 className="text-canonical-h3">Resolución Estándar</h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      Ideal para vía pública, carteles de fachada, marquesinas y banners visibles a más de 1.5 metros.
-                    </p>
+                    <div className="space-y-1">
+                      <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
+                        Resolución Estándar
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-0.5">
+                        Ideal para vía pública, carteles de fachada, marquesinas y banners visibles a más de 1.5 metros.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium">
-                    Sin recargo adicional (Tarifa base)
+                  <div className="text-[11px] sm:text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium pt-2 border-t border-[var(--border-subtle)]/60">
+                    Sin recargo (Tarifa base)
                   </div>
                 </button>
 
@@ -2360,57 +2379,73 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setPrintQuality("alta_resolucion");
-                    setCurrentStep(2);
+                    setCurrentStep(5);
                   }}
-                  className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
+                  className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
                     printQuality === "alta_resolucion"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
                       : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-[var(--text-primary)] font-semibold font-mono">
+                      <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-accent text-[var(--text-primary)] font-semibold font-mono">
                         1440 - 2880 DPI
                       </span>
-                      {printQuality === "alta_resolucion" && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                      {printQuality === "alta_resolucion" && <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
                     </div>
-                    <h3 className="text-canonical-h3">Alta Resolución</h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      Detalle fotográfico con pasadas ultra finas. Recomendado para vidrieras, cuadros, stands y visualización cercana.
-                    </p>
+                    <div className="space-y-1">
+                      <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
+                        Alta Resolución
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-0.5">
+                        Detalle fotográfico con pasadas ultra finas. Recomendado para vidrieras, cuadros y visualización cercana.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-xs font-mono text-primary font-bold">
+                  <div className="text-[11px] sm:text-xs font-mono text-primary font-bold pt-2 border-t border-[var(--border-subtle)]/60">
                     + $2.500 ARS / m²
                   </div>
+                </button>
+              </div>
+
+              {/* NAVEGACIÓN PASO 4 */}
+              <div className="flex justify-between items-center pt-4 border-t border-[var(--border-subtle)]">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(3)}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Volver a Medidas</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* ================= STEP 6: TINTAS ================= */}
-          {currentStep === 2 && (
+          {/* ================= STEP 5: TINTAS ================= */}
+          {currentStep === 5 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
                 <h2 className="text-canonical-h2">
                   Elegir Tipo de Tintas
                 </h2>
                 <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans">
-                  Tecnología de polimerización y curado para máxima adherencia y resistencia química.
+                  Tecnología de polimerización y curado. Al marcar la opción avanzarás automáticamente.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 {/* SOLVENTE */}
                 <button
                   type="button"
                   onClick={() => {
                     setInkType("solvente");
-                    setCurrentStep(2);
+                    setCurrentStep(6);
                   }}
-                  className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
+                  className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
                     inkType === "solvente"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
                       : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
@@ -2419,12 +2454,16 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <Printer className="w-5 h-5 text-primary" />
                       {inkType === "solvente" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-canonical-h3">Solvente / Eco-Solvente</h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      Excelente penetración en PVC y lonas. Alta durabilidad en intemperie y resistencia a lluvias.
-                    </p>
+                    <div className="space-y-1">
+                      <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
+                        Solvente / Eco-Solvente
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-0.5">
+                        Excelente penetración en PVC y lonas. Alta durabilidad en intemperie y resistencia a lluvias.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                  <div className="text-[11px] sm:text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium pt-2 border-t border-[var(--border-subtle)]/60">
                     Incluido estándar
                   </div>
                 </button>
@@ -2434,11 +2473,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setInkType("uv");
-                    setCurrentStep(2);
+                    setCurrentStep(6);
                   }}
-                  className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
+                  className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
                     inkType === "uv"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
                       : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
@@ -2447,12 +2486,16 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <Sparkles className="w-5 h-5 text-primary" />
                       {inkType === "uv" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-canonical-h3">Tintas UV (Curado LED)</h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      Secado instantáneo sin olor. Máxima resistencia a solventes, alcoholes y rayos ultravioletas.
-                    </p>
+                    <div className="space-y-1">
+                      <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
+                        Tintas UV (Curado LED)
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-0.5">
+                        Secado instantáneo sin olor. Máxima resistencia a solventes, alcoholes y rayos ultravioletas.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-xs font-mono text-primary font-bold">
+                  <div className="text-[11px] sm:text-xs font-mono text-primary font-bold pt-2 border-t border-[var(--border-subtle)]/60">
                     + $1.800 ARS / m²
                   </div>
                 </button>
@@ -2462,11 +2505,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                   type="button"
                   onClick={() => {
                     setInkType("directa_uv");
-                    setCurrentStep(2);
+                    setCurrentStep(6);
                   }}
-                  className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-4 ${
+                  className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer col-span-2 sm:col-span-1 ${
                     inkType === "directa_uv"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/40 shadow-sm"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-sm"
                       : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                   }`}
                 >
@@ -2475,21 +2518,37 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                       <Package className="w-5 h-5 text-primary" />
                       {inkType === "directa_uv" && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <h3 className="text-canonical-h3">Impresión Directa UV</h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      Cama plana industrial directamente sobre placas rígidas, acrílico, PAI o PVC sin vinilo intermedio.
-                    </p>
+                    <div className="space-y-1">
+                      <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
+                        Impresión Directa UV
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-0.5">
+                        Cama plana industrial directamente sobre placas rígidas, acrílico, PAI o PVC sin vinilo intermedio.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-xs font-mono text-primary font-bold">
-                    {false ? "Incluido en placa" : "+ $3.200 ARS / m²"}
+                  <div className="text-[11px] sm:text-xs font-mono text-primary font-bold pt-2 border-t border-[var(--border-subtle)]/60">
+                    + $3.200 ARS / m²
                   </div>
+                </button>
+              </div>
+
+              {/* NAVEGACIÓN PASO 5 */}
+              <div className="flex justify-between items-center pt-4 border-t border-[var(--border-subtle)]">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(4)}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Volver a Calidad</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* ================= STEP 7: TERMINACIONES & MONTAJE ================= */}
-          {currentStep === 2 && (
+          {/* ================= STEP 6: TERMINACIONES & MONTAJE ================= */}
+          {currentStep === 6 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
                 <h2 className="text-canonical-h2">
@@ -2506,7 +2565,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 <h3 className="text-canonical-h3">
                   Terminaciones de taller:
                 </h3>
-                <div className="grid grid-cols-1 gap-2.5">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {applicableFinishings.map((finish) => {
                     const isChecked = selectedFinishings.includes(finish.id);
                     const breakdownItem = quoteData?.finishingsBreakdown?.find(
@@ -2516,36 +2575,39 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                     return (
                       <label
                         key={finish.id}
-                        className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start justify-between gap-3.5 ${
+                        className={`p-3 sm:p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2.5 ${
                           isChecked
-                            ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                            ? "border-primary bg-primary/5 ring-2 ring-primary/30 shadow-xs"
                             : "border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-primary/50"
                         }`}
                       >
-                        <div className="flex items-start gap-3.5">
+                        <div className="flex items-start gap-2.5">
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleFinishing(finish.id)}
-                            className="mt-1 w-4 h-4 rounded accent-primary text-primary"
+                            className="mt-0.5 w-4 h-4 rounded accent-primary text-primary shrink-0"
                           />
-                          <div className="space-y-0.5">
-                            <h4 className="text-canonical-h4">
+                          <div className="space-y-1">
+                            <h4 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
                               {finish.name}
                             </h4>
-                            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                            <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed line-clamp-2 mt-0.5">
                               {finish.description}
                             </p>
                           </div>
                         </div>
 
-                        <div className="text-right shrink-0">
+                        <div className="pt-2 border-t border-[var(--border-subtle)]/60 flex items-center justify-between">
+                          <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                            Acabado
+                          </span>
                           {itemCost !== undefined && orderMode === "individual" ? (
-                            <span className="text-xs font-mono font-bold text-primary block">
+                            <span className="text-xs font-mono font-bold text-primary">
                               {itemCost > 0 ? `+${formatPrice(itemCost)}` : "Sin cargo"}
                             </span>
                           ) : (
-                            <span className="text-[11px] font-mono text-[var(--text-secondary)] block">
+                            <span className="text-[11px] font-mono font-medium text-[var(--text-secondary)]">
                               {finish.priceDescription || "Sin cargo"}
                             </span>
                           )}
@@ -2592,11 +2654,11 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                           Seleccioná el material rígido y el espesor sobre el que montaremos tu vinilo:
                         </p>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
                           {Object.entries(MOUNT_OPTIONS).map(([key, opt]) => (
                             <div
                               key={key}
-                              className={`p-3.5 rounded-xl border space-y-2 bg-[var(--bg-surface)] ${
+                              className={`p-3 sm:p-3.5 rounded-xl border space-y-2 bg-[var(--bg-surface)] ${
                                 selectedMount?.type === opt.type
                                   ? "border-primary ring-1 ring-primary/40"
                                   : "border-[var(--border-subtle)]"
@@ -2642,22 +2704,30 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 )}
               </div>
 
-              {/* CONTINUAR DESDE TERMINACIONES */}
-              <div className="pt-4 flex justify-end">
+              {/* NAVEGACIÓN PASO 6 */}
+              <div className="flex justify-between items-center pt-4 border-t border-[var(--border-subtle)]">
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="px-6 py-2.5 rounded-[7px] bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
+                  onClick={() => setCurrentStep(5)}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Confirmar Terminaciones y Continuar</span>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Volver a Tintas</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(7)}
+                  className="px-6 py-2.5 bg-primary hover:bg-[var(--color-primary-hover)] text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  <span>Continuar a Preparar Diseño</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* ================= STEP 8: ARCHIVO O DISEÑO IA ================= */}
-          {currentStep === 2 && (
+          {/* ================= STEP 7: ARCHIVO O DISEÑO IA ================= */}
+          {currentStep === 7 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
                 <h2 className="text-canonical-h2">
@@ -2672,13 +2742,15 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
 
               {orderMode === "individual" ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {/* SUBIR ARCHIVO LOCAL */}
-                    <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 text-center">
+                    <div className="p-3.5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3 sm:space-y-4 text-center">
                       <IconBadge icon={Upload} size="lg" variant="primary" containerStyle="solid" className="mx-auto" />
-                      <div>
-                        <h3 className="text-canonical-h3">Subir Archivo Local</h3>
-                        <p className="text-xs text-[var(--text-secondary)] mt-1">
+                      <div className="space-y-1">
+                        <h3 className="font-heading font-semibold text-xs sm:text-base text-[var(--text-primary)] leading-snug">
+                          Subir Archivo Local
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-1">
                           PDF en curvas, TIFF o JPG a 150 DPI en CMYK.
                         </p>
                       </div>
@@ -2688,24 +2760,26 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                           type="file"
                           accept=".pdf,.tif,.tiff,.jpg,.jpeg,.png"
                           onChange={handleFileUpload}
-                          className="block w-full text-xs text-[var(--text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:bg-primary file:text-white hover:file:bg-[var(--color-primary-hover)] cursor-pointer"
+                          className="block w-full text-xs text-[var(--text-secondary)] file:mr-2 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-2.5 sm:file:px-4 file:rounded-xl file:border-0 file:text-[11px] sm:file:text-xs file:bg-primary file:text-white hover:file:bg-[var(--color-primary-hover)] cursor-pointer"
                         />
                       </label>
                       {uploadedFileName && (
                         <div className="p-2.5 rounded-lg bg-accent text-[var(--text-primary)] border border-accent text-xs flex items-center justify-center gap-1.5">
                           <FileCheck className="w-4 h-4" />
-                          <span>{uploadedFileName}</span>
+                          <span className="truncate max-w-[120px] sm:max-w-none">{uploadedFileName}</span>
                         </div>
                       )}
                     </div>
 
                     {/* DISEÑAR CON IA */}
-                    <div className="p-6 rounded-2xl bg-[var(--bg-surface-subtle)] border border-primary/20 space-y-4 text-center flex flex-col justify-between">
-                      <div className="space-y-4">
+                    <div className="p-3.5 sm:p-6 rounded-2xl bg-[var(--bg-surface-subtle)] border border-primary/20 space-y-3 sm:space-y-4 text-center flex flex-col justify-between">
+                      <div className="space-y-3 sm:space-y-4">
                         <IconBadge icon={Sparkles} size="lg" variant="accent" containerStyle="solid" className="mx-auto" />
-                        <div>
-                          <h3 className="text-canonical-h3">Diseñar Gráfica con IA</h3>
-                          <p className="text-xs text-[var(--text-secondary)] mt-1">
+                        <div className="space-y-1">
+                          <h3 className="font-heading font-semibold text-xs sm:text-base text-[var(--text-primary)] leading-snug">
+                            Diseñar Gráfica con IA
+                          </h3>
+                          <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans leading-relaxed mt-1">
                             Generá textos de impacto, colores contrastados y visualizá el mockup 3D en tiempo real sin salir del cotizador.
                           </p>
                         </div>
@@ -2846,12 +2920,20 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 </div>
               )}
 
-              {/* CONTINUAR DESDE ARCHIVOS */}
-              <div className="pt-4 flex justify-end">
+              {/* NAVEGACIÓN PASO 7 */}
+              <div className="flex justify-between items-center pt-4 border-t border-[var(--border-subtle)]">
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="px-6 py-2.5 rounded-[7px] bg-primary hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
+                  onClick={() => setCurrentStep(6)}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Volver a Terminaciones</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(8)}
+                  className="px-6 py-2.5 bg-primary hover:bg-[var(--color-primary-hover)] text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95"
                 >
                   <span>Ver Resumen Final</span>
                   <ArrowRight className="w-4 h-4" />
@@ -2860,8 +2942,8 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
             </div>
           )}
 
-          {/* ================= STEP 9: RESUMEN Y AGREGAR AL CARRITO ================= */}
-          {currentStep === 2 && (
+          {/* ================= STEP 8: RESUMEN Y AGREGAR AL CARRITO ================= */}
+          {currentStep === 8 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="space-y-1">
                 <h2 className="text-canonical-h2">
@@ -2997,7 +3079,7 @@ export const CotizadorView: React.FC<CotizadorViewProps> = ({
                 )}
 
                 {/* QUALITY & INKS SUMMARY */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+                <div className="grid grid-cols-2 gap-3 pt-1 text-xs">
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-between">
                     <div>
                       <span className="text-[var(--text-secondary)] block text-[11px]">Calidad</span>

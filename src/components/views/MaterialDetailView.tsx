@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { MATERIALS_CATALOG } from "../../data/materials";
 import { MaterialDetailSkeleton } from "../ui/Skeleton";
+import { useSEO } from "../../hooks/useSEO";
 
 interface MaterialDetailViewProps {
   materialId?: string;
@@ -20,6 +21,18 @@ export const MaterialDetailView: React.FC<MaterialDetailViewProps> = ({
   const material =
     MATERIALS_CATALOG.find((m) => m.id === materialId) || MATERIALS_CATALOG[0];
   const [activeImage, setActiveImage] = useState<string>(material?.image || "");
+
+  useSEO(
+    material
+      ? {
+          title: `${material.name} - Especificaciones y Cotización | Carteles.Click`,
+          description: `${material.shortDesc} Usos recomendados: ${material.recommendedUses.slice(0, 3).join(", ")}. Cotizá en tiempo real con Carteles.Click.`,
+          ogTitle: `${material.name} | Sustratos Industriales Certificados`,
+          ogDescription: material.shortDesc,
+          ogImage: material.image,
+        }
+      : undefined
+  );
 
   useEffect(() => {
     setIsLoading(true);

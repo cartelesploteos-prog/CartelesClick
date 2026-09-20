@@ -117,7 +117,7 @@ export const AdminAiUsageView: React.FC = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-[var(--brand-brick)]" />
-            <h2 className="text-sm uppercase tracking-wider font-semibold font-heading text-[var(--text-primary)]">
+            <h2 className="text-sm uppercase tracking-wider font-heading text-[var(--text-primary)]">
               Consumo de IA & Protección de Margen
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -159,7 +159,7 @@ export const AdminAiUsageView: React.FC = () => {
       {editingLimits && (
         <form onSubmit={handleSaveLimits} className="p-5 rounded-xl bg-[var(--bg-surface)] border border-primary/30 space-y-4 animate-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-            <h3 className="text-xs font-medium font-heading uppercase text-primary tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-heading uppercase text-primary tracking-wider flex items-center gap-2">
               <Sliders className="w-4 h-4" /> Parámetros de Cuota de IA por Cliente
             </h3>
             <span className="text-[11px] text-[var(--text-secondary)]">Protección de cuotas & costos</span>
@@ -283,7 +283,7 @@ export const AdminAiUsageView: React.FC = () => {
       <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
         <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h3 className="text-xs font-medium font-heading uppercase text-[var(--text-primary)] tracking-wider">
+            <h3 className="text-xs font-heading uppercase text-[var(--text-primary)] tracking-wider">
               Consumo de IA por Usuario (Diario / Mensual)
             </h3>
             <p className="text-[11px] text-[var(--text-secondary)]">

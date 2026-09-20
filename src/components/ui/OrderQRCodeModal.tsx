@@ -108,7 +108,7 @@ export const OrderQRCodeModal: React.FC<OrderQRCodeModalProps> = ({
               <QrCode className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="qr-modal-title" className="font-heading text-sm sm:text-base font-semibold text-[var(--text-primary)]">
+              <h3 id="qr-modal-title" className="font-heading text-sm sm:text-base text-[var(--text-primary)]">
                 QR de Orden & Seguimiento Móvil
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">

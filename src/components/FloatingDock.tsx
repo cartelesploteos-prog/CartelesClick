@@ -18,8 +18,10 @@ import {
   Package,
   Wrench,
   X,
-  ChevronRight
+  ChevronRight,
+  Smartphone
 } from "lucide-react";
+import { PWAInstallModal } from "./ui/PWAInstallModal";
 import { useAuthStore } from "../store/useAuthStore";
 import { useThemeStore } from "../store/useThemeStore";
 import { useCartStore } from "../store/useCartStore";
@@ -104,6 +106,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
 
   const [expandedMenu, setExpandedMenu] = useState<"tools" | "user" | "modes" | null>(null);
   const [showWorkshopPopup, setShowWorkshopPopup] = useState(false);
+  const [showPWAInstallModal, setShowPWAInstallModal] = useState(false);
   const dockRef = useRef<HTMLElement>(null);
 
   const totalCartItems = useMemo(() => {
@@ -161,6 +164,7 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
   const activePopup = showWorkshopPopup ? "workshop" : expandedMenu;
 
   return (
+    <>
     <nav
       id="floating-dock-navigation"
       ref={dockRef}
@@ -355,6 +359,17 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
                     document.dispatchEvent(new CustomEvent("open-mobile-search"));
                   }}
                 />
+                <DropdownItem
+                  icon={Smartphone}
+                  label="Instalar App"
+                  sublabel="Acceso nativo en iOS o Android"
+                  badge="PWA"
+                  badgeColor="bg-primary text-white"
+                  onClick={() => {
+                    closeAll();
+                    setShowPWAInstallModal(true);
+                  }}
+                />
               </div>
             )}
 
@@ -499,6 +514,11 @@ export const FloatingDock = React.memo((props: FloatingDockProps) => {
         </button>
       </div>
     </nav>
+    <PWAInstallModal
+      isOpen={showPWAInstallModal}
+      onClose={() => setShowPWAInstallModal(false)}
+    />
+    </>
   );
 });
 

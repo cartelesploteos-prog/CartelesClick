@@ -1,12 +1,28 @@
 {
-  "short_name": "CartelesClick",
-  "name": "CartelesClick 2026 - Producción Gráfica & Cartelería 3D",
-  "description": "Plataforma de cotización instantánea, diseño asistido por IA y producción de cartelería en gran formato.",
+  "id": "/",
+  "name": "Carteles.Click - Producción Gráfica & Cartelería 3D",
+  "short_name": "Carteles3D",
+  "description": "Plataforma de cotización instantánea, cálculo paramétrico y producción de cartelería en gran formato.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
-  "theme_color": "#2563eb",
-  "background_color": "#0f172a",
+  "dir": "ltr",
+  "lang": "es-AR",
+  "theme_color": "#1D4ED8",
+  "background_color": "#F8FAFC",
+  "prefer_related_applications": false,
+  "categories": [
+    "business",
+    "productivity",
+    "utilities",
+    "shopping"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -33,21 +49,42 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["business", "productivity", "utilities"],
   "shortcuts": [
     {
       "name": "Cotizador Instantáneo",
       "short_name": "Cotizador",
-      "description": "Calculá tu cartel o impresión en segundos",
+      "description": "Calculá tu cartel, impresión UV o corpóreos en segundos",
       "url": "/?view=cotizador",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
-      "name": "Catálogo de Materiales",
+      "name": "Catálogo de Sustratos",
       "short_name": "Materiales",
-      "description": "Explorá lonas, vinilos, rígidos y corpóreos",
+      "description": "Explorá lonas frontlight, vinilos, acrílicos y polifan",
       "url": "/?view=materiales",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mis Pedidos",
+      "short_name": "Tracking",
+      "description": "Seguimiento en taller y estado de producción",
+      "url": "/?view=pedidos",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

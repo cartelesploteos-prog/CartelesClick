@@ -26,3 +26,56 @@ Los encabezados globales y varias vistas utilizaban pesos pesados (`font-bold` /
 - Verificado en `src/index.css` (capa `@layer base` y estilos de impresión).
 - Verificado en todos los componentes (`AiDesignDrawer.tsx`, `AiUsageChargesTable.tsx`, `OrderQRCodeModal.tsx`, `CotizadorView.tsx`, `MaterialsCatalogView.tsx`, `AdminAiUsageView.tsx`, `WholesaleView.tsx`, `FloatingDock.tsx`, `PosterCreatorView.tsx`).
 - Total de etiquetas `<h[1-6]>` con Bold/Black en el codebase: 0.
+
+---
+
+## DEC-002: Tipografía de Encabezados (H1-H6) en Sansation Regular (400)
+
+- **Fecha:** 2026-09-18
+- **Estado:** CERRADA / APROBADA
+- **Solicitante:** Mariano ("La tipografía de los H es Sansation en un peso regular")
+- **Ámbito:** `src/index.css`, `index.html`, `design_system.md`, todos los encabezados `<h1>` a `<h6>` y clases `.text-canonical-h1` a `.text-canonical-h6`.
+
+### Decisión
+1. Definir `--font-heading: "Sansation", sans-serif;` como la tipografía para todos los encabezados del sistema.
+2. Fijar de manera estricta `font-weight: 400` (Regular / Normal) para todos los niveles de encabezados (`h1` a `h6`), clases canónicas `.text-canonical-h*` y selectores `.font-heading`.
+3. Cargar la familia `Sansation` desde Google Fonts en `index.html`.
+
+### Validación
+- `index.html` carga Google Fonts con la familia Sansation.
+- `src/index.css` aplica `font-family: var(--font-heading), 'Sansation', sans-serif;` y `font-weight: 400;` en `h1-h6`.
+- Compilación y linting validados.
+
+---
+
+## DEC-003: UI/UX Actual como Referencia Estética Invariante y Enfoque de Reconstrucción de Dominio
+
+- **Fecha:** 2026-09-19
+- **Estado:** CERRADA / APROBADA
+- **Solicitante:** Mariano
+- **Ámbito:** Toda la aplicación (Frontend, Dominio, Catálogo, Cotizador, Bulk Order, OC, Roles, Base de datos)
+
+### Contexto y Problema
+Se requería clarificar el alcance de la reestructuración del proyecto para evitar rediseños innecesarios de interfaces que ya están visual y funcionalmente validadas, concentrando el esfuerzo técnico en la robustez interna y la consistencia de datos.
+
+### Decisión
+1. **Fuente de Verdad Estética:** La UI/UX visual actual de CartelesClick es la referencia y fuente de verdad estética definitiva. Queda terminantemente prohibido rediseñarla desde cero.
+2. **Preservación Invariante:** Se preserva intacto el lenguaje visual, composición, jerarquías tipográficas, componentes UI, diseño responsivo, navegación, microinteracciones y comportamientos operativos existentes.
+3. **Foco Exclusivo de Reconstrucción:** Todo el trabajo de reestructuración debe concentrarse en ordenar y desacoplar:
+   - Arquitectura y separación de responsabilidades.
+   - Catálogo de materiales, sustratos y tecnologías.
+   - Modelo de Producto y reglas de compatibilidad.
+   - Terminaciones y acabados (cálculo, costos y compatibilidad).
+   - Motor de Cotización (determinístico, sincronizado entre cliente y backend).
+   - Módulo de Carga Masiva (Bulk Order).
+   - Orden de Compra (OC), especificaciones técnicas y trazabilidad de archivos de diseño.
+   - Modelo de Roles (Cliente, Taller, Administrador) y permisos de visualización.
+   - Modelo de datos y esquemas de persistencia en Firestore.
+
+### Alternativas Descartadas y Motivos
+- **Rediseño completo de vistas (Re-skinning / nuevo layout):** Descartado taxativamente por Mariano. Introduce riesgo de regresión en flujos que ya funcionan, desaprovecha el trabajo consolidado de UX y diluye el foco técnico.
+
+### Validación
+- Registrado como principio rector en el corpus documental.
+- Cualquier propuesta que altere la estética o experiencia visual consolidada será clasificada y rechazada como fuera de alcance.
+

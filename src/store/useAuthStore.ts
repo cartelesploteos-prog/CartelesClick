@@ -15,6 +15,7 @@ import { auth } from "../lib/firebase";
 import { syncUserDocument, Usuario } from "../lib/firestore";
 import { getFirebaseAuthErrorMessage } from "../utils/authErrors";
 import { useNotificationStore } from "./useNotificationStore";
+import { useCartStore } from "./useCartStore";
 
 export const ADMIN_EMAIL = "carteles.ploteos@gmail.com";
 export const ADMIN_PASS = "cartelesclick2026";
@@ -117,6 +118,12 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         }
 
         set({ user, profile, loading: false, isAdmin, isAuthenticated: true });
+        // Automatically load cart from Firestore for authenticated user
+        try {
+          useCartStore.getState().loadCartFromFirestore(user.uid);
+        } catch (e) {
+          console.warn("[Auth] Failed to load cart on login:", e);
+        }
       } else {
         // If Firebase user is null, check if persistent local admin session is active
         const currentSession = get();

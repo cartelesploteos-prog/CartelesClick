@@ -121,7 +121,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {RIGID_GROUPS.map((group) => {
             const isGroupActive = activeFamily === group.id;
             return (
@@ -135,28 +135,30 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
                     onSelectMaterial(group.materialIds[0]);
                   }
                 }}
-                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all relative overflow-hidden cursor-pointer ${
                   isGroupActive
                     ? "bg-primary/10 border-primary shadow-sm ring-1 ring-primary"
                     : "bg-[var(--bg-surface)]/40 border-[var(--border-subtle)] hover:border-primary/40 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="text-2xl">{group.icon}</span>
+                  <span className="text-xl sm:text-2xl">{group.icon}</span>
                   <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                    className={`text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${
                       isGroupActive ? "bg-primary text-white" : "bg-[var(--bg-surface-subtle)] text-[var(--text-secondary)]"
                     }`}
                   >
                     {group.badge}
                   </span>
                 </div>
-                <h4 className="text-canonical-h4">
-                  {group.title}
-                </h4>
-                <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                  {group.subtitle}
-                </p>
+                <div className="space-y-1">
+                  <h4 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] leading-snug">
+                    {group.title}
+                  </h4>
+                  <p className="text-[11px] text-[var(--text-secondary)] font-sans leading-relaxed line-clamp-2 sm:line-clamp-none mt-0.5">
+                    {group.subtitle}
+                  </p>
+                </div>
               </button>
             );
           })}
@@ -175,7 +177,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {RIGID_GROUPS.find((g) => g.id === activeFamily)?.materialIds.map((matId) => {
             const mat = MATERIALS_CATALOG.find((m) => m.id === matId);
             if (!mat) return null;
@@ -195,9 +197,11 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
                     : "bg-[var(--bg-surface)]/40 border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-primary/40"
                 }`}
               >
-                <div className="space-y-0.5 min-w-0">
+                <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-xs truncate">{mat.name}</span>
+                    <h5 className={`font-heading font-semibold text-xs truncate leading-snug ${isSelected ? "text-white" : "text-[var(--text-primary)]"}`}>
+                      {mat.name}
+                    </h5>
                     {mat.badge && !isSelected && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-bold shrink-0">
                         {mat.badge}
@@ -205,7 +209,7 @@ export const RigidMaterialsSelector: React.FC<RigidMaterialsSelectorProps> = ({
                     )}
                   </div>
                   <p
-                    className={`text-[10px] truncate leading-tight ${
+                    className={`text-[10px] font-sans truncate leading-tight mt-0.5 ${
                       isSelected ? "text-white/80" : "text-[var(--text-secondary)]"
                     }`}
                   >

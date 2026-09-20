@@ -2290,7 +2290,7 @@ export const AdminPanelView: React.FC<AdminPanelViewProps> = ({ onNavigate }) =>
                     <div className="flex justify-between items-start gap-2">
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className={`text-xs font-medium ${notif.read ? 'text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
+                          <h4 className={`text-xs ${notif.read ? 'text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
                             {notif.title}
                           </h4>
                           {notif.priority === 'high' && (

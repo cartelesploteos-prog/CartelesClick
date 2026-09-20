@@ -56,7 +56,7 @@ export const AiUsageChargesTable: React.FC<{ onNavigate?: (view: string, param?:
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+              <h3 className="text-sm text-[var(--text-primary)]">
                 Historial de Diseños Generados con IA (Póster Creator)
               </h3>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -116,7 +116,7 @@ export const AiUsageChargesTable: React.FC<{ onNavigate?: (view: string, param?:
       <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
         <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
           <div>
-            <h4 className="text-xs font-medium font-heading text-[var(--text-primary)] uppercase tracking-wider">
+            <h4 className="text-xs font-heading text-[var(--text-primary)] uppercase tracking-wider">
               Desglose Cronológico de Transacciones IA
             </h4>
             <p className="text-[11px] text-[var(--text-secondary)]">
